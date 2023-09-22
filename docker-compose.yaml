@@ -2,7 +2,8 @@ version: '3.8'
 services:
   server:
     build:
-      dockerfile: src/Dockerfile
+      context: ./CarWash_Server
+      dockerfile: Dockerfile
     container_name: misha-server
     ports:
       - "9090:9090"
@@ -27,13 +28,23 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123zxccxz321
+    volumes:
+      - misha-db-data:/var/lib/postgresql/data
+  react_app:
+    build:
+      context: ./CarWash_Site
+      dockerfile: Dockerfile
+    container_name: misha-site
+    ports:
+      - "3000:3000"
+    networks:
+      mynetwork:
+    depends_on:
+      - server
 
 networks:
   mynetwork:
     driver: bridge
 
-
-#    volumes:
-#      - misha-db-data:/var/lib/postgresql/data
-#volumes:
-#  misha-db-data:
+volumes:
+  misha-db-data:
