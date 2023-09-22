@@ -1,0 +1,49 @@
+.MyTable {
+    display: block;
+    margin: 0 auto;
+    width: 95%;
+    border: 1px solid black;
+    overflow-x: auto;
+    table-layout: fixed; /* фиксированная ширина колонок */
+}
+
+.transparent-button {
+    background-color: transparent;
+    display: block;
+    border: none;
+    color: #333; /* измените цвет текста на ваши нужды */
+    font-weight: bold; /* измените стиль текста на ваши нужды */
+    font-size: 17px;
+    /* центрируем блок по горизонтали */
+    justify-content: center;
+    align-items: center;
+    margin: 15px auto 0;
+}
+.my-button {
+    background-color: transparent;
+    border: none;
+    display: flex;
+    font-size: 17px;
+    font-weight: bold;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    color: #333;
+}
+
+.MyTable th {
+    background-color: #4CAF50;
+    font-size: 14px;
+    color: white;
+}
+
+
+
+.MyTable th,
+.MyTable td {
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    padding: 7px 10px;
+    text-align: left;
+    border: 1px solid gray;
+}

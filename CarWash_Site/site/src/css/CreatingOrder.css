@@ -1,0 +1,148 @@
+.full-width {
+    display: block;
+    width: 75%;
+    text-align: center;
+    margin: 1rem auto;
+}
+
+.custom-modal-dialog {
+    max-width: 40%;
+}
+
+.custom-modal-dialog-polishing {
+    max-width: 45%;
+}
+
+.custom-modal-dialog-tire {
+    max-width: 55%;
+}
+
+.btn-submit {
+    display: block;
+    width: 75%;
+    text-align: center;
+    margin: 0 auto; /* центрируем блок по горизонтали */
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-delete {
+    display: block;
+    width: 75%;
+    text-align: center;
+    margin: 0 auto; /* центрируем блок по горизонтали */
+    background-color: #f50b04;
+    border-color: #f50b04;
+}
+
+.btn-delete:hover {
+    background-color: #b41313;
+    border-color: #b41313;
+}
+
+.btn-delete:focus,
+.btn-delete:active:focus,
+.btn-delete.active:focus,
+.btn-delete.focus,
+.btn-delete:active.focus,
+.btn-delete.active.focus {
+    box-shadow: none !important;
+    outline: none !important;
+    border-color: transparent !important;
+}
+
+.selected-items {
+    text-align: center; /* центрируем элементы по горизонтали */
+}
+
+.item {
+    display: inline-block;
+    background-color: #eee;
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    margin-right: 7px;
+    margin-bottom: 7px;
+}
+
+.input-container input[type="text"]:placeholder-shown {
+    opacity: 0.5;
+}
+
+.my-custom-class .modal-content {
+    width: 600px;
+}
+
+.custom-modal {
+    width: 600px;
+}
+
+.input-container {
+    display: flex; /* задаем display: flex для flexbox layout'а */
+    justify-content: center; /* центруем блок по горизонтали */
+    align-items: center; /* центруем блок по вертикали */
+    flex-direction: column; /* изменяем направление flexbox layout'а на столбцы */
+    max-width: 500px; /* устанавливаем максимальную ширину контейнера */
+    margin: 0 auto 1rem;
+}
+
+.dropdown-menu-custom {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    z-index: 1000;
+}
+
+/*
+Текст внутри имен заказов (то есть их имена)
+ */
+.checkbox-custom {
+    display: flex;
+    align-items: center;
+    margin: 0.25rem 1rem;
+    cursor: pointer;
+}
+
+.checked .checkmark {
+    background-color: #17A2B8;
+}
+
+/*
+Отображение полученной цены и времени
+ */
+.label-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 500px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 15px auto;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.price-label,
+.order-time-label {
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+/*
+Текст внутри модульного окна с типами заказов
+ */
+.text {
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 550px;
+}

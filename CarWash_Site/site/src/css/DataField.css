@@ -1,0 +1,69 @@
+.date-field {
+    display: flex; /* задаем display: flex для flexbox layout'а */
+    justify-content: center; /* центруем блок по горизонтали */
+    align-items: center; /* центруем блок по вертикали */
+    width: 500px; /* устанавливаем максимальную ширину контейнера */
+    /* добавляет правый отступ между полями ввода */
+    /* добавляет нижний отступ между полями ввода */
+    margin: 0 auto 1rem;
+}
+
+.time-field {
+    display: flex; /* задаем display: flex для flexbox layout'а */
+    justify-content: center; /* центруем блок по горизонтали */
+    align-items: center; /* центруем блок по вертикали */
+    width: 500px; /* устанавливаем максимальную ширину контейнера */
+    /* добавляет правый отступ между полями ввода */
+    /* добавляет нижний отступ между полями ввода */
+    margin: 0 auto 1rem;
+}
+
+.my-class {
+    position: fixed;
+    width: 500px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: lightgray;
+    border: 1px solid gray;
+    padding: 5px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    animation: fade-in 1s, fade-out 1s 4s;
+    opacity: 1;
+}
+
+.my-custom-datepicker .react-datepicker__time-container {
+    display: block;
+    width: 500px; /*изменить ширину*/
+}
+
+.my-custom-datepicker .react-datepicker__time-box {
+    padding: 10px 20px; /*изменить отступы элемента*/
+    border: 2px solid #ccc; /*изменить толщину и цвет рамки*/
+    border-radius: 8px; /* добавить скругление углов */
+}
+
+.my-custom-datepicker .react-datepicker__time-box:hover {
+    background-color: #efefef; /*изменить цвет фона при наведении*/
+}
+
+.form-row-separated {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.react-datepicker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
