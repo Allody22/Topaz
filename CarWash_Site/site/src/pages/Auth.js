@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {Container, Form} from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
@@ -21,13 +21,11 @@ const Auth = observer(() => {
     const loginClick = async () => {
         try {
             const data = await login(email, password);
-            console.log(data)
             user.setUser(data)
             user.setIsAuth(true)
             history.push(ADMIN_ROUTE)
             socketStore.connectAndSubscribe();
         } catch (error) {
-            console.log(error)
             alert('Произошла ошибка. Пожалуйста, повторите попытку.');
         }
     };
