@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  server:
+    build:
+      dockerfile: src/Dockerfile
+    container_name: misha-server
+    ports:
+      - "9090:9090"
+    networks:
+      mynetwork:
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123zxccxz321
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n
+
+  db:
+    image: postgres:13.7-alpine
+    container_name: misha-db
+    ports:
+      - "1890:1890"
+    networks:
+      mynetwork:
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123zxccxz321
+
+networks:
+  mynetwork:
+    driver: bridge
+
+
+#    volumes:
+#      - misha-db-data:/var/lib/postgresql/data
+#volumes:
+#  misha-db-data:
