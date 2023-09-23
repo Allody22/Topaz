@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
-import ru.nsu.carwash_server.models.secondary.exception.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.secondary.helpers.SingleOrderResponse;
 import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.secondary.helpers.TimeIntervals;
@@ -89,7 +89,7 @@ public class OrderManagementController {
 
     @PostMapping("/deleteOrder_v1")
     @Transactional
-    public ResponseEntity<?> deleteOrder(@RequestParam(name = "orderId", required = true) Long id) {
+    public ResponseEntity<?> deleteOrder(@Valid @RequestParam(name = "orderId", required = true) Long id) {
         var order = orderServiceImp.findById(id);
         if (order != null) {
             Pair<Boolean, String> result = orderServiceImp.deleteOrder(id);
@@ -118,8 +118,8 @@ public class OrderManagementController {
 
     @GetMapping("/getServiceInfo_v1")
     @Transactional
-    public ResponseEntity<?> getServiceInfo(@RequestParam(name = "orderName", required = true) String orderName,
-                                            @RequestParam(name = "orderType", required = true) String orderType) {
+    public ResponseEntity<?> getServiceInfo(@Valid @RequestParam(name = "orderName", required = true) String orderName,
+                                            @Valid @RequestParam(name = "orderType", required = true) String orderType) {
         switch (orderType) {
             case "Wash" -> {
                 var order = ordersWashingRepository.findByName(orderName)
@@ -213,7 +213,7 @@ public class OrderManagementController {
 
     @GetMapping("/getOrderInfo_v1")
     @Transactional
-    public ResponseEntity<?> getOrderInfo(@RequestParam(name = "orderId", required = false) Long orderId) {
+    public ResponseEntity<?> getOrderInfo(@Valid @RequestParam(name = "orderId", required = false) Long orderId) {
         var orderById = orderServiceImp.findById(orderId);
         if (orderId == null) {
             return ResponseEntity.badRequest().body(new MessageResponse("Несуществующий номер заказа"));
@@ -247,7 +247,7 @@ public class OrderManagementController {
 
     @GetMapping("/getActualWashingOrders_v1")
     @Transactional
-    public ResponseEntity<?> getActualWashingServices(@RequestParam(name = "orderName", required = true) String orderName) {
+    public ResponseEntity<?> getActualWashingServices(@Valid @RequestParam(name = "orderName", required = true) String orderName) {
         ConnectedOrdersResponse ordersInfo = orderServiceImp.actualWashingOrders(orderName);
         return ResponseEntity.ok(ordersInfo);
     }
@@ -332,11 +332,11 @@ public class OrderManagementController {
     @GetMapping("/getBookedTimeInOneDay_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> getBookedTimeInOneDay(@RequestParam(name = "startTime")
-                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
-                                                   @RequestParam(name = "endTime")
+    public ResponseEntity<?> getBookedTimeInOneDay(@Valid @RequestParam(name = "startTime")
+                                                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
+                                                   @Valid @RequestParam(name = "endTime")
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
-                                                   @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
+                                                   @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
         List<OrderVersions> orders = orderServiceImp.getOrdersInTimeInterval(startTime,
                 endTime, null, includeCancelled);
 
@@ -357,10 +357,10 @@ public class OrderManagementController {
     @GetMapping("/getOrderCreatedAt_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> getOrderCreatedAt(@RequestParam(name = "startTime")
+    public ResponseEntity<?> getOrderCreatedAt(@Valid @RequestParam(name = "startTime")
                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
-                                               @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
-                                               @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
+                                               @Valid @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
+                                               @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
 
         List<OrderVersions> orders = orderServiceImp.getOrdersCreatedAt(startTime,
                 endTime, includeCancelled);

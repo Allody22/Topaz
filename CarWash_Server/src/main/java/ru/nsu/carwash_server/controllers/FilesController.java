@@ -23,6 +23,7 @@ import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.services.interfaces.FileService;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -45,9 +46,9 @@ public class FilesController {
     @PostMapping("/upload")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,
-                                         @RequestPart("description") String description,
-                                         @RequestPart("status") String status) {
+    public ResponseEntity<?> uploadImage(@Valid  @RequestParam("file") MultipartFile file,
+                                         @Valid @RequestPart("description") String description,
+                                         @Valid @RequestPart("status") String status) {
 
         String decodedDescription = new String(description.getBytes(StandardCharsets.ISO_8859_1),
                 StandardCharsets.UTF_8);
@@ -120,7 +121,7 @@ public class FilesController {
 
   @DeleteMapping("/delete/{filename:.+}")
   @Transactional
-  public ResponseEntity<MessageResponse> deleteFile(@PathVariable String filename) {
+  public ResponseEntity<MessageResponse> deleteFile(@Valid @PathVariable String filename) {
     String message = "";
 
     try {

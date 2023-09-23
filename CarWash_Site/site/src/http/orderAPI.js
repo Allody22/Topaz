@@ -143,7 +143,7 @@ export const updateOrderInfo = async (orderId, userPhone, orderType,
                                       price, wheelR,
                                       startTime, administrator, autoNumber,
                                       autoType, specialist, boxNumber, bonuses,
-                                      comments, executed, endTime,
+                                      comments, endTime,
                                       orders, currentStatus, sale) => {
     const requestBody = {
         orderId: orderId,
@@ -160,7 +160,6 @@ export const updateOrderInfo = async (orderId, userPhone, orderType,
         autoNumber: autoNumber,
         autoType: autoType,
         price: price,
-        executed: executed,
         orders: orders,
         currentStatus: currentStatus,
         sale: sale

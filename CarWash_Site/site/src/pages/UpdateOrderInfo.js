@@ -2,7 +2,7 @@ import '../css/CreatingOrder.css';
 import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import InputField from "../model/InputField";
-import {BrowserRouter as Router, Link, useHistory, useParams} from "react-router-dom";
+import {BrowserRouter as Router, useParams} from "react-router-dom";
 import {
     deleteOrderById,
     getAllPolishingServicesWithPriceAndTime, getAllTireServicesWithPriceAndTime, getAllWashingServicesWithPriceAndTime,
@@ -10,7 +10,7 @@ import {
     updateOrderInfo
 } from "../http/orderAPI";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
-import {DatePicker, Divider, InputNumber, InputPicker, Notification, toaster, useToaster} from "rsuite";
+import {DatePicker, Divider, InputNumber, InputPicker, Notification, useToaster} from "rsuite";
 import addDays from "date-fns/addDays";
 import Modal from "react-bootstrap/Modal";
 import russianToEnglishMap from "../model/map/OrderTypeMapFromRussian";
@@ -162,8 +162,7 @@ const UpdateOrderInfo = observer(() => {
     const [boxNumber, setBoxNumber] = useState(0);
     const [bonuses, setBonuses] = useState(0);
     const [comments, setComments] = useState('');
-    const [executed, setExecuted] = useState('');
-    const [executedToCode, setExecutedToCode] = useState(false);
+    const [executedToCode] = useState(false);
 
     const [selectedSaleId, setSelectedSaleId] = useState(null);
 
@@ -291,11 +290,16 @@ const UpdateOrderInfo = observer(() => {
         } catch
             (error) {
             if (error.response) {
-                setErrorResponse(error.response.data.message)
-                setErrorFlag(flag => !flag)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
-                setErrorResponse("Системная ошибка, проверьте правильность " +
-                    "введённой информации и попробуйте еще раз")
+                setErrorResponse("Системная ошибка с получением информации о заказе. " +
+                    "Попробуйте еще раз")
                 setErrorFlag(flag => !flag)
             }
         }
@@ -352,9 +356,17 @@ const UpdateOrderInfo = observer(() => {
             setMainOrders(filteredOrdersMain);
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
-                alert("Системная ошибка, попробуйте позже")
+                setErrorResponse("Системная ошибка с получением услуг полировки. " +
+                    "Перезагрузите страницу и попробуйте еще раз.")
+                setErrorFlag(flag => !flag)
             }
         }
     }
@@ -503,7 +515,7 @@ const UpdateOrderInfo = observer(() => {
                     russianToEnglishMap[orderType], price, wheelR,
                     startTime.toISOString(), administrator,
                     autoNumber, carType, specialist, boxNumber, bonuses,
-                    comments, executedToCode, endTime.toISOString(),
+                    comments, endTime.toISOString(),
                     selectedItems.map(i => i.replace(/ /g, '_')),
                     currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription);
                 setSuccessResponse(data.message)
@@ -547,8 +559,8 @@ const UpdateOrderInfo = observer(() => {
                     setErrorResponse(error.response.data.message)
                     setErrorFlag(flag => !flag)
                 } else {
-                    setErrorResponse("Системная ошибка, проверьте правильность " +
-                        "введённой информации и попробуйте еще раз")
+                    setErrorResponse("Системная ошибка с удалением заказа. " +
+                        "Проверьте правильность введённой информации и попробуйте еще раз")
                     setErrorFlag(flag => !flag)
                 }
             }

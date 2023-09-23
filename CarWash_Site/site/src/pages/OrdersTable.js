@@ -225,9 +225,13 @@ const OrderTable = observer(() => {
             setSuccessResponse("Yes all orders")
         } catch (error) {
             if (error.response) {
-                setErrorResponse("Что-то пошло не так.\n" +
-                    "Перезагрузите страницу и повторите попытку")
-                setErrorFlag(flag => !flag)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
                 setErrorResponse("Системная ошибка.\n" +
                     "Перезагрузите страницу и повторите попытку")
@@ -252,9 +256,13 @@ const OrderTable = observer(() => {
             setSuccessResponse("Yes all orders")
         } catch (error) {
             if (error.response) {
-                setErrorResponse("Что-то пошло не так.\n" +
-                    "Перезагрузите страницу и повторите попытку")
-                setErrorFlag(flag => !flag)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
                 setErrorResponse("Системная ошибка.\n" +
                     "Перезагрузите страницу и повторите попытку")
@@ -348,9 +356,17 @@ const OrderTable = observer(() => {
             setSuccessResponse("Yes not made orders")
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
-                alert("Системная ошибка, попробуйте позже")
+                setErrorResponse("Системная ошибка. " +
+                    "Еще не выполненные заказы не были получены.")
+                setErrorFlag(flag => !flag)
             }
         } finally {
             setIsSubmittingB(false)

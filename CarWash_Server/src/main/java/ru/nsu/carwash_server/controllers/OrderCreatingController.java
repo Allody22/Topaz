@@ -23,7 +23,7 @@ import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
 import ru.nsu.carwash_server.models.secondary.constants.OrderTypes;
-import ru.nsu.carwash_server.models.secondary.exception.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
@@ -288,7 +288,8 @@ public class OrderCreatingController {
         List<OrdersWashing> ordersWashings = new ArrayList<>();
 
         for (var order : bookingOrderRequest.getOrders()) {
-            var currentOrder = ordersWashingRepository.findByName(order.replace(" ", "_"))
+            String dataBaseOrderName = order.replace(" ", "_");
+            var currentOrder = ordersWashingRepository.findByName(dataBaseOrderName)
                     .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", order.replace("_", " ")));
             ordersWashings.add(currentOrder);
         }

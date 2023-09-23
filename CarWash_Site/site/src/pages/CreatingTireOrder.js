@@ -215,9 +215,17 @@ const CreatingTireOrder = observer(() => {
             setNewTime(newTimeArray);
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
-                alert("Системная ошибка, попробуйте позже")
+                setErrorResponse("Системная ошибка с получением цены. " +
+                    "Попробуйте перезагрузить страницу")
+                setErrorFlag(flag => !flag)
             }
         }
     }
@@ -252,9 +260,17 @@ const CreatingTireOrder = observer(() => {
                 setMainOrders(filteredOrdersMain);
             } catch (error) {
                 if (error.response) {
-                    alert(error.response.data.message)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                    setErrorFlag(flag => !flag);
+
                 } else {
-                    alert("Системная ошибка, попробуйте позже")
+                    setErrorResponse("Системная ошибка с получением акций. " +
+                        "Попробуйте перезагрузить страницу")
+                    setErrorFlag(flag => !flag)
                 }
             }
         }
@@ -273,9 +289,17 @@ const CreatingTireOrder = observer(() => {
             setFiles(response);
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
-                alert("Системная ошибка, попробуйте позже")
+                setErrorResponse("Системная ошибка, проверьте правильность " +
+                    "введённой информации и попробуйте еще раз")
+                setErrorFlag(flag => !flag)
             }
         }
     }
@@ -413,8 +437,13 @@ const CreatingTireOrder = observer(() => {
             setSuccessResponse(sentence)
         } catch (error) {
             if (error.response) {
-                setErrorResponse(error.response.data.message)
-                setErrorFlag(flag => !flag)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
                 setErrorResponse("Системная ошибка, проверьте правильность " +
                     "введённой информации и попробуйте еще раз")

@@ -12,6 +12,7 @@ services:
     depends_on:
       - db
     environment:
+      - TZ=Asia/Novosibirsk
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123zxccxz321
@@ -25,11 +26,13 @@ services:
     networks:
       mynetwork:
     environment:
+      - TZ=Asia/Novosibirsk
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123zxccxz321
     volumes:
       - misha-db-data:/var/lib/postgresql/data
+
   react_app:
     build:
       context: ./CarWash_Site
@@ -39,6 +42,8 @@ services:
       - "3000:3000"
     networks:
       mynetwork:
+    environment:
+      - TZ=Asia/Novosibirsk
     depends_on:
       - server
 

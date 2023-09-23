@@ -1,22 +1,28 @@
 package ru.nsu.carwash_server.payload.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 
 @Data
 public class OrdersArrayPriceAndGoodTimeRequest {
 
-    String orderType;
+    String orderType = null;
 
-    ArrayList<String> orders;
+    ArrayList<String> orders = null;
 
-    String wheelR;
+    String wheelR = null;
 
     int bodyType;
 
-    private Date startTime;
+    @NotNull
+    @JsonFormat(timezone="Asia/Novosibirsk")
+    private Date startTime = null;
 
-    private Date endTime;
+    @NotNull
+    @JsonFormat(timezone="Asia/Novosibirsk")
+    private Date endTime = null;
 }

@@ -1,41 +1,47 @@
 package ru.nsu.carwash_server.payload.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
 @Data
 public class CreatingWashingOrder {
-    private List<String> orders;
+
+    private List<String> orders = null;
 
     @NotNull
-    private Date startTime;
+    @JsonFormat(timezone="Asia/Novosibirsk")
+    private Date startTime = null;
 
-    private String userContacts;
+    private String userContacts = null;
 
     @NotNull
-    private Date endTime;
+    @JsonFormat(timezone="Asia/Novosibirsk")
+    private Date endTime = null;
 
-    private String administrator;
+    private String administrator = null;
 
-    private String specialist;
+    private String specialist = null;
 
     private String sale = null;
 
-    private int boxNumber;
+    @NotNull
+    private Integer boxNumber = null;
 
-    private int bonuses;
+    private Integer bonuses = null;
 
-    private String comments;
+    private String comments = null;
 
-    private String autoNumber;
+    private String autoNumber = null;
 
     private int autoType;
 
     private Integer price = null;
 
-    @NotNull
-    private String currentStatus;
+    @NotBlank
+    private String currentStatus = null;
 }

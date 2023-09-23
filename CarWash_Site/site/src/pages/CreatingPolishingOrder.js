@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
-import {DatePicker, Notification, toaster, useToaster} from 'rsuite';
+import {DatePicker, Notification, useToaster} from 'rsuite';
 
 import addDays from 'date-fns/addDays';
 import {Divider} from 'rsuite';
@@ -439,8 +439,13 @@ const CreatingPolishingOrder = observer(() => {
             setSuccessResponse(sentence)
         } catch (error) {
             if (error.response) {
-                setErrorResponse(error.response.data.message)
-                setErrorFlag(flag => !flag)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
                 setErrorResponse("Системная ошибка, проверьте правильность " +
                     "введённой информации и попробуйте еще раз")

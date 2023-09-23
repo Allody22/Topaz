@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
-import ru.nsu.carwash_server.models.secondary.exception.NotInDataBaseException;
-import ru.nsu.carwash_server.models.secondary.exception.TokenRefreshException;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.TokenRefreshException;
 import ru.nsu.carwash_server.models.users.RefreshToken;
 import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
@@ -112,7 +112,6 @@ public class AuthController {
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
-        System.out.println("ЧЕЛ ПОДОШЁЛ К ОПЕРАЦИИ");
         String operationName = "User_sign_in";
         String descriptionMessage = "Пользователь с логином '" + loginRequest.getUsername() + "' зашёл в аккаунт";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
@@ -151,7 +150,6 @@ public class AuthController {
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new NotInDataBaseException("ролей не найдена роль: ", ERole.ROLE_USER.name()));
             roles.add(userRole);
-            System.out.println(userRole);
         } else {
             Set<ERole> rolesList = EnumSet.allOf(ERole.class);
             roles = strRoles.stream().map(role -> {

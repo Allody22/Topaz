@@ -45,16 +45,6 @@ const buttonStyle = {
     // дополнительные стили по вашему усмотрению...
 };
 
-const modalTextStyle = {
-    fontWeight: 'bold',
-    fontSize: '18px',
-    marginBottom: '5px', // уменьшил отступ
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: '100%'
-};
-
 const modalText = {
     marginBottom: '5px',
     fontWeight: 'bold',
@@ -192,12 +182,19 @@ const SalePage = observer(() => {
         try {
             const response = await getAllSales();
             setFiles(response);
-            console.log(response)
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
-                alert("Системная ошибка, попробуйте позже")
+                setErrorResponse("Файлы не были получены. " +
+                    "Попробуйте перезагрузить страницу")
+                setErrorFlag(flag => !flag)
             }
         }
     }
@@ -215,14 +212,18 @@ const SalePage = observer(() => {
                 setStatus(null)
                 setUploadedFile(null)
                 await getAllImages()
-            } catch
-                (error) {
+            } catch (error) {
                 if (error.response) {
-                    setErrorResponse(error.response.data.message)
-                    setErrorFlag(flag => !flag)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                    setErrorFlag(flag => !flag);
+
                 } else {
-                    setErrorResponse("Системная ошибка, проверьте правильность " +
-                        "введённой информации и попробуйте еще раз")
+                    setErrorResponse("Системная ошибка с загрузкой файлов. " +
+                        "Перезагрузите страницу и попроуйте еще раз")
                     setErrorFlag(flag => !flag)
                 }
             }
