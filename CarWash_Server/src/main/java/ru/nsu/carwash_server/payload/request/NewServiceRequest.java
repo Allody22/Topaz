@@ -2,13 +2,18 @@ package ru.nsu.carwash_server.payload.request;
 
 import lombok.Data;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
 public class NewServiceRequest {
 
-    private String serviceType;
+    @NotBlank
+    private String serviceType = null;
 
+    @NotBlank
     private String name = null;
 
     private Integer priceFirstType = null;
@@ -22,6 +27,7 @@ public class NewServiceRequest {
     private Integer timeSecondType = null;
 
     private Integer timeThirdType = null;
+
     private Integer price_r_13 = null;
 
     private Integer price_r_14 = null;
@@ -64,5 +70,5 @@ public class NewServiceRequest {
 
     private String role = null;
 
-    private List<String> includedIn;
+    private List<String> includedIn = null;
 }

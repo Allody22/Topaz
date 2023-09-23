@@ -6,8 +6,12 @@ import java.util.ArrayList;
 
 @Data
 public class OrdersArrayPriceTimeRequest {
-    String orderType;
-    ArrayList<String> orders;
-    String wheelR;
+
+    String orderType = null;
+
+    ArrayList<String> orders = null;
+
+    String wheelR = null;
+
     int bodyType;
 }

@@ -1,5 +1,6 @@
 package ru.nsu.carwash_server.payload.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,8 +27,10 @@ public class UpdateOrderInfoRequest {
 
     private Integer price = null;
 
+    @JsonFormat(timezone="Asia/Novosibirsk")
     private Date startTime = null;
 
+    @JsonFormat(timezone="Asia/Novosibirsk")
     private Date endTime = null;
 
     private String administrator = null;
@@ -45,8 +48,6 @@ public class UpdateOrderInfoRequest {
     private String comments = null;
 
     private String sale = null;
-
-    private boolean executed;
 
     private List<String> orders = null;
 

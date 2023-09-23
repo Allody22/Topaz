@@ -10,7 +10,7 @@ import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.secondary.constants.OrderStatuses;
-import ru.nsu.carwash_server.models.secondary.exception.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.secondary.helpers.AllOrderTypes;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;

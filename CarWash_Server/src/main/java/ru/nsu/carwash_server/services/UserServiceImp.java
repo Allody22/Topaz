@@ -2,7 +2,7 @@ package ru.nsu.carwash_server.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.nsu.carwash_server.models.secondary.exception.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import {
     InputPicker,
-    Notification, TagPicker, toaster,
+    Notification, TagPicker,
     useToaster,
 } from 'rsuite';
 import '../css/CreatingOrder.css';
@@ -21,7 +21,7 @@ import connectedServiceMap from "../model/map/ConnectedServiceMap";
 import includedServiceMap from "../model/map/IncludedServiceMap";
 import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
-import {BrowserRouter as Router, Link, useHistory} from "react-router-dom";
+import {BrowserRouter as Router} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
 
@@ -63,8 +63,8 @@ const stylesUnderButton = {
 
 
 const AddNewService = observer(() => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitTime, setSubmitTime] = useState(0);
+    const [isSubmitting] = useState(false);
+    const [submitTime] = useState(0);
     const [showModal, setShowModal] = useState(false);
 
     const [showModalB, setShowModalB] = useState(false);

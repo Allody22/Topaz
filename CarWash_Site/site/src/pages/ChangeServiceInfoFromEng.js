@@ -37,8 +37,8 @@ const inputStyle = {
 }
 
 const ChangeServiceInfoFromEng = observer(() => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitTime, setSubmitTime] = useState(0);
+    const [isSubmitting] = useState(false);
+    const [submitTime] = useState(0);
     const [showModal, setShowModal] = useState(false);
 
     const [showModalB, setShowModalB] = useState(false);
@@ -133,7 +133,14 @@ const ChangeServiceInfoFromEng = observer(() => {
                 setWheelSizeAndPrice([])
             } catch (error) {
                 if (error.response) {
-                    alert(error.response.data.message)
+
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join(', '));
+                    setErrorFlag(flag => !flag);
+
                 } else {
                     alert("Системная ошибка, попробуйте позже")
                 }
@@ -236,7 +243,13 @@ const ChangeServiceInfoFromEng = observer(() => {
                         }
                     } catch (error) {
                         if (error.response) {
-                            alert(error.response.data.message)
+                            let messages = [];
+                            for (let key in error.response.data) {
+                                messages.push(error.response.data[key]);
+                            }
+                            setErrorResponse(messages.join(', '));
+                            setErrorFlag(flag => !flag);
+
                         } else {
                             alert("Системная ошибка, попробуйте позже")
                         }

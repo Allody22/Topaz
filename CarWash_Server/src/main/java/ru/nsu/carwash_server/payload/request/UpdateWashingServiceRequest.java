@@ -2,9 +2,12 @@ package ru.nsu.carwash_server.payload.request;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
 public class UpdateWashingServiceRequest {
 
+    @NotBlank
     private String name;
 
     private Integer priceFirstType = null;

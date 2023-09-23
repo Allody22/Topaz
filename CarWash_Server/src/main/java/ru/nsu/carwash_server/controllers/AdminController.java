@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
-import ru.nsu.carwash_server.models.secondary.exception.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.secondary.helpers.OrderPriceTimeDoneTypeInfo;
 import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;

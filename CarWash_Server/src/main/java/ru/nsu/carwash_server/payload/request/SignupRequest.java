@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Data
@@ -16,10 +17,10 @@ import java.util.Set;
 public class SignupRequest {
 
     @NotBlank
-    private String username;
+    private String username = null;
 
-    private Set<String> role;
+    private Set<String> role = null;
 
     @NotBlank
-    private String password;
+    private String password = null;
 }

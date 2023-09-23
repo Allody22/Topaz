@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import '../css/CreatingOrder.css';
 import InputField from "../model/InputField";
-import {InputPicker, Notification, TagPicker, toaster, useToaster} from "rsuite";
+import {InputPicker, Notification, TagPicker, useToaster} from "rsuite";
 import {BrowserRouter as Router, Link, useHistory, useParams} from "react-router-dom";
 import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
@@ -68,8 +68,10 @@ const ChangeUserInfo = observer(() => {
                         <>
                             <div style={{textAlign: 'left'}}>
                                 <p>Тип заказа: {orderTypeMap[JSON.parse(socketStore.message).orderType]}</p>
-                                <p>Время начала заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                                <p>Время конца заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время начала
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время конца
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
                             </div>
                         </>
                     )}
@@ -137,8 +139,12 @@ const ChangeUserInfo = observer(() => {
                 }
             } catch (error) {
                 if (error.response) {
-                    setErrorResponse(error.response.data.message)
-                    setErrorFlag(flag => !flag)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join(', '));
+                    setErrorFlag(flag => !flag);
                 } else {
                     setErrorResponse("Системная ошибка, проверьте правильность " +
                         "введённой информации и попробуйте еще раз")

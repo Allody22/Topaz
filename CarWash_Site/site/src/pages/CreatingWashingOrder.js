@@ -162,9 +162,17 @@ const CreatingWashingOrder = observer(() => {
             setFiles(response);
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
-                alert("Системная ошибка, попробуйте позже")
+                setErrorResponse("Системная ошибка с получением акций. " +
+                    "Перезагрузите страницу и попробуйте еще раз")
+                setErrorFlag(flag => !flag)
             }
         }
     }
@@ -261,7 +269,19 @@ const CreatingWashingOrder = observer(() => {
 
             setNewTime(newTimeArray);
         } catch (error) {
-            alert('Произошла ошибка. Пожалуйста, повторите попытку позже.');
+            if (error.response) {
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
+            } else {
+                setErrorResponse("Системная ошибка с получением цены." +
+                    " Перезагрузите страницу и попробуйте еще раз")
+                setErrorFlag(flag => !flag)
+            }
         }
     }
 
@@ -333,9 +353,17 @@ const CreatingWashingOrder = observer(() => {
                 setAdditionalOrders(filteredOrdersAdditional)
             } catch (error) {
                 if (error.response) {
-                    alert(error.response.data.message)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                    setErrorFlag(flag => !flag);
+
                 } else {
-                    alert("Системная ошибка, попробуйте позже")
+                    setErrorResponse("Системная ошибка с получением услуг, " +
+                        "попробуйте еще раз")
+                    setErrorFlag(flag => !flag)
                 }
             }
         }
@@ -424,8 +452,6 @@ const CreatingWashingOrder = observer(() => {
         setSubmitTime(Date.now());
 
         try {
-            console.log(selectedItems.map(i => i.replace(/ /g, '_')))
-            console.log(currentOrderStatusMapFromRus[currentStatus])
             const response = await createWashingOrder(selectedItems.map(i => i.replace(/ /g, '_')),
                 userContacts, requestStartTime.toISOString(), requestEndTime.toISOString(),
                 administrator, specialist, boxNumber, bonuses, comments,
@@ -449,11 +475,15 @@ const CreatingWashingOrder = observer(() => {
             setSuccessResponse(sentence)
         } catch (error) {
             if (error.response) {
-                setErrorResponse(error.response.data.message)
-                setErrorFlag(flag => !flag)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
             } else {
-                setErrorResponse("Системная ошибка, проверьте правильность " +
-                    "введённой информации и попробуйте еще раз")
+                setErrorResponse("Системная ошибка с получением услуг," +
+                    "введённой информации и попробуйте еще ")
                 setErrorFlag(flag => !flag)
             }
         } finally {

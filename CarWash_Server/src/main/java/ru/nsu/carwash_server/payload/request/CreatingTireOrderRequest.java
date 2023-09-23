@@ -1,10 +1,12 @@
 package ru.nsu.carwash_server.payload.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
@@ -15,38 +17,39 @@ import java.util.List;
 @Builder
 public class CreatingTireOrderRequest {
 
-    private List<String> orders;
+    private List<String> orders = null;
 
-    private String userContacts;
+    private String userContacts = null;
 
-    private String wheelR;
+    private String wheelR = null;
 
     @NotNull
-    private Date startTime;
+    @JsonFormat(timezone="Asia/Novosibirsk")
+    private Date startTime = null;
 
     private String sale = null;
 
     @NotNull
-    private Date endTime;
+    @JsonFormat(timezone="Asia/Novosibirsk")
+    private Date endTime = null;
 
-    private String administrator;
+    private String administrator = null;
 
-    private String specialist;
+    private String specialist = null;
 
+    @NotNull
     private int boxNumber;
 
     private int bonuses;
 
-    private String comments;
+    private String comments = null;
 
-    private String autoNumber;
+    private String autoNumber = null;
 
     private int autoType;
 
-    private boolean executed;
-
     private Integer price = null;
 
-    @NotNull
+    @NotBlank
     private String currentStatus;
 }

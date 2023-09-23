@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.carwash_server.models.secondary.exception.TokenRefreshException;
+import ru.nsu.carwash_server.exceptions.TokenRefreshException;
 import ru.nsu.carwash_server.models.users.RefreshToken;
 import ru.nsu.carwash_server.repository.users.RefreshTokenRepository;
 import ru.nsu.carwash_server.repository.users.UserRepository;
