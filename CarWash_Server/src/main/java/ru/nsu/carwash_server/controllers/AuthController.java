@@ -1,7 +1,13 @@
 package ru.nsu.carwash_server.controllers;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +21,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
@@ -25,7 +33,10 @@ import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
 import ru.nsu.carwash_server.payload.request.LoginRequest;
+import ru.nsu.carwash_server.payload.request.MessagesSms;
 import ru.nsu.carwash_server.payload.request.SignupRequest;
+import ru.nsu.carwash_server.payload.request.Smooth;
+import ru.nsu.carwash_server.payload.request.SmsRequest;
 import ru.nsu.carwash_server.payload.request.TokenRefreshRequest;
 import ru.nsu.carwash_server.payload.response.JwtResponse;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
@@ -39,12 +50,19 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -64,10 +82,13 @@ public class AuthController {
 
     private final UserService userService;
 
+    private RestTemplate restTemplate;
+
     private final OperationsService operationsService;
 
     @Autowired
     public AuthController(
+            RestTemplate restTemplate,
             UserService userService,
             OperationsService operationsService,
             AuthenticationManager authenticationManager,
@@ -78,12 +99,112 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
         this.operationsService = operationsService;
         this.userService = userService;
+        this.restTemplate = restTemplate;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.refreshTokenService = refreshTokenService;
     }
 
+    @PostMapping("/number_check_v1")
+    @SendTo(DestinationPrefixes.NOTIFICATIONS)
+    @Transactional
+    public ResponseEntity<?> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
+        if (userService.existByUsername(number)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: телефон уже занят!"));
+        }
+
+        // Генерация случайного числа от 1000 (включительно) до 10000 (исключительно)
+        Random random = new Random();
+        int randomNumber = 1000 + random.nextInt(8999);
+
+        LocalDateTime oneMinuteLater = LocalDateTime.now().plusMinutes(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        String newDate = oneMinuteLater.format(formatter);
+        System.out.println("new Date: " + newDate);
+
+        MessagesSms message = new MessagesSms();
+        message.setRecipient(number);
+        message.setText("Ваш код: " + randomNumber);
+        message.setRecipientType("recipient");
+        message.setId("2");
+        message.setSource("CarWash");
+        message.setTimeout(3600);
+        message.setShortenUrl(true);
+
+        SmsRequest smsRequest = new SmsRequest();
+        smsRequest.setMessages(Collections.singletonList(message));
+        smsRequest.setValidate(false);
+
+        List<String> tags = new ArrayList<>();
+        tags.add("2023");
+        tags.add("Регистрация");
+        smsRequest.setTags(tags);
+
+        smsRequest.setStartDateTime(newDate);
+
+        LocalDateTime endDateTime = LocalDateTime.now().plusMinutes(5);
+        String newDateStop = endDateTime.format(formatter);
+
+        Smooth smooth = new Smooth();
+        smooth.setStopDateTime(newDateStop);
+        smooth.setStepSeconds(600);
+        smsRequest.setSmooth(smooth);
+
+        smsRequest.setTimeZone("Asia/Novosibirsk");
+        smsRequest.setDuplicateRecipientsAllowed(false);
+
+        List<String> operators = Arrays.asList(
+                "beeline"
+        );
+        List<String> opsosAllowed = new ArrayList<>(operators);
+
+        smsRequest.setOpsosAllowed(opsosAllowed);
+        smsRequest.setOpsosDisallowed(new ArrayList<>());
+
+        smsRequest.setChannel(0);
+        smsRequest.setTransliterate(false);
+
+        String xToken = "8iai05hceeekir0w5e3z9ntgxtg2g8net4m4f3f3b1rxyq02yxbsh633bq02iv1l";
+
+        String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonString = objectMapper.writeValueAsString(smsRequest);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("X-Token", xToken);
+
+        HttpEntity<String> entity = new HttpEntity<>(jsonString, headers);
+
+        System.out.println(jsonString);
+
+
+        //Смотрим сколько раз человек с таким phone уже получал код и если больше n, то не даём код
+        ResponseEntity<String> smsResponse = restTemplate.postForEntity(smsServerUrl, entity, String.class);
+
+
+        System.out.println("RESPONSE SMS");
+        System.out.println(smsResponse);
+
+
+        // Проверка ответа от SMS сервера
+        if (smsResponse.getStatusCode() == HttpStatus.OK) {
+            System.out.println("СМС успешно отправлено!");
+            String operationName = "User_get_phone_code";
+            String descriptionMessage = "'" + number + "' получил код:" + randomNumber;
+            operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
+        } else {
+            System.out.println("Ошибка при отправке СМС: " + smsResponse.getBody());
+        }
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    // Как проверять кому я какой код отправил?
+    // В какой момент удалять информацию о людях с их попытками зарегаться? Каждый раз?
 
     @GetMapping("/getRoles")
     public ResponseEntity<?> getAllRoles() {
@@ -123,6 +244,7 @@ public class AuthController {
                 .refreshToken(refreshToken.getToken())
                 .id(userDetails.getId())
                 .username(userDetails.getUsername())
+                .fullName(userService.getActualUserVersionById(user.getId()).getFullName())
                 .roles(roles)
                 .build();
         return ResponseEntity.ok(jwtResponse);
@@ -256,8 +378,8 @@ public class AuthController {
 
         String operationName = "Admin_log_in";
         String descriptionMessage = "Админ с логином '" + userAdmin.getUsername() + "' зашёл в аккаунт";
-        operationsService.SaveUserOperation(operationName, userAdmin.getUser(), descriptionMessage,1);
-        
+        operationsService.SaveUserOperation(operationName, userAdmin.getUser(), descriptionMessage, 1);
+
 
         return ResponseEntity.ok(jwtResponse);
     }

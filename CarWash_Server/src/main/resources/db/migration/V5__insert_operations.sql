@@ -18,6 +18,10 @@ INSERT INTO operations (name, description) VALUES ('Admin_role_check','Пров�
 INSERT INTO operations_versions (operations_id, creation_time, version, changes)
 VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
 
+INSERT INTO operations (name, description) VALUES ('User_get_phone_code','Проверка номера телефона');
+INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+
 INSERT INTO operations (name, description) VALUES ('Find_user_by_telephone','Поиск информации о клиента по телефону');
 INSERT INTO operations_versions (operations_id, creation_time, version, changes)
 VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
