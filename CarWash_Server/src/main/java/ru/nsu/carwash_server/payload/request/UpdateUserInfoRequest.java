@@ -24,7 +24,4 @@ public class UpdateUserInfoRequest {
     private String userNote = null;
 
     private String email = null;
-
-    private String password = null;
-
 }

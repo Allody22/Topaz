@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Smooth {
-    private String stopDateTime = null;
+    private String stopDateTime;
 
-    private Integer stepSeconds = null;
+    private Integer stepSeconds;
 }

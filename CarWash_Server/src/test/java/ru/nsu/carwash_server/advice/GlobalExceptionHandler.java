@@ -1,8 +1,10 @@
 package ru.nsu.carwash_server.advice;
 
+import com.github.dockerjava.api.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.nsu.carwash_server.exceptions.model.ErrorResponse;
+import ru.nsu.carwash_server.payload.response.MessageResponse;
 
 import java.util.HashMap;
 import java.util.Locale;

@@ -100,13 +100,37 @@ public class UserVersions {
         this.comments = (updateUserInfoRequest.getUserNote() != null) ?
                 updateUserInfoRequest.getUserNote() : userVersions.getComments();
 
-        this.password = (updateUserInfoRequest.getPassword() != null) ?
-                updateUserInfoRequest.getPassword() : userVersions.getPassword();
-
         this.email = (updateUserInfoRequest.getEmail() != null) ?
                 updateUserInfoRequest.getEmail() : userVersions.getEmail();
 
         this.username = (updateUserInfoRequest.getUsername() != null) ?
                 updateUserInfoRequest.getUsername() : userVersions.getUsername();
+    }
+
+    public UserVersions(UserVersions userVersions, String newPassword, String newUsername) {
+        this.user = userVersions.getUser();
+
+        this.version = userVersions.getVersion() + 1;
+
+        this.dateOfCreation = new Date();
+
+        this.password = (newPassword != null) ?
+                newPassword : userVersions.getPassword();
+
+        this.bonuses = userVersions.getBonuses();
+
+        this.phone = (newUsername != null) ?
+                newUsername : userVersions.getUsername();
+
+        this.username = (newUsername != null) ?
+                newUsername : userVersions.getUsername();
+
+        this.fullName = userVersions.getFullName();
+
+        this.adminNote =  userVersions.getAdminNote();
+
+        this.comments =  userVersions.getComments();
+
+        this.email =  userVersions.getEmail();
     }
 }

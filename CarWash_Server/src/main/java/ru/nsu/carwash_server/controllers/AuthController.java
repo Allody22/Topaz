@@ -4,6 +4,7 @@ package ru.nsu.carwash_server.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import ru.nsu.carwash_server.models.OperationsUserLink;
 import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
@@ -113,98 +115,26 @@ public class AuthController {
         if (userService.existByUsername(number)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: телефон уже занят!"));
         }
-
-        // Генерация случайного числа от 1000 (включительно) до 10000 (исключительно)
-        Random random = new Random();
-        int randomNumber = 1000 + random.nextInt(8999);
-
-        LocalDateTime oneMinuteLater = LocalDateTime.now().plusMinutes(1);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        String newDate = oneMinuteLater.format(formatter);
-        System.out.println("new Date: " + newDate);
-
-        MessagesSms message = new MessagesSms();
-        message.setRecipient(number);
-        message.setText("Ваш код: " + randomNumber);
-        message.setRecipientType("recipient");
-        message.setId("2");
-        message.setSource("CarWash");
-        message.setTimeout(3600);
-        message.setShortenUrl(true);
-
-        SmsRequest smsRequest = new SmsRequest();
-        smsRequest.setMessages(Collections.singletonList(message));
-        smsRequest.setValidate(false);
-
-        List<String> tags = new ArrayList<>();
-        tags.add("2023");
-        tags.add("Регистрация");
-        smsRequest.setTags(tags);
-
-        smsRequest.setStartDateTime(newDate);
-
-        LocalDateTime endDateTime = LocalDateTime.now().plusMinutes(5);
-        String newDateStop = endDateTime.format(formatter);
-
-        Smooth smooth = new Smooth();
-        smooth.setStopDateTime(newDateStop);
-        smooth.setStepSeconds(600);
-        smsRequest.setSmooth(smooth);
-
-        smsRequest.setTimeZone("Asia/Novosibirsk");
-        smsRequest.setDuplicateRecipientsAllowed(false);
-
-        List<String> operators = Arrays.asList(
-                "beeline"
-        );
-        List<String> opsosAllowed = new ArrayList<>(operators);
-
-        smsRequest.setOpsosAllowed(opsosAllowed);
-        smsRequest.setOpsosDisallowed(new ArrayList<>());
-
-        smsRequest.setChannel(0);
-        smsRequest.setTransliterate(false);
-
-        String xToken = "8iai05hceeekir0w5e3z9ntgxtg2g8net4m4f3f3b1rxyq02yxbsh633bq02iv1l";
-
         String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonString = objectMapper.writeValueAsString(smsRequest);
+        Pair<HttpEntity<String>, Integer> resultOfSmsCreating = operationsService.createSMS(number);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-Token", xToken);
+        HttpEntity<String> entity = resultOfSmsCreating.getFirst();
 
-        HttpEntity<String> entity = new HttpEntity<>(jsonString, headers);
-
-        System.out.println(jsonString);
-
-
-        //Смотрим сколько раз человек с таким phone уже получал код и если больше n, то не даём код
         ResponseEntity<String> smsResponse = restTemplate.postForEntity(smsServerUrl, entity, String.class);
-
-
-        System.out.println("RESPONSE SMS");
-        System.out.println(smsResponse);
-
 
         // Проверка ответа от SMS сервера
         if (smsResponse.getStatusCode() == HttpStatus.OK) {
-            System.out.println("СМС успешно отправлено!");
             String operationName = "User_get_phone_code";
-            String descriptionMessage = "'" + number + "' получил код:" + randomNumber;
+            String descriptionMessage = "Номер телефона:'" + number + "' получил код:" + resultOfSmsCreating.getSecond();
             operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
         } else {
-            System.out.println("Ошибка при отправке СМС: " + smsResponse.getBody());
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка на стороне сервера для отправки смс: "
+                    + smsResponse.getBody()));
         }
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse("Код успешно отправлен"));
     }
-
-    // Как проверять кому я какой код отправил?
-    // В какой момент удалять информацию о людях с их попытками зарегаться? Каждый раз?
 
     @GetMapping("/getRoles")
     public ResponseEntity<?> getAllRoles() {
@@ -256,6 +186,10 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userService.existByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: телефон уже занят!"));
+        }
+
+        if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(signUpRequest.getUsername()) + "")) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
         }
 
         Set<Role> roles = new HashSet<>();

@@ -17,6 +17,7 @@ import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
 import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequest;
+import ru.nsu.carwash_server.payload.request.UpdateUserPasswordRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
@@ -60,6 +61,34 @@ public class UserController {
     }
 
     @Transactional
+    @PostMapping("/updateUserPassword_v1")
+    public ResponseEntity<?> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
+
+        if (!updateUserPasswordRequest.getSecretCode().equals(operationsService
+                .getLatestCodeByPhoneNumber(updateUserPasswordRequest.getUsername()) + "")) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+
+        User user = userService.getFullUserById(userId);
+
+        var latestUserVersion = userService.getActualUserVersionByUsername(updateUserPasswordRequest.getUsername());
+
+        UserVersions newVersion = new UserVersions(latestUserVersion, updateUserPasswordRequest.getPassword(), updateUserPasswordRequest.getUsername());
+        user.addUserVersion(newVersion);
+
+        String operationName = "Update_user_info_by_user";
+
+        String descriptionMessage = "Пользователь "+ updateUserPasswordRequest.getUsername() + " получил новый пароль";
+        operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+
+        return ResponseEntity.ok(new MessageResponse("Пользователь с айди '" + userId
+                + "' с телефоном " + updateUserPasswordRequest.getUsername() + "обновил пароль или телефон"));
+    }
+
+    @Transactional
     @PostMapping("/updateUserInfo_v1")
     public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequest updateUserInfoRequest) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -100,10 +129,8 @@ public class UserController {
         String descriptionMessage = getString(updateUserInfoRequest, newVersion.getUsername());
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-
         return ResponseEntity.ok(new MessageResponse("Пользователь с айди '" + userId
-                + "' с телефоном " + updateUserInfoRequest.getUsername() + ", теперь с заметкой: '" + newVersion.getAdminNote()
-                + "' и своими комментариями: '" + newVersion.getComments() + "'"));
+                + "' и с телефоном " + updateUserInfoRequest.getUsername() + "изменил информацию о себе"));
     }
 
     @Transactional
