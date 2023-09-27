@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.exceptions.UserNotFoundException;
+import ru.nsu.carwash_server.exceptions.model.ErrorMessage;
 
 import java.util.Date;
 

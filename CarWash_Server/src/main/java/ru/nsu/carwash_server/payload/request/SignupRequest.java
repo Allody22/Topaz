@@ -17,7 +17,7 @@ import java.util.Set;
 public class SignupRequest {
 
     @NotBlank
-    private String username = null;
+    private String phone = null;
 
     private Set<String> role = null;
 

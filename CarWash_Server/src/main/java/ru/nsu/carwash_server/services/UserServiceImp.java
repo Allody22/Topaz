@@ -24,38 +24,19 @@ import java.util.Set;
 @Service
 public class UserServiceImp implements UserService {
 
-    private final OrdersRepository ordersRepository;
-
-    private final RoleRepository roleRepository;
-    private final OrdersPolishingRepository ordersPolishingRepository;
-    private final OrdersTireRepository ordersTireRepository;
-    private final OrdersWashingRepository ordersWashingRepository;
     private final UserRepository userRepository;
 
     private final UserVersionsRepository userVersionsRepository;
 
-    private final OrderVersionsRepository orderVersionsRepository;
 
     @Autowired
-    public UserServiceImp(OrdersRepository ordersRepository,
-                          RoleRepository roleRepository,
-                          OrdersWashingRepository ordersWashingRepository,
-                          OrdersTireRepository ordersTireRepository,
-                          OrdersPolishingRepository ordersPolishingRepository,
-                          OrderVersionsRepository orderVersionsRepository,
-                          UserVersionsRepository userVersionsRepository,
+    public UserServiceImp(UserVersionsRepository userVersionsRepository,
                           UserRepository userRepository) {
-        this.ordersRepository = ordersRepository;
-        this.roleRepository = roleRepository;
-        this.ordersWashingRepository = ordersWashingRepository;
-        this.orderVersionsRepository = orderVersionsRepository;
         this.userVersionsRepository = userVersionsRepository;
-        this.ordersPolishingRepository = ordersPolishingRepository;
-        this.ordersTireRepository = ordersTireRepository;
         this.userRepository = userRepository;
     }
 
-    public void saveNewUser(User user, Set<Role> roles, int version, UserVersions userFirstVersion){
+    public void saveNewUser(User user, Set<Role> roles, int version, UserVersions userFirstVersion) {
         user.setDateOfCreation(new Date());
         user.setRoles(roles);
         userFirstVersion.setVersion(version);
@@ -65,8 +46,8 @@ public class UserServiceImp implements UserService {
         userRepository.save(user);
     }
 
-    public boolean existByUsername(String username) {
-        return userVersionsRepository.existsByUsername(username);
+    public boolean existByPhone(String username) {
+        return userVersionsRepository.existsByPhone(username);
     }
 
     public User getFullUserById(Long userId) {
@@ -75,16 +56,16 @@ public class UserServiceImp implements UserService {
 
     }
 
-    public List<String> getAllActualUsernames() {
+    public List<String> getAllActualPhones() {
         List<User> userList = userRepository.getAllUsers();
         List<String> usernames = new ArrayList<>();
         for (var user : userList) {
-            usernames.add(getActualUserVersionById(user.getId()).getUsername());
+            usernames.add(getActualUserVersionById(user.getId()).getPhone());
         }
         return usernames;
     }
 
-    public UserVersions getActualUserVersionByUsername(String username) {
+    public UserVersions getActualUserVersionByPhone(String username) {
         var userVersionList = userVersionsRepository.findLatestVersionByUsername
                 (username);
         UserVersions latestUserVersion;

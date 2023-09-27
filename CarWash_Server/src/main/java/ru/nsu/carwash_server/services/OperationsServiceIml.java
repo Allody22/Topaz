@@ -7,28 +7,20 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.nsu.carwash_server.exceptions.BadRequestException;
-import ru.nsu.carwash_server.models.OperationsUserLink;
-import ru.nsu.carwash_server.models.OperationsVersions;
+import ru.nsu.carwash_server.models.operations.OperationsUserLink;
+import ru.nsu.carwash_server.models.operations.OperationsVersions;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.payload.request.MessagesSms;
 import ru.nsu.carwash_server.payload.request.Smooth;
 import ru.nsu.carwash_server.payload.request.SmsRequest;
-import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.UserOperationsResponse;
-import ru.nsu.carwash_server.repository.operations.OperationsRepository;
 import ru.nsu.carwash_server.repository.operations.OperationsUsersLinkRepository;
 import ru.nsu.carwash_server.repository.operations.OperationsVersionsRepository;
-import ru.nsu.carwash_server.repository.orders.OrderVersionsRepository;
-import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
-import ru.nsu.carwash_server.repository.orders.OrdersRepository;
-import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
-import ru.nsu.carwash_server.repository.orders.OrdersWashingRepository;
+import ru.nsu.carwash_server.services.interfaces.OperationService;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -41,58 +33,34 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class OperationsService {
+public class OperationsServiceIml implements OperationService {
 
-    private final OperationsRepository operationsRepository;
 
     private final OperationsVersionsRepository operationsVersionsRepository;
 
     private final OperationsUsersLinkRepository operationsUsersLinkRepository;
 
-    private final OrdersRepository ordersRepository;
-    private final OrdersPolishingRepository ordersPolishingRepository;
-    private final OrdersTireRepository ordersTireRepository;
-    private final OrdersWashingRepository ordersWashingRepository;
-
-    private final OrderVersionsRepository orderVersionsRepository;
-
     private final UserServiceImp userServiceImp;
 
-    private EntityManager entityManager;
-
     @Autowired
-    public OperationsService(OrdersRepository ordersRepository,
-                             OperationsVersionsRepository operationsVersionsRepository,
-                             OperationsRepository operationsRepository,
-                             UserServiceImp userServiceImp,
-                             OperationsUsersLinkRepository operationsUsersLinkRepository,
-                             OrdersWashingRepository ordersWashingRepository,
-                             OrdersTireRepository ordersTireRepository,
-                             OrdersPolishingRepository ordersPolishingRepository,
-                             OrderVersionsRepository orderVersionsRepository,
-                             EntityManager entityManager) {
-        this.entityManager = entityManager;
-        this.ordersRepository = ordersRepository;
+    public OperationsServiceIml(OperationsVersionsRepository operationsVersionsRepository,
+                                UserServiceImp userServiceImp,
+                                OperationsUsersLinkRepository operationsUsersLinkRepository) {
         this.userServiceImp = userServiceImp;
         this.operationsUsersLinkRepository = operationsUsersLinkRepository;
-        this.operationsRepository = operationsRepository;
         this.operationsVersionsRepository = operationsVersionsRepository;
-        this.ordersWashingRepository = ordersWashingRepository;
-        this.orderVersionsRepository = orderVersionsRepository;
-        this.ordersPolishingRepository = ordersPolishingRepository;
-        this.ordersTireRepository = ordersTireRepository;
     }
 
     public void checkUserSMS(String number) {
-        if (getAllCodeOperationsByTime(number, LocalDateTime.now().minusHours(1)).size() >= 2) {
+        if (getAllDescriptionOperationsByTime(number,"получил код:", LocalDateTime.now().minusHours(1)).size() >= 2) {
             throw new BadRequestException("Уже было отправлено больше двух запросов в час");
         }
     }
 
 
-    public Optional<OperationsUserLink> findLatestByPhone(String phoneNumber, String advice) {
-        return operationsUsersLinkRepository.findLatestByDescriptionContainingWithAdvice(phoneNumber,
-                advice, LocalDateTime.now().minusHours(1));
+    public Optional<OperationsUserLink> findLatestByPhoneInLastHours(String phoneNumber, String advice, int hourNumber) {
+        return operationsUsersLinkRepository.findLatestByDescriptionContainingWithAdviceInLastHour(phoneNumber,
+                advice, LocalDateTime.now().minusHours(hourNumber));
     }
 
 
@@ -105,11 +73,11 @@ public class OperationsService {
         throw new IllegalArgumentException("Код не найден в описании");
     }
 
-    public List<OperationsUserLink> getAllCodeOperationsByTime(String phoneNumber, LocalDateTime time) {
-        return operationsUsersLinkRepository.findAllByDescriptionContainingWithAdvice(phoneNumber, "получил код:", time);
+    public List<OperationsUserLink> getAllDescriptionOperationsByTime(String phoneNumber,String descriptionMessage, LocalDateTime time) {
+        return operationsUsersLinkRepository.findAllByDescriptionContainingWithAdvice(phoneNumber, descriptionMessage, time);
     }
 
-    public Pair<HttpEntity<String>, Integer> createSMS(String number) throws JsonProcessingException {
+    public Pair<HttpEntity<String>, Integer> createSmsCode(String number) throws JsonProcessingException {
 
         //Смотрим сколько раз человек с таким phone уже получал код и если больше 2 раз за час, то не даём код
         checkUserSMS(number);
@@ -184,7 +152,7 @@ public class OperationsService {
     }
 
     public int getLatestCodeByPhoneNumber(String phoneNumber) {
-        Optional<OperationsUserLink> operationsUserLinkOptional = findLatestByPhone(phoneNumber, "получил код:");
+        Optional<OperationsUserLink> operationsUserLinkOptional = findLatestByPhoneInLastHours(phoneNumber, "получил код:", 1);
         if (operationsUserLinkOptional.isPresent()) {
             String description = operationsUserLinkOptional.get().getDescription();
             return extractCodeFromDescription(description);
@@ -204,28 +172,17 @@ public class OperationsService {
         operationsUsersLinkRepository.save(operationsUserLink);
     }
 
-    public OperationsVersions getLatestOperationsVersionById(Long id) {
-        return operationsVersionsRepository.findLatestVersionByOperations_Id(id)
-                .orElseThrow(() -> new NotInDataBaseException("услуг операций не найдена операция с айди: ",
-                        id.toString()));
-    }
 
-    public List<OperationsVersions> getAllUserOperationsByIdOrUsername(Long id, String username) {
+    public List<OperationsVersions> getAllUserOperationsByIdOrPhone(Long id, String phone) {
         if (id != null) {
             return operationsUsersLinkRepository.findAllOperationsByUserId(id);
         }
-        Long userIdByName = userServiceImp.getActualUserVersionByUsername(username).getUser().getId();
+        Long userIdByName = userServiceImp.getActualUserVersionByPhone(phone).getUser().getId();
         if (userIdByName != null) {
             return operationsUsersLinkRepository.findAllOperationsByUserId(userIdByName);
         } else {
             return null;
         }
-    }
-
-    public OperationsVersions getOperationVersionByIdAndVersion(Long id, Integer version) {
-        return operationsVersionsRepository.findOperationsVersionsByVersionAndOperations_Id(version, id)
-                .orElseThrow(() -> new NotInDataBaseException("услуг операций не найдена операция с айди: ",
-                        id.toString() + " и версией:" + version.toString()));
     }
 
     public OperationsVersions getOperationVersionByNameAndVersion(String name, Integer version) {

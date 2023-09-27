@@ -21,7 +21,7 @@ import ru.nsu.carwash_server.payload.request.UpdateUserPasswordRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
-import ru.nsu.carwash_server.services.OperationsService;
+import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.OrderService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/user")
 public class UserController {
 
-    private final OperationsService operationsService;
+    private final OperationsServiceIml operationsService;
 
     private final OrderService orderService;
 
@@ -50,7 +50,7 @@ public class UserController {
 
     @Autowired
     public UserController(
-            OperationsService operationsService,
+            OperationsServiceIml operationsService,
             OrderService orderService,
             UserService userService,
             RoleRepository roleRepository) {
@@ -74,7 +74,7 @@ public class UserController {
 
         User user = userService.getFullUserById(userId);
 
-        var latestUserVersion = userService.getActualUserVersionByUsername(updateUserPasswordRequest.getUsername());
+        var latestUserVersion = userService.getActualUserVersionByPhone(updateUserPasswordRequest.getUsername());
 
         UserVersions newVersion = new UserVersions(latestUserVersion, updateUserPasswordRequest.getPassword(), updateUserPasswordRequest.getUsername());
         user.addUserVersion(newVersion);
@@ -96,7 +96,7 @@ public class UserController {
 
         User user = userService.getFullUserById(userId);
 
-        var latestUserVersion = userService.getActualUserVersionByUsername(updateUserInfoRequest.getUsername());
+        var latestUserVersion = userService.getActualUserVersionByPhone(updateUserInfoRequest.getPhone());
         Set<Role> roles;
         Set<String> strRoles = updateUserInfoRequest.getRoles();
 
@@ -126,11 +126,11 @@ public class UserController {
 
         String operationName = "Update_user_info_by_user";
 
-        String descriptionMessage = getString(updateUserInfoRequest, newVersion.getUsername());
+        String descriptionMessage = getString(updateUserInfoRequest, newVersion.getPhone());
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         return ResponseEntity.ok(new MessageResponse("Пользователь с айди '" + userId
-                + "' и с телефоном " + updateUserInfoRequest.getUsername() + "изменил информацию о себе"));
+                + "' и с телефоном " + updateUserInfoRequest.getPhone() + "изменил информацию о себе"));
     }
 
     @Transactional
@@ -155,8 +155,8 @@ public class UserController {
     }
 
     private static String getString(UpdateUserInfoRequest updateUserInfoRequest, String username) {
-        String newUsername = (updateUserInfoRequest.getUsername() != null) ?
-                "новый username: '" + updateUserInfoRequest.getUsername() + "'," : null;
+        String newUsername = (updateUserInfoRequest.getPhone() != null) ?
+                "новый username: '" + updateUserInfoRequest.getPhone() + "'," : null;
 
         String newFullName = (updateUserInfoRequest.getFullName() != null) ?
                 "новое ФИО: '" + updateUserInfoRequest.getFullName() + "'," : null;

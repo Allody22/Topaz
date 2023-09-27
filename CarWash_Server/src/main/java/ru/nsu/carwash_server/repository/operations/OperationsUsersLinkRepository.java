@@ -4,8 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import ru.nsu.carwash_server.models.OperationsUserLink;
-import ru.nsu.carwash_server.models.OperationsVersions;
+import ru.nsu.carwash_server.models.operations.OperationsUserLink;
+import ru.nsu.carwash_server.models.operations.OperationsVersions;
 import ru.nsu.carwash_server.models.users.User;
 
 import java.time.LocalDateTime;
@@ -21,10 +21,9 @@ public interface OperationsUsersLinkRepository extends JpaRepository<OperationsU
     @Query(value = "SELECT * FROM operations_users_link WHERE description LIKE %:phoneNumber% " +
             "AND description LIKE %:advice% AND creation_time >= :startTime " +
             "ORDER BY creation_time DESC LIMIT 1", nativeQuery = true)
-    Optional<OperationsUserLink> findLatestByDescriptionContainingWithAdvice(@Param("phoneNumber") String phoneNumber,
-                                                                             @Param("advice") String advice,
-                                                                             @Param("startTime") LocalDateTime startTime
-    );
+    Optional<OperationsUserLink> findLatestByDescriptionContainingWithAdviceInLastHour(@Param("phoneNumber") String phoneNumber,
+                                                                                       @Param("advice") String advice,
+                                                                                       @Param("startTime") LocalDateTime startTime);
 
     @Query(value = "SELECT * FROM operations_users_link WHERE description " +
             "LIKE %:phoneNumber% AND description LIKE %:advice% AND creation_time > :threshold " +

@@ -24,7 +24,7 @@ import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.UserInformationResponse;
 import ru.nsu.carwash_server.payload.response.UserOrdersResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
-import ru.nsu.carwash_server.services.OperationsService;
+import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.OrderServiceImp;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.UserService;
@@ -47,14 +47,14 @@ public class AdminController {
 
     private final OrderServiceImp orderServiceImp;
 
-    private final OperationsService operationsService;
+    private final OperationsServiceIml operationsService;
 
     private final UserService userService;
 
     @Autowired
     public AdminController(
             OrderServiceImp orderServiceImp,
-            OperationsService operationsService,
+            OperationsServiceIml operationsService,
             RoleRepository roleRepository,
             UserService userService) {
         this.operationsService = operationsService;
@@ -75,7 +75,7 @@ public class AdminController {
     @Transactional
     public ResponseEntity<?> findUserByTelephone(@Valid @RequestParam("username") String username) {
 
-        UserVersions latestUserVersion = userService.getActualUserVersionByUsername(username);
+        UserVersions latestUserVersion = userService.getActualUserVersionByPhone(username);
         User user = latestUserVersion.getUser();
 
         return ResponseEntity.ok(new UserInformationResponse(user.getOrders(), user.getId(),
@@ -88,7 +88,7 @@ public class AdminController {
     @Transactional
     public ResponseEntity<?> getUserOrdersByAdmin(@Valid @RequestParam("username") String username) {
 
-        User user = userService.getActualUserVersionByUsername(username).getUser();
+        User user = userService.getActualUserVersionByPhone(username).getUser();
 
         List<OrderPriceTimeDoneTypeInfo> userOrders = new ArrayList<>();
 
@@ -107,14 +107,14 @@ public class AdminController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<?> getAllUser() {
-        return ResponseEntity.ok(userService.getAllActualUsernames());
+        return ResponseEntity.ok(userService.getAllActualPhones());
     }
 
     @PostMapping("/updateUserInfo_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequest updateUserInfoRequest) {
-        var latestUserVersion = userService.getActualUserVersionByUsername(updateUserInfoRequest.getUsername());
+        var latestUserVersion = userService.getActualUserVersionByPhone(updateUserInfoRequest.getPhone());
 
         User user = latestUserVersion.getUser();
         Long userId = user.getId();
@@ -158,8 +158,8 @@ public class AdminController {
     }
 
     private static String getString(UpdateUserInfoRequest updateUserInfoRequest, UserVersions newVersion) {
-        String newUsername = (updateUserInfoRequest.getUsername() != null) ?
-                "новый username: '" + updateUserInfoRequest.getUsername() + "'," : null;
+        String newPhone = (updateUserInfoRequest.getPhone() != null) ?
+                "новый username: '" + updateUserInfoRequest.getPhone() + "'," : null;
 
         String newFullName = (updateUserInfoRequest.getFullName() != null) ?
                 "новое ФИО: '" + updateUserInfoRequest.getFullName() + "'," : null;
@@ -176,7 +176,7 @@ public class AdminController {
         String newUserNote = (updateUserInfoRequest.getUserNote() != null) ?
                 "новую заметку от самого пользователя: '" + updateUserInfoRequest.getUserNote() + "'," : null;
 
-        return "Пользователь '" + newVersion.getUsername() + "' получил" + newUsername +
+        return "Пользователь '" + newVersion.getPhone() + "' получил" + newPhone +
                 newFullName + newRoles + newAdminNote + newEmail + newUserNote;
     }
 }
