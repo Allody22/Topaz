@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.nsu.carwash_server.models.OperationsUserLink;
+import ru.nsu.carwash_server.models.operations.OperationsUserLink;
 import ru.nsu.carwash_server.models.orders.Order;
 
 import javax.persistence.CascadeType;

@@ -1,7 +1,11 @@
 package ru.nsu.carwash_server.controllers;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +19,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
@@ -32,7 +38,7 @@ import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.TokenRefreshResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
 import ru.nsu.carwash_server.security.jwt.JwtUtils;
-import ru.nsu.carwash_server.services.OperationsService;
+import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.RefreshTokenService;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.UserService;
@@ -64,12 +70,15 @@ public class AuthController {
 
     private final UserService userService;
 
-    private final OperationsService operationsService;
+    private RestTemplate restTemplate;
+
+    private final OperationsServiceIml operationsService;
 
     @Autowired
     public AuthController(
+            RestTemplate restTemplate,
             UserService userService,
-            OperationsService operationsService,
+            OperationsServiceIml operationsService,
             AuthenticationManager authenticationManager,
             RoleRepository roleRepository,
             PasswordEncoder encoder,
@@ -78,12 +87,40 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
         this.operationsService = operationsService;
         this.userService = userService;
+        this.restTemplate = restTemplate;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.refreshTokenService = refreshTokenService;
     }
 
+    @PostMapping("/generate_code_v1")
+    @SendTo(DestinationPrefixes.NOTIFICATIONS)
+    @Transactional
+    public ResponseEntity<?> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
+        if (userService.existByPhone(number)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: телефон уже занят!"));
+        }
+        String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
+
+        Pair<HttpEntity<String>, Integer> resultOfSmsCreating = operationsService.createSmsCode(number);
+
+        HttpEntity<String> entity = resultOfSmsCreating.getFirst();
+
+        ResponseEntity<String> smsResponse = restTemplate.postForEntity(smsServerUrl, entity, String.class);
+
+        // Проверка ответа от SMS сервера
+        if (smsResponse.getStatusCode() == HttpStatus.OK) {
+            String operationName = "User_get_phone_code";
+            String descriptionMessage = "Номер телефона:'" + number + "' получил код:" + resultOfSmsCreating.getSecond();
+            operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка на стороне сервера для отправки смс: "
+                    + smsResponse.getBody()));
+        }
+
+        return ResponseEntity.ok(new MessageResponse("Код успешно отправлен"));
+    }
 
     @GetMapping("/getRoles")
     public ResponseEntity<?> getAllRoles() {
@@ -94,12 +131,12 @@ public class AuthController {
     @SendTo(DestinationPrefixes.NOTIFICATIONS)
     @Transactional
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        if (!userService.existByUsername(loginRequest.getUsername())) {
+        if (!userService.existByPhone(loginRequest.getPhone())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: такого пользователя не существует!"));
         }
 
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getPhone(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -113,7 +150,7 @@ public class AuthController {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
         String operationName = "User_sign_in";
-        String descriptionMessage = "Пользователь с логином '" + loginRequest.getUsername() + "' зашёл в аккаунт";
+        String descriptionMessage = "Пользователь с логином '" + loginRequest.getPhone() + "' зашёл в аккаунт";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         JwtResponse jwtResponse = JwtResponse
@@ -123,6 +160,7 @@ public class AuthController {
                 .refreshToken(refreshToken.getToken())
                 .id(userDetails.getId())
                 .username(userDetails.getUsername())
+                .fullName(userService.getActualUserVersionById(user.getId()).getFullName())
                 .roles(roles)
                 .build();
         return ResponseEntity.ok(jwtResponse);
@@ -132,8 +170,12 @@ public class AuthController {
     @SendTo(DestinationPrefixes.NOTIFICATIONS)
     @Transactional
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userService.existByUsername(signUpRequest.getUsername())) {
+        if (userService.existByPhone(signUpRequest.getPhone())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: телефон уже занят!"));
+        }
+
+        if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(signUpRequest.getPhone()) + "")) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
         }
 
         Set<Role> roles = new HashSet<>();
@@ -141,9 +183,9 @@ public class AuthController {
         user.setDateOfCreation(new Date());
         UserVersions userFirstVersion = new UserVersions();
         userFirstVersion.setPassword(encoder.encode(signUpRequest.getPassword()));
-        userFirstVersion.setUsername(signUpRequest.getUsername());
+        userFirstVersion.setPhone(signUpRequest.getPhone());
         userFirstVersion.setDateOfCreation(new Date());
-        userFirstVersion.setPhone(signUpRequest.getUsername());
+        userFirstVersion.setPhone(signUpRequest.getPhone());
 
         Set<String> strRoles = signUpRequest.getRole();
         if (strRoles == null || strRoles.isEmpty()) {
@@ -173,7 +215,7 @@ public class AuthController {
         userService.saveNewUser(user, roles, 1, userFirstVersion);
 
         String operationName = "User_sign_up";
-        String descriptionMessage = "Клиент с логином '" + signUpRequest.getUsername() + "' зарегистрировался";
+        String descriptionMessage = "Клиент с логином '" + signUpRequest.getPhone() + "' зарегистрировался";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
@@ -190,7 +232,7 @@ public class AuthController {
 
         UserVersions latestUserVersion = userService.getActualUserVersionById(user.getId());
 
-        String token = jwtUtils.generateTokenFromUsername(latestUserVersion.getUsername());
+        String token = jwtUtils.generateTokenFromUsername(latestUserVersion.getPhone());
 
         return ResponseEntity.ok(new TokenRefreshResponse(token, request.getRefreshToken()));
     }
@@ -208,7 +250,7 @@ public class AuthController {
         UserVersions userLatestVersion = userService.getActualUserVersionById(currentUserId);
 
         String operationName = "User_sign_out";
-        String descriptionMessage = "Клиент с логином '" + userLatestVersion.getUsername() + "' вышел из аккаунта";
+        String descriptionMessage = "Клиент с логином '" + userLatestVersion.getPhone() + "' вышел из аккаунта";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
@@ -218,12 +260,12 @@ public class AuthController {
     @PostMapping("/admin/signin_v1")
     @Transactional
     public ResponseEntity<?> signInAdmin(@Valid @RequestBody LoginRequest loginRequest) {
-        if (!userService.existByUsername(loginRequest.getUsername())) {
+        if (!userService.existByPhone(loginRequest.getPhone())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: такого пользователя не существует!"));
         }
 
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getPhone(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -255,9 +297,9 @@ public class AuthController {
         UserVersions userAdmin = userService.getActualUserVersionById(currentUserId);
 
         String operationName = "Admin_log_in";
-        String descriptionMessage = "Админ с логином '" + userAdmin.getUsername() + "' зашёл в аккаунт";
-        operationsService.SaveUserOperation(operationName, userAdmin.getUser(), descriptionMessage,1);
-        
+        String descriptionMessage = "Админ с логином '" + userAdmin.getPhone() + "' зашёл в аккаунт";
+        operationsService.SaveUserOperation(operationName, userAdmin.getUser(), descriptionMessage, 1);
+
 
         return ResponseEntity.ok(jwtResponse);
     }

@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.nsu.carwash_server.models.OperationsVersions;
-import ru.nsu.carwash_server.services.OperationsService;
+import ru.nsu.carwash_server.models.operations.OperationsVersions;
+import ru.nsu.carwash_server.services.OperationsServiceIml;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -21,11 +21,11 @@ import java.util.List;
 @RequestMapping("/api/operations")
 public class OperationController {
 
-    private final OperationsService operationsService;
+    private final OperationsServiceIml operationsService;
 
     @Autowired
     public OperationController(
-            OperationsService operationsService) {
+            OperationsServiceIml operationsService) {
         this.operationsService = operationsService;
 
     }
@@ -34,7 +34,7 @@ public class OperationController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<?> getUserOperations(@Valid @RequestParam("username") String username) {
-        List<OperationsVersions> userOperations = operationsService.getAllUserOperationsByIdOrUsername(null, username);
+        List<OperationsVersions> userOperations = operationsService.getAllUserOperationsByIdOrPhone(null, username);
         return ResponseEntity.ok(operationsService.getRationalOperationForm(userOperations));
     }
 }

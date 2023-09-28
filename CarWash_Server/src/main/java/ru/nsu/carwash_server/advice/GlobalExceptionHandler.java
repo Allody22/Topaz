@@ -3,6 +3,7 @@ package ru.nsu.carwash_server.advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -39,8 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
-    @Order()
-    public ErrorResponse handleAllOtherErrors() {
-        return ErrorResponse.builder().error("Неожиданная ошибка.").build();
+    public ErrorResponse onThrowable(final Throwable e) {
+        return ErrorResponse.builder().error("Неожиданная ошибка на сервере: " + e.getMessage()).build();
     }
 }

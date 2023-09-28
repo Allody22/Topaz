@@ -1,4 +1,4 @@
-package ru.nsu.carwash_server.advice;
+package ru.nsu.carwash_server.exceptions.model;
 
 import lombok.Data;
 import lombok.ToString;

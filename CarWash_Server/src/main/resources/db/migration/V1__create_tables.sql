@@ -9,7 +9,6 @@ CREATE TABLE user_version
     id            BIGSERIAL PRIMARY KEY,
     user_id       BIGINT       NOT NULL,
     creation_time TIMESTAMP,
-    username      VARCHAR(255),
     phone         VARCHAR(255),
     email         VARCHAR(255),
     bonuses       INT,

@@ -12,8 +12,8 @@ public interface UserVersionsRepository extends JpaRepository<UserVersions, Long
     @Query("SELECT uv FROM UserVersions uv WHERE uv.user.id = :userId ORDER BY uv.dateOfCreation DESC")
     List<UserVersions> findLatestVersionByUserId(@Param("userId") Long userId);
 
-    @Query(value = "SELECT * FROM user_version where username = :username ORDER BY creation_time DESC", nativeQuery = true)
-    List<UserVersions> findLatestVersionByUsername(@Param("username") String username);
+    @Query(value = "SELECT * FROM user_version where phone = :phone ORDER BY creation_time DESC", nativeQuery = true)
+    List<UserVersions> findLatestVersionByUsername(@Param("phone") String username);
 
-    boolean existsByUsername(String username);
+    boolean existsByPhone(String username);
 }

@@ -37,7 +37,7 @@ import ru.nsu.carwash_server.payload.response.OrderInfoResponse;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersWashingRepository;
-import ru.nsu.carwash_server.services.OperationsService;
+import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.OrderService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
@@ -65,7 +65,7 @@ public class OrderCreatingController {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderCreatingController.class);
 
-    private final OperationsService operationsService;
+    private final OperationsServiceIml operationsService;
 
     private final UserService userService;
 
@@ -76,7 +76,7 @@ public class OrderCreatingController {
             UserService userService,
             OrdersPolishingRepository ordersPolishingRepository,
             OrderService orderService,
-            OperationsService operationsService,
+            OperationsServiceIml operationsService,
             SimpMessagingTemplate simpMessagingTemplate) {
         this.userService = userService;
         this.operationsService = operationsService;
@@ -136,7 +136,7 @@ public class OrderCreatingController {
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
         String operationName = "Book_washing_order";
-        String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getUsername() + "' забронировал заказ на автомойку";
+        String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getPhone() + "' забронировал заказ на автомойку";
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
@@ -198,7 +198,7 @@ public class OrderCreatingController {
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
         String operationName = "Book_polishing_order";
-        String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getUsername() + "' забронировал заказ на полировку";
+        String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getPhone() + "' забронировал заказ на полировку";
 
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
@@ -258,7 +258,7 @@ public class OrderCreatingController {
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
         String operationName = "Book_tire_order";
-        String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getUsername() + "' забронировал заказ на шиномонтаж";
+        String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getPhone() + "' забронировал заказ на шиномонтаж";
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
@@ -283,7 +283,7 @@ public class OrderCreatingController {
         UserVersions user = userService.getActualUserVersionById(userDetails.getId());
 
         administrator = (bookingOrderRequest.getAdministrator() != null && !bookingOrderRequest.getAdministrator().isEmpty())
-                ? bookingOrderRequest.getAdministrator() : user.getUsername();
+                ? bookingOrderRequest.getAdministrator() : user.getPhone();
 
         List<OrdersWashing> ordersWashings = new ArrayList<>();
 
@@ -312,7 +312,7 @@ public class OrderCreatingController {
         OrderVersions orderVersions = result.getSecond();
 
         String operationName = "Create_washing_order";
-        String descriptionMessage = "Админ с логином '" + user.getUsername() + "' создал заказ на автомойку";
+        String descriptionMessage = "Админ с логином '" + user.getPhone() + "' создал заказ на автомойку";
 
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
@@ -343,7 +343,7 @@ public class OrderCreatingController {
         UserVersions user = userService.getActualUserVersionById(userDetails.getId());
 
         administrator = (bookingOrderRequest.getAdministrator() != null && !bookingOrderRequest.getAdministrator().isEmpty())
-                ? bookingOrderRequest.getAdministrator() : user.getUsername();
+                ? bookingOrderRequest.getAdministrator() : user.getPhone();
 
 
         List<OrdersPolishing> ordersPolishings = new ArrayList<>();
@@ -372,7 +372,7 @@ public class OrderCreatingController {
         OrderVersions newOrderVersion = result.getSecond();
 
         String operationName = "Create_polishing_order";
-        String descriptionMessage = "Админ с логином '" + user.getUsername() + "' создал заказ на полировку";
+        String descriptionMessage = "Админ с логином '" + user.getPhone() + "' создал заказ на полировку";
 
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
@@ -401,7 +401,7 @@ public class OrderCreatingController {
         UserVersions user = userService.getActualUserVersionById(userDetails.getId());
 
         administrator = (bookingOrderRequest.getAdministrator() != null && !bookingOrderRequest.getAdministrator().isEmpty())
-                ? bookingOrderRequest.getAdministrator() : user.getUsername();
+                ? bookingOrderRequest.getAdministrator() : user.getPhone();
 
         List<OrdersTire> ordersTireService = new ArrayList<>();
 
@@ -430,7 +430,7 @@ public class OrderCreatingController {
         OrderVersions newOrderVersion = result.getSecond();
 
         String operationName = "Create_tire_order";
-        String descriptionMessage = "Админ с логином '" + user.getUsername() + "' создал заказ на шиномонтаж";
+        String descriptionMessage = "Админ с логином '" + user.getPhone() + "' создал заказ на шиномонтаж";
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
 

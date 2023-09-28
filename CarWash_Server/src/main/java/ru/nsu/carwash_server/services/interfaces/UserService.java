@@ -26,7 +26,7 @@ public interface UserService {
      * @param username - имя для проверки
      * @return true - если пользователь существует, иначе false
      */
-    boolean existByUsername(String username);
+    boolean existByPhone(String username);
 
     /**
      * Получение всей информации и пользователе
@@ -42,7 +42,7 @@ public interface UserService {
      *
      * @return список строк с username
      */
-    List<String> getAllActualUsernames();
+    List<String> getAllActualPhones();
 
     /**
      * Получение последней версии пользователя
@@ -51,7 +51,7 @@ public interface UserService {
      * @param username - имя для поиска
      * @return последняя версия пользователя
      */
-    UserVersions getActualUserVersionByUsername(String username);
+    UserVersions getActualUserVersionByPhone(String username);
 
     /**
      * Получение последней версии пользователя

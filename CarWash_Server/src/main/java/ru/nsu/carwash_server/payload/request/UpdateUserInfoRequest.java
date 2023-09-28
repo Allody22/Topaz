@@ -13,7 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class UpdateUserInfoRequest {
 
-    private String username = null;
+    private String phone = null;
 
     private String fullName = null;
 
@@ -24,7 +24,4 @@ public class UpdateUserInfoRequest {
     private String userNote = null;
 
     private String email = null;
-
-    private String password = null;
-
 }

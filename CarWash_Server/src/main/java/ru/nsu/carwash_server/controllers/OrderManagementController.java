@@ -38,7 +38,7 @@ import ru.nsu.carwash_server.payload.response.TimeAndPriceResponse;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersWashingRepository;
-import ru.nsu.carwash_server.services.OperationsService;
+import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.OrderServiceImp;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.UserService;
@@ -69,11 +69,11 @@ public class OrderManagementController {
 
     private final UserService userService;
 
-    private final OperationsService operationsService;
+    private final OperationsServiceIml operationsService;
 
     @Autowired
     public OrderManagementController(
-            OperationsService operationsService,
+            OperationsServiceIml operationsService,
             OrdersWashingRepository ordersWashingRepository,
             OrdersTireRepository ordersTireRepository,
             UserService userService,

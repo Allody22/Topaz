@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 public class LoginRequest {
 
 	@NotBlank
-	private String username = null;
+	private String phone = null;
 
 	@NotBlank
 	private String password = null;

@@ -1,4 +1,4 @@
-package ru.nsu.carwash_server.models;
+package ru.nsu.carwash_server.models.operations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
