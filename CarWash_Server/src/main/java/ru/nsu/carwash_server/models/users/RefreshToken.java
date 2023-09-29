@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
-import ru.nsu.carwash_server.models.users.User;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,7 +20,8 @@ import java.time.Instant;
 @Entity(name = "refreshToken")
 @NoArgsConstructor
 @ToString
-@Getter @Setter
+@Getter
+@Setter
 @AllArgsConstructor
 public class RefreshToken {
 

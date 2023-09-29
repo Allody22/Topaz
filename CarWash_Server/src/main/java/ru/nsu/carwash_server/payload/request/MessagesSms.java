@@ -9,17 +9,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MessagesSms {
 
-        private String recipient = "";
+    private String recipient = "";
 
-        private String text = "";
+    private String text = "";
 
-        private String recipientType = "";
+    private String recipientType = "";
 
-        private String id;
+    private String id;
 
-        private String source;
+    private String source;
 
-        private Integer timeout;
+    private Integer timeout;
 
-        private Boolean shortenUrl;
+    private Boolean shortenUrl;
 }

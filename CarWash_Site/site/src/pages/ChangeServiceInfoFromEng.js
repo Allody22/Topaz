@@ -1,12 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
-import {
-    Notification, useToaster,
-} from 'rsuite';
+import {Notification, SelectPicker, useToaster,} from 'rsuite';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
-
-import {SelectPicker} from 'rsuite';
 
 import 'rsuite/dist/rsuite.css';
 

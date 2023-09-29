@@ -2,30 +2,21 @@ import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
-import {DatePicker, Notification, useToaster} from 'rsuite';
-
+import {DatePicker, Divider, InputNumber, InputPicker, Notification, useToaster} from 'rsuite';
 import addDays from 'date-fns/addDays';
-import {Divider} from 'rsuite';
-
 import 'rsuite/dist/rsuite.css';
 
 import Modal from "react-bootstrap/Modal";
-
-import {InputNumber, InputPicker} from 'rsuite';
 import InputField from "../model/InputField";
-import {
-    createPolishingOrder, getAllPolishingServicesWithPriceAndTime,
-    getPriceAndFreeTime
-} from "../http/orderAPI";
+import {createPolishingOrder, getAllPolishingServicesWithPriceAndTime, getPriceAndFreeTime} from "../http/orderAPI";
 import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
 import {BrowserRouter as Router, useHistory} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
 import currentOrderStatusMapFromRus from "../model/map/CurrentOrderStatusMapFromRus";
-import {getAllSales} from "../http/userAPI";
-import fileNameFromEngMap from "../model/map/FileNamesFromEngMap";
 import InputFieldNear from "../model/InputFieldNear";
+import saleStore from "../store/SaleStore.js";
 
 
 const carTypesArray = [
@@ -165,27 +156,41 @@ const CreatingPolishingOrder = observer(() => {
         }
     };
 
+
+    useEffect(() => {
+        if (saleStore?.error) {
+            const errorResponseMessage = (
+                <Notification
+                    type="error"
+                    header="Ошибка!"
+                    closable
+                    style={{border: '1px solid black'}}
+                >
+                    <div style={{width: 320}}>
+                        {saleStore.error}
+                    </div>
+                </Notification>
+            );
+
+            toaster.push(errorResponseMessage, {placement: "bottomEnd"});
+            saleStore.error = null; // Очищаем ошибку после показа
+        }
+    }, [saleStore?.error]);
+
+
     const filesOptions = files.map(file => ({
-        label: `${fileNameFromEngMap[file.name]} - ${file.description}`,
+        label: `${file.name} - ${file.description}`,
         value: file.id
     }));
 
-    async function getAllImages() {
-        try {
-            const response = await getAllSales();
-            setFiles(response);
-        } catch (error) {
-            if (error.response) {
-                alert(error.response.data.message)
-            } else {
-                alert("Системная ошибка, попробуйте позже")
-            }
-        }
-    }
 
     useEffect(() => {
-        getAllImages();
-    }, []);
+        if (saleStore.discounts.length === 0) {
+            saleStore.loadDiscounts();
+        } else {
+            setFiles(saleStore.discounts);
+        }
+    }, [saleStore.discounts]);
 
 
     const getItemValueByName = (name) => {

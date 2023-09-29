@@ -22,11 +22,11 @@ public class BookingTireOrderRequest {
     private String wheelR = null;
 
     @NotNull
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime = null;
 
     @NotNull
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime = null;
 
     private String administrator = null;

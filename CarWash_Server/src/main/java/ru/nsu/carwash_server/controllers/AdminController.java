@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
-import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.secondary.helpers.OrderPriceTimeDoneTypeInfo;
 import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
@@ -25,8 +25,9 @@ import ru.nsu.carwash_server.payload.response.UserInformationResponse;
 import ru.nsu.carwash_server.payload.response.UserOrdersResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
 import ru.nsu.carwash_server.services.OperationsServiceIml;
-import ru.nsu.carwash_server.services.OrderServiceImp;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
+import ru.nsu.carwash_server.services.interfaces.OperationService;
+import ru.nsu.carwash_server.services.interfaces.OrderService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
@@ -45,20 +46,20 @@ public class AdminController {
 
     private final RoleRepository roleRepository;
 
-    private final OrderServiceImp orderServiceImp;
+    private final OrderService orderService;
 
-    private final OperationsServiceIml operationsService;
+    private final OperationService operationsService;
 
     private final UserService userService;
 
     @Autowired
     public AdminController(
-            OrderServiceImp orderServiceImp,
+            OrderService orderService,
             OperationsServiceIml operationsService,
             RoleRepository roleRepository,
             UserService userService) {
         this.operationsService = operationsService;
-        this.orderServiceImp = orderServiceImp;
+        this.orderService = orderService;
         this.userService = userService;
         this.roleRepository = roleRepository;
     }
@@ -73,7 +74,7 @@ public class AdminController {
     @GetMapping("/findUserByTelephone_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> findUserByTelephone(@Valid @RequestParam("username") String username) {
+    public ResponseEntity<?> findUserByTelephone(@Valid @RequestParam("phone") String username) {
 
         UserVersions latestUserVersion = userService.getActualUserVersionByPhone(username);
         User user = latestUserVersion.getUser();
@@ -93,7 +94,7 @@ public class AdminController {
         List<OrderPriceTimeDoneTypeInfo> userOrders = new ArrayList<>();
 
         for (var item : user.getOrders()) {
-            OrderVersions latestOrderVersion = orderServiceImp.getActualOrderVersion(item.getId());
+            OrderVersions latestOrderVersion = orderService.getActualOrderVersion(item.getId());
 
             userOrders.add(new OrderPriceTimeDoneTypeInfo(latestOrderVersion.getOrderType(),
                     latestOrderVersion.getPrice(), item.getId(),
@@ -103,7 +104,7 @@ public class AdminController {
         return ResponseEntity.ok(new UserOrdersResponse(userOrders));
     }
 
-    @GetMapping("/getAllUserNames_v1")
+    @GetMapping("/getAllUserTelephones_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<?> getAllUser() {

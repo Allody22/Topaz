@@ -5,7 +5,9 @@ import InputField from "../model/InputField";
 import {BrowserRouter as Router, useParams} from "react-router-dom";
 import {
     deleteOrderById,
-    getAllPolishingServicesWithPriceAndTime, getAllTireServicesWithPriceAndTime, getAllWashingServicesWithPriceAndTime,
+    getAllPolishingServicesWithPriceAndTime,
+    getAllTireServicesWithPriceAndTime,
+    getAllWashingServicesWithPriceAndTime,
     getOrderInfo,
     updateOrderInfo
 } from "../http/orderAPI";
@@ -306,7 +308,6 @@ const UpdateOrderInfo = observer(() => {
     }
 
 
-
     useEffect(() => {
             getThisOrderInfo(id);
         }, [id]
@@ -343,7 +344,6 @@ const UpdateOrderInfo = observer(() => {
             return "Неизвестно"
         }
     };
-
 
 
     async function getAllPolishingServices() {
@@ -438,8 +438,10 @@ const UpdateOrderInfo = observer(() => {
                         <>
                             <div style={{textAlign: 'left'}}>
                                 <p>Тип заказа: {orderTypeMap[JSON.parse(socketStore.message).orderType]}</p>
-                                <p>Время начала заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                                <p>Время конца заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время начала
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время конца
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
                             </div>
                         </>
                     )}

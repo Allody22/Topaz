@@ -2,8 +2,8 @@ import {$authHost, $host} from "./index";
 import jwt_decode from "jwt-decode";
 
 //Версия с вроде как правильным рефреш токеном
-export const login = async (username, password) => {
-    const {data} = await $host.post('api/auth/admin/signin_v1', {username, password})
+export const login = async (phone, password) => {
+    const {data} = await $host.post('api/auth/admin/signin_v1', {phone, password})
     const {token, refreshToken} = data
     localStorage.setItem('token', token)
     localStorage.setItem('refreshToken', refreshToken)
@@ -56,30 +56,29 @@ export const uploadImage = async (file, description, status) => {
 };
 
 
-
 export const check = async () => {
     await $authHost.get('api/admin/users/adminRoleCheck_v1');
 }
 
-export const updateUserInfo = async (username, fullName, roles, adminNote, userNote, email) => {
+export const updateUserInfo = async (phone, fullName, roles, adminNote, userNote, email) => {
     const requestBody = {
         fullName: fullName,
-        username: username,
+        phone: phone,
         roles: roles,
         adminNote: adminNote,
         userNote: userNote,
         email: email
     };
-    const response =  await $authHost.post('api/admin/users/updateUserInfo_v1',requestBody);
+    const response = await $authHost.post('api/admin/users/updateUserInfo_v1', requestBody);
     return await response.data;
 };
 
 export const getAllUsers = async () => {
-    const response = await $authHost.get('api/admin/users/getAllUserNames_v1');
+    const response = await $authHost.get('api/admin/users/getAllUserTelephones_v1');
     return await response.data;
 };
 
-export const findUserByPhone = async (userName) => {
-    const response = await $authHost.get('api/admin/users/findUserByTelephone_v1?username=' +  encodeURIComponent(userName));
+export const findUserByPhone = async (phone) => {
+    const response = await $authHost.get('api/admin/users/findUserByTelephone_v1?phone=' + encodeURIComponent(phone));
     return await response.data;
 };

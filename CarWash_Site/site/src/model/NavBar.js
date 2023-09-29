@@ -2,10 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {Context} from "../index";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
-import {
-    ADMIN_ROUTE,
-    LOGIN_ROUTE
-} from "../utils/consts";
+import {ADMIN_ROUTE, LOGIN_ROUTE} from "../utils/consts";
 import {Button} from "react-bootstrap";
 import {observer} from "mobx-react-lite";
 import Container from "react-bootstrap/Container";
@@ -16,7 +13,6 @@ import Modal from "react-bootstrap/Modal";
 import orderTypeMap from "./map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
 import '../css/CreatingOrder.css';
-
 
 
 const NavBar = observer(() => {
@@ -99,10 +95,10 @@ const NavBar = observer(() => {
                                         fontWeight: 'bold'
                                     }}
                                 >
-                                    <div style={{ flex: 1 }}>Айди</div>
-                                    <div style={{ flex: 1 }}>Тип</div>
-                                    <div style={{ flex: 1 }}>Время начала</div>
-                                    <div style={{ flex: 1 }}>Время конца</div>
+                                    <div style={{flex: 1}}>Айди</div>
+                                    <div style={{flex: 1}}>Тип</div>
+                                    <div style={{flex: 1}}>Время начала</div>
+                                    <div style={{flex: 1}}>Время конца</div>
                                 </div>
 
                                 {detectedOrders.map(item => (
@@ -117,30 +113,31 @@ const NavBar = observer(() => {
                                             alignItems: 'center'
                                         }}
                                     >
-                                        <div style={{ flex: 1 }}>
+                                        <div style={{flex: 1}}>
                                             <button
                                                 onClick={() => handleClick(item.id)}
-                                                style={{ color: 'blue' }}
+                                                style={{color: 'blue'}}
                                                 className='notification-button'
                                             >
                                                 {item.id}
                                             </button>
                                         </div>
 
-                                        <div style={{ flex: 1, marginRight:'7px' }}>
-                                            <span style={{ color: "black" }}>{item.orderType}</span>
+                                        <div style={{flex: 1, marginRight: '7px'}}>
+                                            <span style={{color: "black"}}>{item.orderType}</span>
                                         </div>
 
-                                        <div style={{ flex: 1 }}>
-                                            <span style={{ color: "black" }}>{item.startTime}</span>
+                                        <div style={{flex: 1}}>
+                                            <span style={{color: "black"}}>{item.startTime}</span>
                                         </div>
 
-                                        <div style={{ flex: 1 }}>
-                                            <span style={{ color: "black" }}>{item.endTime}</span>
+                                        <div style={{flex: 1}}>
+                                            <span style={{color: "black"}}>{item.endTime}</span>
                                         </div>
 
-                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <button onClick={() => removeDetectedOrder(item.id)} style={{ cursor: "pointer" }}>
+                                        <div style={{display: 'flex', justifyContent: 'center'}}>
+                                            <button onClick={() => removeDetectedOrder(item.id)}
+                                                    style={{cursor: "pointer"}}>
                                                 &#10006;
                                             </button>
                                         </div>

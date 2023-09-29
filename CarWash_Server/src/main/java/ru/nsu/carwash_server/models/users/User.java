@@ -34,7 +34,8 @@ import java.util.Set;
 @Table(name = "users")
 @NoArgsConstructor
 @ToString
-@Getter @Setter
+@Getter
+@Setter
 @AllArgsConstructor
 public class User {
 
@@ -46,7 +47,7 @@ public class User {
     @Column(name = "creation_time")
     private Date dateOfCreation;
 
-    @OneToMany(mappedBy = "user",  cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
     private Set<Order> orders;

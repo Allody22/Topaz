@@ -3,7 +3,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 100px;  /* добавить отступ сверху для смещения кнопок вниз */
+    margin-top: 100px; /* добавить отступ сверху для смещения кнопок вниз */
 }
 
 .resizable-image-container {

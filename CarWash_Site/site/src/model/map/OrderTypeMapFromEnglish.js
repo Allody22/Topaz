@@ -4,9 +4,9 @@ const englishToRussianTypeMap = {
     "wash ELITE": "Мойка ELITE",
     "wash VIP": "Мойка VIP",
     "wash Site": "Мойка с сайта",
-    "wash Комфорт" : "Мойка Комфорт",
-    "wash Стандарт" : "Мойка Стандарт",
-    "wash Эконом" : "Мойка Эконом",
+    "wash Комфорт": "Мойка Комфорт",
+    "wash Стандарт": "Мойка Стандарт",
+    "wash Эконом": "Мойка Эконом",
     "wash null": "Мойка неизвестная",
     "Unknown": "Неизвестно",
     "polishing": "Полировка",
@@ -16,5 +16,6 @@ const englishToRussianTypeMap = {
     "tire App": "Шиномонтаж с приложения",
     "polishing Order": "Полировка",
     "polishing Site": "Полировка с сайта",
-    "polishing App": "Полировка с приложения"}
+    "polishing App": "Полировка с приложения"
+}
 export default englishToRussianTypeMap

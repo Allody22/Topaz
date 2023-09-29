@@ -19,10 +19,10 @@ public class OrdersArrayPriceAndGoodTimeRequest {
     int bodyType;
 
     @NotNull
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime = null;
 
     @NotNull
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime = null;
 }

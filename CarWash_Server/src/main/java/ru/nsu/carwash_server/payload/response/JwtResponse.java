@@ -13,17 +13,17 @@ import java.util.List;
 @NoArgsConstructor
 public class JwtResponse {
 
-	private String token;
+    private String token;
 
-	private String type = "Bearer";
+    private String type = "Bearer";
 
-	private String refreshToken;
+    private String refreshToken;
 
-	private Long id;
+    private Long id;
 
-	private String username;
+    private String username;
 
-	private String fullName;
+    private String fullName;
 
-	private List<String> roles;
+    private List<String> roles;
 }

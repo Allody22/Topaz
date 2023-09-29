@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -15,9 +14,9 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class LoginRequest {
 
-	@NotBlank
-	private String phone = null;
+    @NotBlank
+    private String phone = null;
 
-	@NotBlank
-	private String password = null;
+    @NotBlank
+    private String password = null;
 }

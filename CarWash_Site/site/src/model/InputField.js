@@ -1,7 +1,7 @@
 import '../css/CreatingOrder.css';
 import {useState} from "react";
 
-const InputField = ({ label, id, value, onChange, inputStyle }) => {
+const InputField = ({label, id, value, onChange, inputStyle}) => {
     const [hasValue, setHasValue] = useState(value !== "");
 
     const handleChange = (e) => {

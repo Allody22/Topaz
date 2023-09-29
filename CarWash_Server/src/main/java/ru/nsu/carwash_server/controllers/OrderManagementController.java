@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
+import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.secondary.helpers.SingleOrderResponse;
 import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.secondary.helpers.TimeIntervals;
@@ -162,43 +162,43 @@ public class OrderManagementController {
                 "новый размер шин: '" + updateOrderInfoRequest.getWheelR() + "', " : null;
 
         String newUserPhone = (updateOrderInfoRequest.getUserPhone() != null) ?
-                "новый контакт клиента: '" + updateOrderInfoRequest.getUserPhone() + "', ": null;
+                "новый контакт клиента: '" + updateOrderInfoRequest.getUserPhone() + "', " : null;
 
         String newOrderType = (updateOrderInfoRequest.getOrderType() != null) ?
-                "новый тип заказа: " + updateOrderInfoRequest.getOrderType() + "', ": null;
+                "новый тип заказа: " + updateOrderInfoRequest.getOrderType() + "', " : null;
 
         String newPrice = (updateOrderInfoRequest.getPrice() != null) ?
-                "новую цену: '" + updateOrderInfoRequest.getPrice() + "', ": null;
+                "новую цену: '" + updateOrderInfoRequest.getPrice() + "', " : null;
 
         String newStartTime = (updateOrderInfoRequest.getStartTime() != null) ?
                 "новое время начала: '" + updateOrderInfoRequest.getStartTime() + "', " : null;
 
         String newEndTime = (updateOrderInfoRequest.getEndTime() != null) ?
-                "новое время конца: '" + updateOrderInfoRequest.getEndTime() + "', ": null;
+                "новое время конца: '" + updateOrderInfoRequest.getEndTime() + "', " : null;
 
         String newAdministrator = (updateOrderInfoRequest.getAdministrator() != null) ?
-                "нового администратора: '" + updateOrderInfoRequest.getAdministrator() + "', ": null;
+                "нового администратора: '" + updateOrderInfoRequest.getAdministrator() + "', " : null;
 
         String newAutoNumber = (updateOrderInfoRequest.getAutoNumber() != null) ?
-                "новый номер авто: '" + updateOrderInfoRequest.getAutoNumber() + "', ": null;
+                "новый номер авто: '" + updateOrderInfoRequest.getAutoNumber() + "', " : null;
 
         String newAutoType = (updateOrderInfoRequest.getAutoType() != null) ?
-                "новый тип авто: '" + updateOrderInfoRequest.getAutoType() + "', ": null;
+                "новый тип авто: '" + updateOrderInfoRequest.getAutoType() + "', " : null;
 
         String newSpecialist = (updateOrderInfoRequest.getSpecialist() != null) ?
-                "нового специалиста: '" + updateOrderInfoRequest.getSpecialist() + "', ": null;
+                "нового специалиста: '" + updateOrderInfoRequest.getSpecialist() + "', " : null;
 
         String newBoxNumber = (updateOrderInfoRequest.getBoxNumber() != null) ?
-                "новый бокс: '" + updateOrderInfoRequest.getBoxNumber() + "', ": null;
+                "новый бокс: '" + updateOrderInfoRequest.getBoxNumber() + "', " : null;
 
         String newComments = (updateOrderInfoRequest.getComments() != null) ?
-                "новые комментарии: '" + updateOrderInfoRequest.getComments() + "', ": null;
+                "новые комментарии: '" + updateOrderInfoRequest.getComments() + "', " : null;
 
         String newOrders = (updateOrderInfoRequest.getOrders() != null) ?
-                "новые услуги: '" + updateOrderInfoRequest.getOrders() + "', ": null;
+                "новые услуги: '" + updateOrderInfoRequest.getOrders() + "', " : null;
 
         String newCurrentStatus = (updateOrderInfoRequest.getCurrentStatus() != null) ?
-                "новое состояние: '" + updateOrderInfoRequest.getCurrentStatus() + "', ": null;
+                "новое состояние: '" + updateOrderInfoRequest.getCurrentStatus() + "', " : null;
 
 
         String descriptionMessage = "Заказ с айди'" + updateOrderInfoRequest.getOrderId() + "' получил" +
@@ -333,7 +333,7 @@ public class OrderManagementController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<?> getBookedTimeInOneDay(@Valid @RequestParam(name = "startTime")
-                                                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
+                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
                                                    @Valid @RequestParam(name = "endTime")
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
                                                    @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
@@ -431,7 +431,7 @@ public class OrderManagementController {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 12, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 13, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 14, ordersArrayPriceTimeRequest.getOrderType()));
-        }  else {
+        } else {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 8, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 9, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 10, ordersArrayPriceTimeRequest.getOrderType()));

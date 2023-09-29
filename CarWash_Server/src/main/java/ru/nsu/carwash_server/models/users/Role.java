@@ -22,7 +22,8 @@ import javax.persistence.Table;
 @Table(name = "roles")
 @NoArgsConstructor
 @ToString
-@Getter @Setter
+@Getter
+@Setter
 @AllArgsConstructor
 public class Role {
 

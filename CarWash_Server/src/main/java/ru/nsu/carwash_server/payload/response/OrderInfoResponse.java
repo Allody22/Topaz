@@ -17,10 +17,10 @@ public class OrderInfoResponse {
 
     private List<String> orders;
 
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime;
 
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime;
 
     private String administrator;

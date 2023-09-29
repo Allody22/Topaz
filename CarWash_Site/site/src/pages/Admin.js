@@ -11,31 +11,36 @@ import updateClientInfo from "../assets/updatingClientInfo.png"
 import updateServiceInfo from "../assets/updateServiceInfo.png"
 import addNewService from "../assets/addService.png"
 import SalePhoto from "../assets/SalePhoto.png"
+import userOperations from "../assets/UsersOperations.png"
 
 
 import {
     CHANGE_SERVICE_INFO,
-    CHANGE_USERINFO_ROUTE, CHECK_SALES, CREATE_NEW_SERVICE,
-    CREATE_POLISHING_ORDER_ROUTE, CREATE_TIRE_ORDER_ROUTE,
-    CREATE_WASHING_ORDER_ROUTE, ORDERS_TABLE_ROUTE, UPDATE_ORDER_INFO_ROUTE
+    CHANGE_USERINFO_ROUTE,
+    CHECK_SALES,
+    CREATE_NEW_SERVICE,
+    CREATE_POLISHING_ORDER_ROUTE,
+    CREATE_TIRE_ORDER_ROUTE,
+    CREATE_WASHING_ORDER_ROUTE,
+    ORDERS_TABLE_ROUTE,
+    UPDATE_ORDER_INFO_ROUTE,
+    USER_OPERATIONS
 } from "../utils/consts";
-import {BrowserRouter as Router, useHistory} from "react-router-dom";
-import socketStore from "../store/SocketStore";
 import {observer} from "mobx-react-lite";
+import ActionButton from "../model/ActionButton";
+import {BrowserRouter as Router} from "react-router-dom";
 import {Notification, toaster} from "rsuite";
-import {format, parseISO} from "date-fns";
+import socketStore from "../store/SocketStore";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
-import {action} from "mobx";
+import {format, parseISO} from "date-fns";
+const styles = {
+    buttonContainer: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' },
+    image: { width: '100px', height: '60px', marginLeft: '15px', marginTop: '20px' },
+    verySmallImage: { width: '85px', height: '60px', marginLeft: '30px', marginTop: '20px' },
+};
 
-const imageStyle = {width: '100px', height: '60px', marginLeft: '15px', marginTop: '20px'};
-const verySmallImageStyle = {width: '85px', height: '60px', marginLeft: '30px', marginTop: '20px'}
 
 const Admin = observer(() => {
-    const history = useHistory()
-
-    const markAsShown = action(() => {
-        socketStore.isAlreadyShown = true;
-    });
 
     const newOrderMessage = (
         <Router>
@@ -51,8 +56,10 @@ const Admin = observer(() => {
                         <>
                             <div style={{textAlign: 'left'}}>
                                 <p>Тип заказа: {orderTypeMap[JSON.parse(socketStore.message).orderType]}</p>
-                                <p>Время начала заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                                <p>Время конца заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время начала
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время конца
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
                             </div>
                         </>
                     )}
@@ -64,132 +71,25 @@ const Admin = observer(() => {
     useEffect(() => {
         if (socketStore.message && !socketStore.isAlreadyShown) {
             toaster.push(newOrderMessage, {placement: "bottomEnd"});
-            markAsShown();
+            socketStore.isAlreadyShown = true;
         }
     }, [socketStore.message]);
 
-
     return (
         <Container className="d-flex flex-column">
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'}}>
-                <Button variant="outline-dark"
-                        className="mt-4 p-2 flex-grow-1"
-                        onClick={() => history.push(ORDERS_TABLE_ROUTE)}>
-                    Таблица заказов по дням
-                </Button>
-                <Image src={dataBase} fluid
-                       style={verySmallImageStyle}/>
-            </div>
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'}}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(CREATE_WASHING_ORDER_ROUTE)}
-                    style={{marginTop: '10px'}}
-                >
-                    Добавление заказа на мойку
-                </Button>
-                <Image src={carWashImage} fluid style={imageStyle}/>
-            </div>
-
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'}}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(CREATE_POLISHING_ORDER_ROUTE)}
-                    style={{marginTop: '10px'}}
-                >
-                    Добавление заказа на полировку
-                </Button>
-                <Image src={polishingImage} fluid
-                       style={verySmallImageStyle}/>
-
-            </div>
-
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'}}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(CREATE_TIRE_ORDER_ROUTE)}
-                    style={{marginTop: '10px'}}
-                >
-                    Добавление заказа на шиномонтаж
-                </Button>
-                <Image src={tireServiceImage} fluid style={imageStyle}/>
-            </div>
-
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'}}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(UPDATE_ORDER_INFO_ROUTE)}
-                    style={{marginTop: '10px'}}
-                >
-                    Изменить информацию о заказе
-                </Button>
-                <Image src={updateOrderInfo} fluid style={verySmallImageStyle}/>
-            </div>
-
-
-            <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginTop: '10px'
-            }}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(CHECK_SALES)}
-                    style={{marginTop: '10px'}}
-                >
-                    Страница акций
-                </Button>
-                <Image src={SalePhoto} fluid style={verySmallImageStyle}/>
-            </div>
-
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'}}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(CHANGE_USERINFO_ROUTE)}
-                    style={{marginTop: '10px'}}
-                >
-                    Изменить информацию о человеке
-                </Button>
-                <Image src={updateClientInfo} fluid style={verySmallImageStyle}/>
-
-            </div>
-
-
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'}}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(CHANGE_SERVICE_INFO)}
-                    style={{marginTop: '10px'}}
-                >
-                    Изменить информацию об услуге
-                </Button>
-                <Image src={updateServiceInfo} fluid style={verySmallImageStyle}/>
-            </div>
-
-            <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginTop: '10px', marginBottom: '20px'
-            }}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(CREATE_NEW_SERVICE)}
-                    style={{marginTop: '10px'}}
-                >
-                    Добавить новую услугу
-                </Button>
-                <Image src={addNewService} fluid style={verySmallImageStyle}/>
-            </div>
-
-
+                <ActionButton label="Таблица заказов по дням" route={ORDERS_TABLE_ROUTE} imageSrc={dataBase} style={styles.verySmallImage} />
+                <ActionButton label="Добавление заказа на мойку" route={CREATE_WASHING_ORDER_ROUTE} imageSrc={carWashImage} style={styles.image} />
+                <ActionButton label="Добавление заказа на полировку" route={CREATE_POLISHING_ORDER_ROUTE} imageSrc={polishingImage} style={styles.verySmallImage} />
+                <ActionButton label="Добавление заказа на шиномонтаж" route={CREATE_TIRE_ORDER_ROUTE} imageSrc={tireServiceImage} style={styles.image} />
+                <ActionButton label="Изменить информацию о заказе" route={UPDATE_ORDER_INFO_ROUTE} imageSrc={updateOrderInfo} style={styles.verySmallImage} />
+                <ActionButton label="Страница акций" route={CHECK_SALES} imageSrc={SalePhoto} style={styles.verySmallImage} />
+                <ActionButton label="Изменить информацию о человеке" route={CHANGE_USERINFO_ROUTE} imageSrc={updateClientInfo} style={styles.verySmallImage} />
+                <ActionButton label="Просмотр операций" route={USER_OPERATIONS} imageSrc={userOperations} style={styles.verySmallImage} />
+                <ActionButton label="Изменить информацию об услуге" route={CHANGE_SERVICE_INFO} imageSrc={updateServiceInfo} style={styles.verySmallImage} />
+                <ActionButton label="Добавить новую услугу" route={CREATE_NEW_SERVICE} imageSrc={addNewService} style={styles.verySmallImage} />
         </Container>
     );
 });
+
 
 export default Admin;

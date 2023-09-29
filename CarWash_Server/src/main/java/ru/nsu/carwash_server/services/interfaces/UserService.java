@@ -12,9 +12,9 @@ public interface UserService {
     /**
      * Сохранение нового пользователя в БД
      *
-     * @param user - информация о сущности пользователя
-     * @param roles - роли пользователя
-     * @param version - версия пользователя
+     * @param user             - информация о сущности пользователя
+     * @param roles            - роли пользователя
+     * @param version          - версия пользователя
      * @param userFirstVersion - первая версия пользователя
      */
     void saveNewUser(User user, Set<Role> roles, int version, UserVersions userFirstVersion);

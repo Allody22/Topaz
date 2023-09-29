@@ -14,13 +14,13 @@ public class CreatingPolishingOrder {
     private List<String> orders = null;
 
     @NotNull
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime = null;
 
     private String userContacts = null;
 
     @NotNull
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime = null;
 
     private String administrator = null;

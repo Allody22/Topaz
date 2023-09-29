@@ -55,7 +55,7 @@ export const getActualTireOrders = async () => {
 
 export const getOrdersBookedInOneDay = async (startTime, endTime, flag) => {
     const {data: {orders}} = await $authHost.get('/api/orders/management/getBookedTimeInOneDay_v1?startTime='
-        + encodeURIComponent(startTime) + '&endTime=' + encodeURIComponent(endTime) + "&includeCancelled=" + flag );
+        + encodeURIComponent(startTime) + '&endTime=' + encodeURIComponent(endTime) + "&includeCancelled=" + flag);
     return await orders;
 };
 
@@ -164,7 +164,7 @@ export const updateOrderInfo = async (orderId, userPhone, orderType,
         currentStatus: currentStatus,
         sale: sale
     };
-    const response = await  $authHost.post('api/orders/management/updateOrderInfo_v1', requestBody);
+    const response = await $authHost.post('api/orders/management/updateOrderInfo_v1', requestBody);
     return response.data;
 };
 
@@ -273,7 +273,7 @@ export const createPolishingOrder = async (orders, userContacts, startTime,
         autoType: autoType,
         price: price,
         currentStatus: currentStatus,
-        sale : sale
+        sale: sale
     };
     const response = await $authHost.post('api/orders/new/createPolishingOrder_v1', requestBody);
     return response.data;

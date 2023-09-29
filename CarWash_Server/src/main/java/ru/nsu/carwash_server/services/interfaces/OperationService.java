@@ -9,10 +9,19 @@ import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.payload.response.UserOperationsResponse;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 public interface OperationService {
+
+    /**
+     * Просто достаём все операции из таблицы
+     *
+     * @return список из всех операций
+     */
+    List<OperationsUserLink> getAllOperations();
+
 
     /**
      * Пользователь не может получать смс больше 2 штук в час.
@@ -109,8 +118,19 @@ public interface OperationService {
      * Метод для перевода операций в удобную для просмотра форму
      * для их возврата из запроса
      *
-      * @param operationsVersions - набор операций
+     * @param operationsVersions - набор операций
      * @return новая форма операции
      */
     List<UserOperationsResponse> getRationalOperationForm(List<OperationsVersions> operationsVersions);
+
+    /**
+     * Получаем все операции всех пользователей в каком-то
+     * промежутке времени
+     *
+     * @param startTime - время поиска начала
+     * @param endTime   - время поиска конца
+     * @return список операций
+     */
+    List<OperationsUserLink> getAllOperationsInATime(Date startTime, Date endTime);
+
 }

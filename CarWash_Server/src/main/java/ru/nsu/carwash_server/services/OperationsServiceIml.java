@@ -9,9 +9,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import ru.nsu.carwash_server.exceptions.BadRequestException;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.operations.OperationsUserLink;
 import ru.nsu.carwash_server.models.operations.OperationsVersions;
-import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.payload.request.MessagesSms;
 import ru.nsu.carwash_server.payload.request.Smooth;
@@ -20,6 +20,7 @@ import ru.nsu.carwash_server.payload.response.UserOperationsResponse;
 import ru.nsu.carwash_server.repository.operations.OperationsUsersLinkRepository;
 import ru.nsu.carwash_server.repository.operations.OperationsVersionsRepository;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
+import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,7 +41,7 @@ public class OperationsServiceIml implements OperationService {
 
     private final OperationsUsersLinkRepository operationsUsersLinkRepository;
 
-    private final UserServiceImp userServiceImp;
+    private final UserService userServiceImp;
 
     @Autowired
     public OperationsServiceIml(OperationsVersionsRepository operationsVersionsRepository,
@@ -51,8 +52,16 @@ public class OperationsServiceIml implements OperationService {
         this.operationsVersionsRepository = operationsVersionsRepository;
     }
 
+    public List<OperationsUserLink> getAllOperations() {
+        return operationsUsersLinkRepository.findAll();
+    }
+
+    public List<OperationsUserLink> getAllOperationsInATime(Date startTime, Date endTime) {
+        return operationsUsersLinkRepository.findAllByCreationTimeBetween(startTime, endTime);
+    }
+
     public void checkUserSMS(String number) {
-        if (getAllDescriptionOperationsByTime(number,"получил код:", LocalDateTime.now().minusHours(1)).size() >= 2) {
+        if (getAllDescriptionOperationsByTime(number, "получил код:", LocalDateTime.now().minusHours(1)).size() >= 2) {
             throw new BadRequestException("Уже было отправлено больше двух запросов в час");
         }
     }
@@ -73,7 +82,7 @@ public class OperationsServiceIml implements OperationService {
         throw new IllegalArgumentException("Код не найден в описании");
     }
 
-    public List<OperationsUserLink> getAllDescriptionOperationsByTime(String phoneNumber,String descriptionMessage, LocalDateTime time) {
+    public List<OperationsUserLink> getAllDescriptionOperationsByTime(String phoneNumber, String descriptionMessage, LocalDateTime time) {
         return operationsUsersLinkRepository.findAllByDescriptionContainingWithAdvice(phoneNumber, descriptionMessage, time);
     }
 

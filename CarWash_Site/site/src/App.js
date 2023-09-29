@@ -8,8 +8,8 @@ const App = observer(() => {
 
     return (
         <BrowserRouter>
-            <NavBar />
-            <AppRouter />
+            <NavBar/>
+            <AppRouter/>
         </BrowserRouter>
     );
 });

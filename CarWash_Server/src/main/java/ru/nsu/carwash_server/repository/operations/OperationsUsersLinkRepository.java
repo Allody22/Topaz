@@ -9,11 +9,21 @@ import ru.nsu.carwash_server.models.operations.OperationsVersions;
 import ru.nsu.carwash_server.models.users.User;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface OperationsUsersLinkRepository extends JpaRepository<OperationsUserLink, Long> {
+
+
+    @Query(value = "SELECT * FROM operations_users_link " +
+            "WHERE creation_time BETWEEN :startTime AND :endTime " +
+            "ORDER BY creation_time DESC", nativeQuery = true)
+    List<OperationsUserLink> findAllByCreationTimeBetween(
+            @Param("startTime") Date startTime,
+            @Param("endTime") Date endTime
+    );
 
     @Query(value = "SELECT * FROM operations_users_link WHERE user_id = :UserId", nativeQuery = true)
     Optional<User> findByUserId(@Param("UserId") Long userId);

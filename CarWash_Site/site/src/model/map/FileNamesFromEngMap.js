@@ -5,5 +5,6 @@ const fileNameFromEngMap = {
     "Saturday.png": "Суббота",
     "Sunday.png": "Воскресенье",
     "Wednesday.png": "Среда",
-    "Thursday.png": "Четверг"}
+    "Thursday.png": "Четверг"
+}
 export default fileNameFromEngMap

@@ -1,9 +1,9 @@
 const currentOrderStatusMapFromEng = {
-    "cancelled" : "Отменён",
+    "cancelled": "Отменён",
     "createdPaid0PercentNotDone": "Не оплачен и не сделан",
     "createdPaid5PercentNotDone": "Оплачен на 5 процентов и не сделан",
-    "createdPaid10PercentNotDone":"Оплачен на 10 процентов и не сделан",
-    "createdPaid20PercentNotDone":"Оплачен на 20 процентов и не сделан",
+    "createdPaid10PercentNotDone": "Оплачен на 10 процентов и не сделан",
+    "createdPaid20PercentNotDone": "Оплачен на 20 процентов и не сделан",
     "createdPaid30PercentNotDone": "Оплачен на 30 процентов и не сделан",
     "createdPaid40PercentNotDone": "Оплачен на 40 процентов и не сделан",
     "createdPaid50PercentNotDone": "Оплачен на 50 процентов и не сделан",

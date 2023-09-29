@@ -118,10 +118,10 @@ public class UserVersions {
 
         this.fullName = userVersions.getFullName();
 
-        this.adminNote =  userVersions.getAdminNote();
+        this.adminNote = userVersions.getAdminNote();
 
-        this.comments =  userVersions.getComments();
+        this.comments = userVersions.getComments();
 
-        this.email =  userVersions.getEmail();
+        this.email = userVersions.getEmail();
     }
 }

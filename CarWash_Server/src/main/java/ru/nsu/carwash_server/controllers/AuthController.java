@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
-import ru.nsu.carwash_server.models.secondary.constants.ERole;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.exceptions.TokenRefreshException;
+import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
+import ru.nsu.carwash_server.models.secondary.constants.ERole;
 import ru.nsu.carwash_server.models.users.RefreshToken;
 import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
@@ -41,6 +41,7 @@ import ru.nsu.carwash_server.security.jwt.JwtUtils;
 import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.RefreshTokenService;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
+import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
@@ -72,7 +73,7 @@ public class AuthController {
 
     private RestTemplate restTemplate;
 
-    private final OperationsServiceIml operationsService;
+    private final OperationService operationsService;
 
     @Autowired
     public AuthController(
@@ -94,7 +95,7 @@ public class AuthController {
         this.refreshTokenService = refreshTokenService;
     }
 
-    @PostMapping("/generate_code_v1")
+    @GetMapping("/generate_code_v1")
     @SendTo(DestinationPrefixes.NOTIFICATIONS)
     @Transactional
     public ResponseEntity<?> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
@@ -171,7 +172,7 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userService.existByPhone(signUpRequest.getPhone())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: телефон уже занят!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Такой телефон уже занят!"));
         }
 
         if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(signUpRequest.getPhone()) + "")) {

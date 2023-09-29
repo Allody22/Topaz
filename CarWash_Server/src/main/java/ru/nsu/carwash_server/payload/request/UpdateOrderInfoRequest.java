@@ -29,10 +29,10 @@ public class UpdateOrderInfoRequest {
 
     private Integer price = null;
 
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime = null;
 
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime = null;
 
     private String administrator = null;

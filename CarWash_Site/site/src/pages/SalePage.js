@@ -1,23 +1,21 @@
 import React, {useEffect, useState} from 'react';
 import {Button} from 'react-bootstrap';
-import {
-    InputPicker,
-    Notification, Uploader, useToaster,
-} from 'rsuite';
+import {Notification, useToaster,} from 'rsuite';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
 import 'rsuite/dist/rsuite.css';
 
 import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
-import {BrowserRouter as Router, useHistory} from "react-router-dom";
+import {BrowserRouter as Router} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
-import {getAllSales, uploadImage} from "../http/userAPI";
+import {uploadImage} from "../http/userAPI";
 import StatusFileMap from "../model/map/StatusFileMapFromEnd";
 import Modal from "react-bootstrap/Modal";
 import InputField from "../model/InputField";
 import StatusFileMapFromRus from "../model/map/StatusFileMapFromRus";
+import saleStore from "../store/SaleStore";
 
 const inputStyle = {
     fontWeight: 'bold', display: 'flex',
@@ -67,7 +65,6 @@ const confirmationStyle = {
     alignItems: 'center',     // заменено на camelCase
     textAlign: 'center'      // заменено на camelCase
 };
-
 
 
 const statusStyle = {
@@ -122,10 +119,8 @@ const saleDay = [
 ].map(item => ({label: item, value: item}));
 
 
-
 const SalePage = observer(() => {
     const toaster = useToaster();
-    const history = useHistory()
 
     const [errorResponse, setErrorResponse] = useState();
     const [errorFlag, setErrorFlag] = useState(false);
@@ -178,30 +173,40 @@ const SalePage = observer(() => {
 
     const [files, setFiles] = useState([]);
 
-    async function getAllImages() {
-        try {
-            const response = await getAllSales();
-            setFiles(response);
-        } catch (error) {
-            if (error.response) {
-                let messages = [];
-                for (let key in error.response.data) {
-                    messages.push(error.response.data[key]);
-                }
-                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
-                setErrorFlag(flag => !flag);
+    useEffect(() => {
+        if (saleStore?.error) {
+            const errorResponseMessage = (
+                <Notification
+                    type="error"
+                    header="Ошибка!"
+                    closable
+                    style={{border: '1px solid black'}}
+                >
+                    <div style={{width: 320}}>
+                        {saleStore.error}
+                    </div>
+                </Notification>
+            );
 
-            } else {
-                setErrorResponse("Файлы не были получены. " +
-                    "Попробуйте перезагрузить страницу")
-                setErrorFlag(flag => !flag)
-            }
+            toaster.push(errorResponseMessage, {placement: "bottomEnd"});
+            saleStore.error = null; // Очищаем ошибку после показа
         }
-    }
+    }, [saleStore?.error]);
+
 
     useEffect(() => {
-        getAllImages();
-    }, []);
+        if (saleStore.discounts.length === 0) {
+            saleStore.loadDiscounts();
+        } else {
+            setFiles(saleStore.discounts);
+        }
+    }, [saleStore.discounts]);
+
+
+    const handleRefreshDiscounts = () => {
+        saleStore.refreshDiscounts();
+    };
+
 
     const handleUpload = async () => {
         if (uploadedFile && description && status) {
@@ -211,7 +216,7 @@ const SalePage = observer(() => {
                 setDescription(null)
                 setStatus(null)
                 setUploadedFile(null)
-                await getAllImages()
+                handleRefreshDiscounts()
             } catch (error) {
                 if (error.response) {
                     let messages = [];
@@ -330,7 +335,7 @@ const SalePage = observer(() => {
                                 <Button
                                     variant={"outline-dark"}
                                     className="mt-4 p-2 flex-grow-1"
-                                    onClick={()  => handleOpenModal(file)}
+                                    onClick={() => handleOpenModal(file)}
                                     style={{marginTop: '10px'}}
                                 >
                                     Обновить данную услугу
@@ -349,13 +354,15 @@ const SalePage = observer(() => {
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
-                            style={{   width: 500,
+                            style={{
+                                width: 500,
                                 display: 'block',
                                 marginBottom: 10,
                                 marginLeft: 'auto',
                                 marginRight: 'auto',
                                 marginTop: 10,
-                                WebkitTextFillColor: "#000000" }}>
+                                WebkitTextFillColor: "#000000"
+                            }}>
                             {saleDay.map((item) => (
                                 <option key={item.value} value={item.value}>
                                     {item.label}
@@ -370,9 +377,10 @@ const SalePage = observer(() => {
                             value={description}
                             onChange={setDescription}
                         />
-                        <input type="file" onChange={handleFileChange} style={inputFileStyle} />
+                        <input type="file" onChange={handleFileChange} style={inputFileStyle}/>
 
-                        {uploadedFile ? <img src={URL.createObjectURL(uploadedFile)} alt="Uploaded" style={{ width: '100%', margin: '20px 0' }} /> : null}
+                        {uploadedFile ? <img src={URL.createObjectURL(uploadedFile)} alt="Uploaded"
+                                             style={{width: '100%', margin: '20px 0'}}/> : null}
 
                     </Modal.Body>
                     <Modal.Footer>
@@ -392,7 +400,8 @@ const SalePage = observer(() => {
                         <p style={confirmationStyle}>Проверьте еще раз информацию</p>
                         <p style={modalText}>{StatusFileMap[status] || status || "Неизвестно"}</p>
                         <p style={modalText}>Описание: {description || "Неизвестно"}</p>
-                        {uploadedFile ? <img src={URL.createObjectURL(uploadedFile)} alt="Uploaded" style={{ width: '100%', margin: '20px 0' }} /> : null}
+                        {uploadedFile ? <img src={URL.createObjectURL(uploadedFile)} alt="Uploaded"
+                                             style={{width: '100%', margin: '20px 0'}}/> : null}
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant='secondary' onClick={handleCloseConfirmationModal}>

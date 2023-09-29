@@ -20,3 +20,5 @@ export const CREATE_NEW_SERVICE = `/createNewService`
 
 export const CHECK_SALES = `/checkSales`
 
+export const USER_OPERATIONS = `/operations`
+

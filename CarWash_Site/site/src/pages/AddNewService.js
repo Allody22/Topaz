@@ -1,10 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
-import {
-    InputPicker,
-    Notification, TagPicker,
-    useToaster,
-} from 'rsuite';
+import {InputPicker, Notification, TagPicker, useToaster,} from 'rsuite';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
 
@@ -13,9 +9,7 @@ import 'rsuite/dist/rsuite.css';
 import Modal from "react-bootstrap/Modal";
 
 import InputField from "../model/InputField";
-import {
-    createNewService
-} from "../http/orderAPI";
+import {createNewService} from "../http/orderAPI";
 import orderTypeMapFromRussian from "../model/map/OrderTypeMapFromRussian";
 import connectedServiceMap from "../model/map/ConnectedServiceMap";
 import includedServiceMap from "../model/map/IncludedServiceMap";
@@ -113,8 +107,10 @@ const AddNewService = observer(() => {
                         <>
                             <div style={{textAlign: 'left'}}>
                                 <p>Тип заказа: {orderTypeMap[JSON.parse(socketStore.message).orderType]}</p>
-                                <p>Время начала заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                                <p>Время конца заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время начала
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время конца
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
                             </div>
                         </>
                     )}
@@ -274,7 +270,7 @@ const AddNewService = observer(() => {
                     getTimeByWheelR('21'), getTimeByWheelR('22'),
                     orderTypeMapFromRussian[role], [...washingTypeIncludedEnglish, ...washingTypeConnectedEnglish])
                 setSuccessResponse(null)
-                setSuccessResponse("В базе данных появилась услуга '" + (response.name).replaceAll('_',' ') + "'")
+                setSuccessResponse("В базе данных появилась услуга '" + (response.name).replaceAll('_', ' ') + "'")
             } catch
                 (error) {
                 if (error.response) {

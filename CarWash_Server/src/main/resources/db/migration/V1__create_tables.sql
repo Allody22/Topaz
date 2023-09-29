@@ -13,8 +13,8 @@ CREATE TABLE user_version
     email         VARCHAR(255),
     bonuses       INT,
     password      VARCHAR(255) NOT NULL,
-    fullName      VARCHAR(255),
-    adminNote     TEXT,
+    full_name      VARCHAR(255),
+    admin_note     TEXT,
     comments      TEXT,
     version       INT,
     FOREIGN KEY (user_id) REFERENCES users (id)

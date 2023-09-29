@@ -2,5 +2,6 @@ const connectedServiceMap = {
     "VIP": "VIP",
     "ELITE": "ELITE",
     "Стандарт": "Стандарт",
-    "Эконом": "Эконом"}
+    "Эконом": "Эконом"
+}
 export default connectedServiceMap

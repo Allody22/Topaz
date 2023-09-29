@@ -14,10 +14,10 @@ import java.util.Date;
 public class GetBookedOrdersInTimeIntervalRequest {
 
     @NotNull
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime = null;
 
     @NotNull
-    @JsonFormat(timezone="Asia/Novosibirsk")
-    private Date endTime  = null ;
+    @JsonFormat(timezone = "Asia/Novosibirsk")
+    private Date endTime = null;
 }

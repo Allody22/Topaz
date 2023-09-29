@@ -14,6 +14,6 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class TokenRefreshRequest {
 
-  @NotBlank
-  private String refreshToken;
+    @NotBlank
+    private String refreshToken;
 }

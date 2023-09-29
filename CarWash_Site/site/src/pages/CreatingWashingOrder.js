@@ -1,31 +1,24 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
 
-import {DatePicker, Notification, useToaster} from 'rsuite';
+import {DatePicker, Divider, InputNumber, InputPicker, Notification, useToaster} from 'rsuite';
 import addDays from 'date-fns/addDays';
-import {Divider} from 'rsuite';
 
 import 'rsuite/dist/rsuite.css';
 
 import Modal from "react-bootstrap/Modal";
-
-import {InputNumber, InputPicker} from 'rsuite';
 import InputField from "../model/InputField";
-import {
-    createWashingOrder, getAllWashingServicesWithPriceAndTime,
-    getPriceAndFreeTime,
-} from "../http/orderAPI";
+import {createWashingOrder, getAllWashingServicesWithPriceAndTime, getPriceAndFreeTime,} from "../http/orderAPI";
 import socketStore from "../store/SocketStore";
 import {observer} from "mobx-react-lite";
 import {BrowserRouter as Router, useHistory} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
 import currentOrderStatusMapFromRus from "../model/map/CurrentOrderStatusMapFromRus";
-import fileNameFromEngMap from "../model/map/FileNamesFromEngMap";
-import {getAllSales} from "../http/userAPI";
 import InputFieldNear from "../model/InputFieldNear";
+import saleStore from "../store/SaleStore";
 
 const orderStatusArray = [
     "Отменён",
@@ -55,10 +48,16 @@ const orderStatusArray = [
     "Полностью оплачен и сделан"
 ].map(item => ({label: item, value: item}));
 
-const importantInputStyle = {
-    fontWeight: 'bold', display: 'flex', color:'red',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
+const baseInputStyle = {
+    fontWeight: 'bold',
+    display: 'flex',
+    fontSize: '17px',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: '5px'
+};
+
+const importantInputStyle = {...baseInputStyle, color: 'red'};
 
 const carTypesArray = [
     '1 тип - седан',
@@ -91,6 +90,7 @@ const inputStyleForPriceTime = {
     margin: '5px', padding: '5px', border: '1px solid #ccc',
     backgroundColor: '#fff', borderRadius: '5px', boxSizing: 'border-box'
 };
+
 
 const CreatingWashingOrder = observer(() => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,35 +151,42 @@ const CreatingWashingOrder = observer(() => {
     const [administrator, setAdministrator] = useState('');
     const [comments, setComments] = useState('');
 
-    const filesOptions = files.map(file => ({
-        label: `${fileNameFromEngMap[file.name]} - ${file.description}`,
-        value: file.id
-    }));
+    useEffect(() => {
+        if (saleStore?.error) {
+            const errorResponseMessage = (
+                <Notification
+                    type="error"
+                    header="Ошибка!"
+                    closable
+                    style={{border: '1px solid black'}}
+                >
+                    <div style={{width: 320}}>
+                        {saleStore.error}
+                    </div>
+                </Notification>
+            );
 
-    async function getAllImages() {
-        try {
-            const response = await getAllSales();
-            setFiles(response);
-        } catch (error) {
-            if (error.response) {
-                let messages = [];
-                for (let key in error.response.data) {
-                    messages.push(error.response.data[key]);
-                }
-                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
-                setErrorFlag(flag => !flag);
-
-            } else {
-                setErrorResponse("Системная ошибка с получением акций. " +
-                    "Перезагрузите страницу и попробуйте еще раз")
-                setErrorFlag(flag => !flag)
-            }
+            toaster.push(errorResponseMessage, {placement: "bottomEnd"});
+            saleStore.error = null; // Очищаем ошибку после показа
         }
-    }
+    }, [saleStore?.error]);
+
+
+    const filesOptions = useMemo(() =>
+            files.map(file => ({
+                label: `${file.name} - ${file.description}`,
+                value: file.id
+            }))
+        , [files]);
+
 
     useEffect(() => {
-        getAllImages();
-    }, []);
+        if (saleStore.discounts.length === 0) {
+            saleStore.loadDiscounts();
+        } else {
+            setFiles(saleStore.discounts);
+        }
+    }, [saleStore.discounts]);
 
     const updateItem = (name, value) => {
         if (!checkIfItemExists(name)) {
@@ -387,8 +394,10 @@ const CreatingWashingOrder = observer(() => {
                         <>
                             <div style={{textAlign: 'left'}}>
                                 <p>Тип заказа: {orderTypeMap[JSON.parse(socketStore.message).orderType]}</p>
-                                <p>Время начала заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                                <p>Время конца заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время начала
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                <p>Время конца
+                                    заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
                             </div>
                         </>
                     )}
@@ -575,7 +584,10 @@ const CreatingWashingOrder = observer(() => {
                                 justifyContent: 'center'
                             }}>
                                 <InputNumber size="sm" placeholder="sm"
-                                             style={Object.assign({}, stylesForInput, {margin: '0 auto',marginTop:'10px'})}
+                                             style={Object.assign({}, stylesForInput, {
+                                                 margin: '0 auto',
+                                                 marginTop: '10px'
+                                             })}
                                              min={0}
                                              onChange={value => handleItemChange(item.name, value)}
                                              value={getItemValueByName(item.name) || 0}/>

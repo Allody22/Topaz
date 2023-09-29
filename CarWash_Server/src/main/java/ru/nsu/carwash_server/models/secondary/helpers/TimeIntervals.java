@@ -10,10 +10,10 @@ import java.util.Date;
 @AllArgsConstructor
 public class TimeIntervals {
 
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime;
 
-    @JsonFormat( timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime;
 
     private Integer box;

@@ -19,7 +19,7 @@ public class CarWashServerApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... arg) throws Exception {
+    public void run(String... arg) {
 //    storageService.deleteAll();
         storageService.init();
     }

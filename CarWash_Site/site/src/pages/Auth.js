@@ -1,9 +1,10 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Container, Form} from "react-bootstrap";
 import Card from "react-bootstrap/Card";
+import {Notification, toaster} from 'rsuite';
 import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
-import {useLocation, useHistory} from "react-router-dom";
+import {useHistory} from "react-router-dom";
 import {ADMIN_ROUTE} from "../utils/consts";
 import {login} from "../http/userAPI";
 import {observer} from "mobx-react-lite";
@@ -11,22 +12,57 @@ import {Context} from "../index";
 import socketStore from "../store/SocketStore";
 
 const Auth = observer(() => {
-    useLocation();
+
+    const [errorResponse, setErrorResponse] = useState();
+    const [errorFlag, setErrorFlag] = useState(false);
 
     const {user} = useContext(Context)
     const history = useHistory()
-    const [email, setEmail] = useState('')
+    const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
+
+    const errorResponseMessage = (
+        <Notification
+            type="error"
+            header="Ошибка!"
+            closable
+            style={{border: '1px solid black'}}
+        >
+            <div style={{width: 320}}>
+                {errorResponse}
+            </div>
+        </Notification>
+    );
+
+    useEffect(() => {
+        if (errorResponse) {
+            setTimeout(() => {
+                toaster.push(errorResponseMessage, {placement: "bottomEnd"});
+            }, 100);
+        }
+    }, [errorFlag]);
 
     const loginClick = async () => {
         try {
-            const data = await login(email, password);
+            const data = await login(phone, password);
             user.setUser(data)
             user.setIsAuth(true)
             history.push(ADMIN_ROUTE)
             socketStore.connectAndSubscribe();
         } catch (error) {
-            alert('Произошла ошибка. Пожалуйста, повторите попытку.');
+            if (error.response) {
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
+            } else {
+                setErrorResponse("Системная ошибка, проверьте правильность " +
+                    "введённой информации и попробуйте еще раз")
+                setErrorFlag(flag => !flag)
+            }
         }
     };
 
@@ -42,8 +78,8 @@ const Auth = observer(() => {
                     <Form.Control
                         className="mt-3"
                         placeholder="Введите ваш телефон..."
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
+                        value={phone}
+                        onChange={e => setPhone(e.target.value)}
                     />
                     <Form.Control
                         className="mt-3"
@@ -65,14 +101,16 @@ const Auth = observer(() => {
             </Card>
             <div
 
-                style={{ display:'flex',alignItems: "center", justifyContent: "center",
+                style={{
+                    display: 'flex', alignItems: "center", justifyContent: "center",
                     textAlign: "left", fontFamily: "Arial, sans-serif",
                     position: "absolute", bottom: "10px", width: "90%",
                     height: "70px", backgroundColor: "white", color: "black",
                     border: "1px solid black", boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.2)", padding: "10px",
                 }}>
-                Если вы считаете, что у вас должны быть права, чтобы пользоваться этой страницей, но вы почему-то не можете на неё зайти,
-                то, вам нужно обратиться к своему начальнику, чтобы он дал вам доступ. <br />
+                Если вы считаете, что у вас должны быть права, чтобы пользоваться этой страницей, но вы почему-то не
+                можете на неё зайти,
+                то, вам нужно обратиться к своему начальнику, чтобы он дал вам доступ. <br/>
                 Если вы считаете, что какие-то кнопки неправильно работают, вам не хватает функционала
                 или у вас есть какие-то вопросы, пожалуйста, напишите на почту misha.bogdanov.03@gmail.com
             </div>
