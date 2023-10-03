@@ -16,7 +16,6 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/topaz_application
       - POSTGRES_USER=topaz_application
       - POSTGRES_PASSWORD=NSU_UNIVERSITY_123_321_ZNAEM_VICHMAT
-      -
   db:
     image: postgres:13.7-alpine
     container_name: misha-db
