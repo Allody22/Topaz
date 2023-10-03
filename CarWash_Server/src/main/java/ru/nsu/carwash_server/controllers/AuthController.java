@@ -112,6 +112,7 @@ public class AuthController {
 
         // Проверка ответа от SMS сервера
         if (smsResponse.getStatusCode() == HttpStatus.OK) {
+            System.out.println(resultOfSmsCreating.getSecond());
             String operationName = "User_get_phone_code";
             String descriptionMessage = "Номер телефона:'" + number + "' получил код:" + resultOfSmsCreating.getSecond();
             operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);

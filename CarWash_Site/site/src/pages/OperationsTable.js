@@ -12,12 +12,6 @@ import socketStore from "../store/SocketStore";
 import {observer} from "mobx-react-lite";
 import {getAllOperations, getAllOperationsInOneDay} from "../http/operations";
 
-const inputStyle = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-
 const columns = [
     {
         Header: 'Айди',
@@ -57,13 +51,10 @@ const columns = [
 
 const OperationsTable = observer(() => {
 
-    const [orders, setOrders] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSubmittingB, setIsSubmittingB] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const start = new Date(selectedDate);
     const end = new Date(selectedDate);
-    const [includeCancelled, setIncludeCancelled] = useState(false);
 
     const [operations, setOperations] = useState([]);
 

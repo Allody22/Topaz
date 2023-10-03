@@ -31,19 +31,19 @@ services:
     volumes:
       - misha-db-data:/var/lib/postgresql/data
 
-  react_app:
-    build:
-      context: ./CarWash_Site
-      dockerfile: Dockerfile
-    container_name: misha-site
-    ports:
-      - "3000:3000"
-    networks:
-      mynetwork:
-    environment:
-      - TZ=Asia/Novosibirsk
-    depends_on:
-      - server
+#  react_app:
+#    build:
+#      context: ./CarWash_Site
+#      dockerfile: Dockerfile
+#    container_name: misha-site
+#    ports:
+#      - "3000:3000"
+#    networks:
+#      mynetwork:
+#    environment:
+#      - TZ=Asia/Novosibirsk
+#    depends_on:
+#      - server
 
 networks:
   mynetwork:

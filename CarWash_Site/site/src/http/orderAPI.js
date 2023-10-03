@@ -6,11 +6,6 @@ export const getOrderInfo = async (orderId) => {
     return await response.data;
 };
 
-export const getActualWashingOrders = async (orderName) => {
-    const response = await $authHost.get('/api/orders/management/getActualWashingOrders_v1?orderName=' + encodeURIComponent(orderName));
-    return await response.data;
-};
-
 export const getServiceInfo = async (orderName, orderType) => {
     const response = await $authHost.get('/api/orders/management/getServiceInfo_v1?orderName='
         + encodeURIComponent(orderName) + '&orderType=' + encodeURIComponent(orderType));

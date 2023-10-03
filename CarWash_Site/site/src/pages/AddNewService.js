@@ -19,42 +19,52 @@ import {BrowserRouter as Router} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
 
+const flexCenterStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+};
+
+const marginTopStyle = {
+    marginTop: '5px'
+};
+
+
 const smallInputStyle = {
-    display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
+    ...flexCenterStyle,
+    ...marginTopStyle
+};
+
 const inputStyle = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
+    ...flexCenterStyle,
+    ...marginTopStyle,
+    fontWeight: 'bold',
+    fontSize: '17px'
+};
 
-const serviceTypesArray = [
-    'Шиномонтаж',
-    'Мойка',
-    'Полировка'
-].map(item => ({label: item, value: item}));
-
-const washingTypesArray = [
-    'VIP',
-    'ELITE',
-    'Стандарт',
-    'Эконом'
-].map(item => ({label: item, value: item}));
-
-const rolesTypesArray = [
-    'Главная',
-    'Дополнительная'
-].map(item => ({label: item, value: item}));
+const baseStyle = {
+    width: 500,
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: 10
+};
 
 const styles = {
-    width: 500, display: 'block',
-    marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
+    ...baseStyle,
+    marginBottom: 10
 };
 
 const stylesUnderButton = {
-    width: 500, display: 'block',
-    marginBottom: 35, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
+    ...baseStyle,
+    marginBottom: 35
 };
 
+const toLabelValueArray = (items) => items.map(item => ({ label: item, value: item }));
+
+const serviceTypesArray = toLabelValueArray(['Шиномонтаж', 'Мойка', 'Полировка']);
+const washingTypesArray = toLabelValueArray(['VIP', 'ELITE', 'Стандарт', 'Эконом']);
+const rolesTypesArray = toLabelValueArray(['Главная', 'Дополнительная']);
 
 const AddNewService = observer(() => {
     const [isSubmitting] = useState(false);

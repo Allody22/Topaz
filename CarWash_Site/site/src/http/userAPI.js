@@ -10,15 +10,6 @@ export const login = async (phone, password) => {
     return jwt_decode(token)
 }
 
-//Функция для рефреша токена
-export const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem('refreshToken')
-    const {data} = await $host.post('api/auth/refreshtoken_v1', {refreshToken})
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('refreshToken', data.refreshToken)
-    return jwt_decode(data.token)
-}
-
 export const signOut = async () => {
     await $authHost.post('api/auth/signout_v1');
     localStorage.clear();

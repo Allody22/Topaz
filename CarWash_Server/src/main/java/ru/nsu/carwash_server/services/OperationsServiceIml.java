@@ -115,7 +115,7 @@ public class OperationsServiceIml implements OperationService {
         smsRequest.setMessages(Collections.singletonList(message));
 
         //При true смс не отправляется
-        smsRequest.setValidate(false);
+        smsRequest.setValidate(true);
 
         List<String> tags = new ArrayList<>();
         tags.add("Подтверждение телефона");
