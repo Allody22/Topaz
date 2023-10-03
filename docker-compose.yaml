@@ -4,7 +4,7 @@ services:
     build:
       context: ./CarWash_Server
       dockerfile: Dockerfile
-    container_name: misha-server
+    container_name: topaz-server
     ports:
       - "9090:9090"
     networks:
@@ -18,7 +18,7 @@ services:
       - POSTGRES_PASSWORD=NSU_UNIVERSITY_123_321_ZNAEM_VICHMAT
   db:
     image: postgres:13.7-alpine
-    container_name: misha-db
+    container_name: topaz-db
     ports:
       - "5432:5432"
     networks:
@@ -35,7 +35,7 @@ services:
 #    build:
 #      context: ./CarWash_Site
 #      dockerfile: Dockerfile
-#    container_name: misha-site
+#    container_name: topaz-site
 #    ports:
 #      - "3000:3000"
 #    networks:
