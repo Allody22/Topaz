@@ -13,23 +13,22 @@ services:
       - db
     environment:
       - TZ=Asia/Novosibirsk
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123zxccxz321
-      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n
-
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/topaz_application
+      - POSTGRES_USER=topaz_application
+      - POSTGRES_PASSWORD=NSU_UNIVERSITY_123_321_ZNAEM_VICHMAT
+      -
   db:
     image: postgres:13.7-alpine
     container_name: misha-db
     ports:
-      - "1890:1890"
+      - "5432:5432"
     networks:
       mynetwork:
     environment:
       - TZ=Asia/Novosibirsk
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123zxccxz321
+      - POSTGRES_DB=topaz_application
+      - POSTGRES_PASSWORD=NSU_UNIVERSITY_123_321_ZNAEM_VICHMAT
+      - POSTGRES_USER=topaz_application
     volumes:
       - misha-db-data:/var/lib/postgresql/data
 
