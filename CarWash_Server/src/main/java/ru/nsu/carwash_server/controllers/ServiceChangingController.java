@@ -47,7 +47,7 @@ public class ServiceChangingController {
     private final OrdersTireRepository tireRepository;
 
     private final UserService userService;
-    
+
     private final OperationsServiceIml operationsService;
 
     @Autowired
@@ -76,7 +76,7 @@ public class ServiceChangingController {
         Long userId = userDetails.getId();
         String operationName = "Create_new_service_by_admin";
         User user = userService.getFullUserById(userId);
-        
+
         switch (newServiceRequest.getServiceType()) {
             case "wash" -> {
                 StringJoiner joiner = new StringJoiner(";");

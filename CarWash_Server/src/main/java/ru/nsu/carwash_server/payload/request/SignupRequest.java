@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
-import java.util.Set;
 
 @Data
 @Builder
@@ -17,8 +16,6 @@ public class SignupRequest {
 
     @NotBlank
     private String phone = null;
-
-    private Set<String> role = null;
 
     @NotBlank
     private String password = null;

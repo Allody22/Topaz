@@ -2,6 +2,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
+import '../css/CommonStyles.css';
 
 import {DatePicker, Divider, InputNumber, InputPicker, Notification, useToaster} from 'rsuite';
 import addDays from 'date-fns/addDays';
@@ -19,78 +20,22 @@ import {format, parseISO} from "date-fns";
 import currentOrderStatusMapFromRus from "../model/map/CurrentOrderStatusMapFromRus";
 import InputFieldNear from "../model/InputFieldNear";
 import saleStore from "../store/SaleStore";
+import {carTypesArray, orderStatusArray} from "../model/Constants";
 
-const orderStatusArray = [
-    "Отменён",
-    "Не оплачен и не сделан",
-    "Оплачен на 5 процентов и не сделан",
-    "Оплачен на 10 процентов и не сделан",
-    "Оплачен на 20 процентов и не сделан",
-    "Оплачен на 30 процентов и не сделан",
-    "Оплачен на 40 процентов и не сделан",
-    "Оплачен на 50 процентов и не сделан",
-    "Оплачен на 60 процентов и не сделан",
-    "Оплачен на 70 процентов и не сделан",
-    "Оплачен на 80 процентов и не сделан",
-    "Оплачен на 90 процентов и не сделан",
-    "Полностью оплачен и не сделан",
-    "Не оплачен, но сделан",
-    "Оплачен на 5 процентов и сделан",
-    "Оплачен на 10 процентов и сделан",
-    "Оплачен на 20 процентов и сделан",
-    "Оплачен на 30 процентов и сделан",
-    "Оплачен на 40 процентов и сделан",
-    "Оплачен на 50 процентов и сделан",
-    "Оплачен на 60 процентов и сделан",
-    "Оплачен на 70 процентов и сделан",
-    "Оплачен на 80 процентов и сделан",
-    "Оплачен на 90 процентов и сделан",
-    "Полностью оплачен и сделан"
-].map(item => ({label: item, value: item}));
-
-const baseInputStyle = {
-    fontWeight: 'bold',
-    display: 'flex',
-    fontSize: '17px',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: '5px'
+const stylesForInput = {
+    width: 190, marginBottom: 10, marginTop: 5
 };
-
-const importantInputStyle = {...baseInputStyle, color: 'red'};
-
-const carTypesArray = [
-    '1 тип - седан',
-    '2 тип - кроссовер',
-    '3 тип - джип',
-    'Неизвестно'
-].map(item => ({label: item, value: item}));
 
 const styles = {
     width: 500, display: 'block',
     marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
 };
 
-const stylesForInput = {
-    width: 190, marginBottom: 10, marginTop: 5
-};
 
 const inputStyle = {
     fontWeight: 'bold', display: 'flex',
     fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
 }
-
-const smallInputStyle = {
-    display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-const inputStyleForPriceTime = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center',
-    margin: '5px', padding: '5px', border: '1px solid #ccc',
-    backgroundColor: '#fff', borderRadius: '5px', boxSizing: 'border-box'
-};
-
 
 const CreatingWashingOrder = observer(() => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -544,12 +489,11 @@ const CreatingWashingOrder = observer(() => {
     ];
     return (
         <>
-            <p style={{...inputStyle, marginTop: '15px'}}>Страница добавления заказов на мойку</p>
-            <p style={smallInputStyle}>Здесь вы можете сами создать какой-то заказ
-                на автомойку из всех актуальных услуг, а потом получить всю информацию о нём</p>
-            <p style={smallInputStyle}> &nbsp;<strong>Обязательно</strong>&nbsp;выберите время заказа, тип кузова,
-                набор услуг и состояние заказа</p>
-
+            <p className="input-style-modified">Страница добавления заказов на мойку</p>
+            <p className="small-input-style">Здесь вы можете сами создать какой-то заказ мойки на автомойку из всех
+                актуальных услуг, а потом получить всю информацию о нём</p>
+            <p className="small-input-style"> &nbsp;<strong>Обязательно</strong>&nbsp;выберите все элементы с красными
+                под красным текстом</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
                 Основные услуги
@@ -682,7 +626,8 @@ const CreatingWashingOrder = observer(() => {
                 </div>)}
 
             <Divider></Divider>
-            <p style={importantInputStyle}>Выберите тип кузова</p>
+            <p className="important-input-style">Выберите тип кузова</p>
+
             <InputPicker
                 data={carTypesArray}
                 value={carTypeMap}
@@ -691,7 +636,7 @@ const CreatingWashingOrder = observer(() => {
                 menuStyle={{fontSize: "17px"}}
             />
 
-            <p style={importantInputStyle}>Выберите день заказа</p>
+            <p className="important-input-style">Выберите день заказа</p>
             <DatePicker
                 isoWeek
                 locale={{
@@ -735,19 +680,19 @@ const CreatingWashingOrder = observer(() => {
                     label='Цена услуги:'
                     id='price'
                     value={price}
-                    inputStyle={inputStyleForPriceTime}
+                    className="input-style-for-price-time"
                     onChange={setPrice}
                 />
                 <InputFieldNear
                     label='Время выполнения:'
                     id='time'
                     value={orderTime}
-                    inputStyle={inputStyleForPriceTime}
+                    className="input-style-for-price-time"
                     onChange={setOrderTime}
                 />
             </div>
 
-            <p style={importantInputStyle}>Расписание с доступным временем</p>
+            <p className="important-input-style">Расписание с доступным временем</p>
 
             <InputPicker
                 data={stringTimeForCurrentDay.sort(compareTimeIntervals).map((item) => ({label: item, value: item}))}
@@ -774,17 +719,17 @@ const CreatingWashingOrder = observer(() => {
                     label='Номер телефона клиента:'
                     id='name'
                     value={userContacts}
-                    inputStyle={inputStyle}
+                    className="input-style"
                     onChange={setUserContacts}
                 />
                 <InputField
                     label='Номер автомобиля:'
                     id='carNumber'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={carNumber}
                     onChange={setCarNumber}
                 />
-                <p style={importantInputStyle}>Выберите состояние заказа</p>
+                <p className="important-input-style">Выберите состояние заказа</p>
 
                 <InputPicker
                     data={orderStatusArray}
@@ -794,7 +739,7 @@ const CreatingWashingOrder = observer(() => {
                     menuStyle={{fontSize: "17px"}}
                 />
 
-                <p style={inputStyle}>Выберите акцию, если необходимо</p>
+                <p className="input-style">Выберите акцию, если необходимо</p>
 
                 <InputPicker
                     data={filesOptions}
@@ -811,7 +756,7 @@ const CreatingWashingOrder = observer(() => {
 
                 <InputField
                     label='Специалист:'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     id='specialist'
                     value={specialist}
                     onChange={setSpecialist}
@@ -819,21 +764,21 @@ const CreatingWashingOrder = observer(() => {
                 <InputField
                     label='Администратор:'
                     id='administrator'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={administrator}
                     onChange={setAdministrator}
                 />
                 <InputField
                     label='Количество использованных бонусов:'
                     id='bonuses'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={bonuses}
                     onChange={setBonuses}
                 />
                 <InputField
                     label='Комментарии:'
                     id='comments'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={comments}
                     onChange={setComments}
                 />

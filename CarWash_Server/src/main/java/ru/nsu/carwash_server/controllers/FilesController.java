@@ -46,7 +46,7 @@ public class FilesController {
     @PostMapping("/upload")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> uploadImage(@Valid  @RequestParam("file") MultipartFile file,
+    public ResponseEntity<?> uploadImage(@Valid @RequestParam("file") MultipartFile file,
                                          @Valid @RequestPart("description") String description,
                                          @Valid @RequestPart("status") String status) {
 
@@ -119,24 +119,24 @@ public class FilesController {
     }
 
 
-  @DeleteMapping("/delete/{filename:.+}")
-  @Transactional
-  public ResponseEntity<MessageResponse> deleteFile(@Valid @PathVariable String filename) {
-    String message = "";
+    @DeleteMapping("/delete/{filename:.+}")
+    @Transactional
+    public ResponseEntity<MessageResponse> deleteFile(@Valid @PathVariable String filename) {
+        String message = "";
 
-    try {
-      boolean existed = fileService.delete(filename);
+        try {
+            boolean existed = fileService.delete(filename);
 
-      if (existed) {
-        message = "Delete the file successfully: " + filename;
-        return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse(message));
-      }
+            if (existed) {
+                message = "Delete the file successfully: " + filename;
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse(message));
+            }
 
-      message = "The file does not exist!";
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse(message));
-    } catch (Exception e) {
-      message = "Could not delete the file: " + filename + ". Error: " + e.getMessage();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse(message));
+            message = "The file does not exist!";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse(message));
+        } catch (Exception e) {
+            message = "Could not delete the file: " + filename + ". Error: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse(message));
+        }
     }
-  }
 }

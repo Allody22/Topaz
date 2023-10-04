@@ -1,4 +1,5 @@
 import '../css/CreatingOrder.css';
+import '../css/CommonStyles.css';
 import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import InputField from "../model/InputField";
@@ -23,83 +24,18 @@ import currentOrderStatusMapFromEng from "../model/map/CurrentOrderStatusMapFrom
 import currentOrderStatusMapFromRus from "../model/map/CurrentOrderStatusMapFromRus";
 import fileNameFromEngMap from "../model/map/FileNamesFromEngMap";
 import {getAllSales} from "../http/userAPI";
+import {carTypesArray, orderStatusArray, serviceTypesArray} from "../model/Constants";
 
 const wheelSizeArray = [
     'R13', 'R14', 'R15', 'R16', 'R17', 'R18', 'R19', 'R20', 'R21', 'R22'].map(item => ({label: item, value: item}));
 
-const smallInputStyle = {
-    display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-const serviceTypesArray = [
-    "Мойка",
-    "Полировка",
-    "Шиномонтаж",
-    "Мойка с сайта",
-    "Шиномонтаж с сайта",
-    "Полировка с сайта",
-    "Шиномонтаж с приложения",
-    "Полировка с приложения",
-    "Мойка ELITE",
-    "Мойка VIP",
-    "Мойка Комфорт",
-    "Мойка Стандарт",
-    "Мойка Эконом",
-    "Мойка неизвестная",
-    "Неизвестно",
-].map(item => ({label: item, value: item}));
-
-
-const orderStatusArray = [
-    "Отменён",
-    "Не оплачен и не сделан",
-    "Оплачен на 5 процентов и не сделан",
-    "Оплачен на 10 процентов и не сделан",
-    "Оплачен на 20 процентов и не сделан",
-    "Оплачен на 30 процентов и не сделан",
-    "Оплачен на 40 процентов и не сделан",
-    "Оплачен на 50 процентов и не сделан",
-    "Оплачен на 60 процентов и не сделан",
-    "Оплачен на 70 процентов и не сделан",
-    "Оплачен на 80 процентов и не сделан",
-    "Оплачен на 90 процентов и не сделан",
-    "Полностью оплачен и не сделан",
-    "Не оплачен, но сделан",
-    "Оплачен на 5 процентов и сделан",
-    "Оплачен на 10 процентов и сделан",
-    "Оплачен на 20 процентов и сделан",
-    "Оплачен на 30 процентов и сделан",
-    "Оплачен на 40 процентов и сделан",
-    "Оплачен на 50 процентов и сделан",
-    "Оплачен на 60 процентов и сделан",
-    "Оплачен на 70 процентов и сделан",
-    "Оплачен на 80 процентов и сделан",
-    "Оплачен на 90 процентов и сделан",
-    "Полностью оплачен и сделан"
-].map(item => ({label: item, value: item}));
+const stylesForInput = {
+    width: 190, marginBottom: 10, marginTop: 5
+};
 
 const styles = {
     width: 500, display: 'block',
     marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
-};
-
-
-const carTypesArray = [
-    '1 тип - седан',
-    '2 тип - кроссовер',
-    '3 тип - джип',
-    'Неизвестно'
-].map(item => ({label: item, value: item}));
-[
-    'Заказ был выполнен',
-    'Заказ не был выполнен',
-].map(item => ({label: item, value: item}));
-const inputStyle = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-const stylesForInput = {
-    width: 190, marginBottom: 10, marginTop: 5
 };
 
 const UpdateOrderInfo = observer(() => {
@@ -596,14 +532,14 @@ const UpdateOrderInfo = observer(() => {
 
     return (
         <>
-            <p style={{...inputStyle, marginTop: '15px'}}>Страница изменения информации о заказе</p>
-            <p style={smallInputStyle}>Вы можете открыть таблицу с заказами за какой-то день,
+            <p className="input-style-modified">Страница изменения информации о заказе</p>
+            <p className="small-input-style">Вы можете открыть таблицу с заказами за какой-то день,
                 выбрать там заказ, информацию о котором хотите обновить, а он сам окажется здесь</p>
 
 
             <Form onSubmit={sendUpdateRequest}>
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Айди заказа'
                     id='orderId'
                     value={orderId}
@@ -814,7 +750,7 @@ const UpdateOrderInfo = observer(() => {
                 <Divider></Divider>
 
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Телефон пользователя'
                     id='userPhone'
                     value={userPhone}
@@ -835,41 +771,32 @@ const UpdateOrderInfo = observer(() => {
                 />
 
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Цена за заказ (целое число)'
                     id='price'
                     value={price}
                     onChange={setPrice}
                 />
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Администратор'
                     id='administrator'
                     value={administrator}
                     onChange={setAdministrator}
                 />
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Специалист'
                     id='specialist'
                     value={specialist}
                     onChange={setSpecialist}
                 />
-                <p style={inputStyle}>Выберите тип кузова</p>
+                <p className="input-style">Выберите тип кузова</p>
                 <InputPicker
                     data={carTypesArray}
                     value={carTypeMap}
                     onChange={setCarTypeMap}
-
-                    style={{
-                        width: 500,
-                        display: 'block',
-                        marginBottom: 10,
-                        marginLeft: 'auto',
-                        marginRight: 'auto',
-                        marginTop: 10,
-                        WebkitTextFillColor: "#000000"
-                    }}
+                    style={{...styles, WebkitTextFillColor: "#000000"}}
                     menuStyle={{fontSize: "17px"}}
                 />
                 <p style={{
@@ -892,20 +819,20 @@ const UpdateOrderInfo = observer(() => {
                     menuStyle={{fontSize: "17px"}}
                 />
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Номер автомобиля'
                     id='autoNumber'
                     value={autoNumber}
                     onChange={setAutoNumber}
                 />
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Номер бокса'
                     id='boxNumber'
                     value={boxNumber}
                     onChange={setBoxNumber}
                 />
-                <p style={inputStyle}>Время начала заказа</p>
+                <p className="input-style">Время начала заказа</p>
 
                 <DatePicker
                     isoWeek
@@ -940,7 +867,7 @@ const UpdateOrderInfo = observer(() => {
                     }}
                 />
 
-                <p style={inputStyle}>Время конца заказа</p>
+                <p className="input-style">Время конца заказа</p>
                 <DatePicker
                     isoWeek
                     locale={{
@@ -974,7 +901,7 @@ const UpdateOrderInfo = observer(() => {
                     }}
                 />
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Комментарии клиента'
                     id='comments'
                     value={comments}
@@ -993,7 +920,7 @@ const UpdateOrderInfo = observer(() => {
                     menuStyle={{fontSize: "17px"}}
                 />
 
-                <p style={inputStyle}>Выберите акцию, если необходимо</p>
+                <p className="input-style">Выберите акцию, если необходимо</p>
 
                 <InputPicker
                     data={filesOptions}
@@ -1005,7 +932,7 @@ const UpdateOrderInfo = observer(() => {
 
 
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Использованные клиентом бонусы'
                     id='bonuses'
                     value={bonuses}
@@ -1014,7 +941,7 @@ const UpdateOrderInfo = observer(() => {
                 {showConfirmationUpdateOrder && (
                     <div className='confirmation-container'>
                         <div className='confirmation-message'>
-                            <p style={inputStyle}>Вы уверены, что хотите изменить информацию об этом заказе?</p>
+                            <p className="input-style">Вы уверены, что хотите изменить информацию об этом заказе?</p>
                             <p>Это изменит информацию об этом заказе ВО ВСЕЙ базе данных для ВСЕХ</p>
                             <p>Пожалуйста, предварительно спросите у клиента разрешение на изменение его заказа</p>
                             <div className='confirmation-buttons'>
@@ -1041,7 +968,7 @@ const UpdateOrderInfo = observer(() => {
             {showConfirmation && (
                 <div className='confirmation-container'>
                     <div className='confirmation-message'>
-                        <p style={inputStyle}>Вы уверены, что хотите удалить заказ?</p>
+                        <p className="input-style">Вы уверены, что хотите удалить заказ?</p>
                         <p>Это изменит информацию об этом заказе ВО ВСЕЙ базе данных для ВСЕХ</p>
                         <p>Пожалуйста, предварительно спросите у клиента разрешение на удаление его заказа</p>
                         <div className='confirmation-buttons'>

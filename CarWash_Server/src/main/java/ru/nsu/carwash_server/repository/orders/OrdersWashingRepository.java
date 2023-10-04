@@ -23,9 +23,9 @@ public interface OrdersWashingRepository extends JpaRepository<OrdersWashing, Lo
             "time_third_type = COALESCE(:TimeThirdType,time_third_type), role = COALESCE(:Role,role)" +
             "WHERE name = :Name", nativeQuery = true)
     void updateWashingServiceInfo(@Param("Name") String name, @Param("NewPrice") Integer priceFirst,
-                                @Param("PriceSecondType") Integer priceSecond, @Param("PriceThirdType") Integer priceThirdType,
-                                @Param("TimeFirstType") Integer timeFirst, @Param("TimeSecondType") Integer timeSecond,
-                                @Param("TimeThirdType") Integer timeThird, @Param("Role") String role);
+                                  @Param("PriceSecondType") Integer priceSecond, @Param("PriceThirdType") Integer priceThirdType,
+                                  @Param("TimeFirstType") Integer timeFirst, @Param("TimeSecondType") Integer timeSecond,
+                                  @Param("TimeThirdType") Integer timeThird, @Param("Role") String role);
 
     @Transactional
     @Query(value = "SELECT name FROM orders_washing WHERE role = :Role", nativeQuery = true)

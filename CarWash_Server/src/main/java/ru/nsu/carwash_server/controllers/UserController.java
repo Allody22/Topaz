@@ -81,7 +81,7 @@ public class UserController {
 
         String operationName = "Update_user_info_by_user";
 
-        String descriptionMessage = "Пользователь "+ updateUserPasswordRequest.getUsername() + " получил новый пароль";
+        String descriptionMessage = "Пользователь " + updateUserPasswordRequest.getUsername() + " получил новый пароль";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         return ResponseEntity.ok(new MessageResponse("Пользователь с айди '" + userId

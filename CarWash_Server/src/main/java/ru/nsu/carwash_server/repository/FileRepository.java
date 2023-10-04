@@ -24,7 +24,6 @@ public interface FileRepository extends JpaRepository<File, Long> {
     Optional<File> checkByNameAndStatus(@Param("name") String name, @Param("status") String status);
 
 
-
     @Query(value = "DELETE FROM files WHERE name LIKE CONCAT('%', :name, '%') AND version = :version", nativeQuery = true)
     Optional<File> deleteByNameAndVersion(@Param("name") String name, @Param("version") int version);
 

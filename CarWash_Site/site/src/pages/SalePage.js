@@ -3,6 +3,7 @@ import {Button} from 'react-bootstrap';
 import {Notification, useToaster,} from 'rsuite';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
+import '../css/CommonStyles.css';
 import 'rsuite/dist/rsuite.css';
 
 import {observer} from "mobx-react-lite";
@@ -16,11 +17,7 @@ import Modal from "react-bootstrap/Modal";
 import InputField from "../model/InputField";
 import StatusFileMapFromRus from "../model/map/StatusFileMapFromRus";
 import saleStore from "../store/SaleStore";
-
-const inputStyle = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
+import {saleDay} from "../model/Constants";
 
 const inputFileStyle = {
     display: 'block',          // делает input блочным элементом
@@ -106,17 +103,6 @@ const imageStyle = {
     height: 'auto',
     marginBottom: '5px' // уменьшил отступ
 };
-
-
-const saleDay = [
-    'Акция на понедельник',
-    'Акция на вторник',
-    'Акция на среду',
-    'Акция на четверг',
-    'Акция на пятницу',
-    'Акция на субботу',
-    'Акция на воскресенье'
-].map(item => ({label: item, value: item}));
 
 
 const SalePage = observer(() => {
@@ -307,7 +293,7 @@ const SalePage = observer(() => {
 
     return (
         <>
-            <p style={{...inputStyle, marginTop: '15px'}}>Страница акций</p>
+            <p className="input-style-modified">Страница акций</p>
             <div style={containerStyle}>
                 {files.map(file => {
                     const fileExtension = file.name.split('.').pop().toLowerCase();

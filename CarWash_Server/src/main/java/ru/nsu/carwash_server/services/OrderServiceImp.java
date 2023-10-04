@@ -188,7 +188,7 @@ public class OrderServiceImp implements OrderService {
 
             UpdateOrderInfoRequest updateOrderInfoRequest = new UpdateOrderInfoRequest();
             updateOrderInfoRequest.setCurrentStatus(OrderStatuses.cancelled);
-            OrderVersions newOrderVersion = new OrderVersions(actualOrderVersion,updateOrderInfoRequest,
+            OrderVersions newOrderVersion = new OrderVersions(actualOrderVersion, updateOrderInfoRequest,
                     ordersTires, ordersPolishings, ordersWashings, allOrdersByTypes.getOrdersTire(),
                     allOrdersByTypes.getOrdersPolishing(), allOrdersByTypes.getOrdersWashing());
             result = Pair.of(true, "Информация о заказе успешно обновлена");
@@ -320,12 +320,12 @@ public class OrderServiceImp implements OrderService {
     //Если true - то учитываем отменённые
     public List<OrderVersions> getOrdersInTimeInterval(Date startTime, Date endTime, Integer box, boolean flag) {
         if (box == null) {
-            if (flag){
+            if (flag) {
                 return orderVersionsRepository.getLatestOrderVersionsInOneDayFullWithCancelled(startTime, endTime);
             }
             return orderVersionsRepository.getLatestOrderVersionsInOneDayFull(startTime, endTime);
         } else {
-            if (flag){
+            if (flag) {
                 return orderVersionsRepository.getLatestOrderVersionsInOneDayFullInBoxWithCancelled(startTime, endTime, box);
             }
             return orderVersionsRepository.getLatestOrderVersionsInOneDayFullInBox(startTime, endTime, box);

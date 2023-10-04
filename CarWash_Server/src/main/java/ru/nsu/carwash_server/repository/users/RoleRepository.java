@@ -13,10 +13,10 @@ import java.util.Optional;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
-  Optional<Role> findByName(ERole name);
+    Optional<Role> findByName(ERole name);
 
-  @Transactional
-  @Query(value = "SELECT name FROM roles", nativeQuery = true)
-  Optional<List<String>> getAllBy();
+    @Transactional
+    @Query(value = "SELECT name FROM roles", nativeQuery = true)
+    Optional<List<String>> getAllBy();
 
 }

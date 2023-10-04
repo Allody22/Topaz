@@ -110,8 +110,8 @@ public interface OrderService {
      * еще нет заказа
      *
      * @param startTime - начальное время для проверки
-     * @param endTime - конечное время для проверки
-     * @param box - бокс для проверки
+     * @param endTime   - конечное время для проверки
+     * @param box       - бокс для проверки
      * @return true - если время доступно, false иначе
      */
     boolean checkIfTimeFree(Date startTime, Date endTime, Integer box);
@@ -130,8 +130,8 @@ public interface OrderService {
      * именами услуг в бд для проверки
      *
      * @param currentOrdersPolishing - текущие услуги полировки
-     * @param currentOrdersWashing - текущие услуги мойки
-     * @param currentOrdersTire - текущие услуги шиномонтажа
+     * @param currentOrdersWashing   - текущие услуги мойки
+     * @param currentOrdersTire      - текущие услуги шиномонтажа
      * @return все проверенные услуги
      */
     AllOrderTypes copyOrdersByName(List<OrdersPolishing> currentOrdersPolishing,
@@ -141,22 +141,22 @@ public interface OrderService {
      * Сохранение заказа полировки с сайта или с приложения
      *
      * @param ordersPolishings - набор услуг
-     * @param startTime - начальное время
-     * @param endTime - конечное время
-     * @param administrator - администратор заказа
-     * @param specialist - специалист (мойщик) заказа
-     * @param boxNumber - номер бокса этого заказа
-     * @param bonuses - набор бонусов этого заказа
-     * @param comments - комментарии к заказу
-     * @param autoNumber - номер автомобиля для полировки
-     * @param autoType - тип кузова автомобиля
-     * @param userContacts - контакты пользователя
-     * @param user - сущность пользователя из БД
-     * @param price - цена заказа
-     * @param orderSource - откуда пришёл заказ (сайт или приложение)
-     * @param currentStatus - текущей статус оплаты и готовности заказа
-     * @param version - версия заказа
-     * @param sale - акции к заказу, если она есть
+     * @param startTime        - начальное время
+     * @param endTime          - конечное время
+     * @param administrator    - администратор заказа
+     * @param specialist       - специалист (мойщик) заказа
+     * @param boxNumber        - номер бокса этого заказа
+     * @param bonuses          - набор бонусов этого заказа
+     * @param comments         - комментарии к заказу
+     * @param autoNumber       - номер автомобиля для полировки
+     * @param autoType         - тип кузова автомобиля
+     * @param userContacts     - контакты пользователя
+     * @param user             - сущность пользователя из БД
+     * @param price            - цена заказа
+     * @param orderSource      - откуда пришёл заказ (сайт или приложение)
+     * @param currentStatus    - текущей статус оплаты и готовности заказа
+     * @param version          - версия заказа
+     * @param sale             - акции к заказу, если она есть
      * @return созданный заказ и его версия в паре
      */
     Pair<Order, OrderVersions> savePolishingOrder(List<OrdersPolishing> ordersPolishings, Date startTime,
@@ -169,24 +169,24 @@ public interface OrderService {
     /**
      * Создание заказа шиномонтажа
      *
-     * @param ordersTire - набор услуг
-     * @param startTime - начальное время
-     * @param endTime - конечное время
+     * @param ordersTire    - набор услуг
+     * @param startTime     - начальное время
+     * @param endTime       - конечное время
      * @param administrator - администратор заказа
-     * @param specialist - специалист (мойщик) заказа
-     * @param boxNumber - номер бокса этого заказа
-     * @param bonuses - набор бонусов этого заказа
-     * @param comments - комментарии к заказу
-     * @param autoNumber - номер автомобиля для полировки
-     * @param autoType - тип кузова автомобиля
-     * @param userContacts - контакты пользователя
-     * @param user - сущность пользователя из БД
-     * @param price - цена заказа
-     * @param wheelR - размер колёс автомобиля
-     * @param orderSource - откуда пришёл заказ (сайт или приложение)
+     * @param specialist    - специалист (мойщик) заказа
+     * @param boxNumber     - номер бокса этого заказа
+     * @param bonuses       - набор бонусов этого заказа
+     * @param comments      - комментарии к заказу
+     * @param autoNumber    - номер автомобиля для полировки
+     * @param autoType      - тип кузова автомобиля
+     * @param userContacts  - контакты пользователя
+     * @param user          - сущность пользователя из БД
+     * @param price         - цена заказа
+     * @param wheelR        - размер колёс автомобиля
+     * @param orderSource   - откуда пришёл заказ (сайт или приложение)
      * @param currentStatus - текущей статус оплаты и готовности заказа
-     * @param version - версия заказа
-     * @param sale - акции к заказу, если она есть
+     * @param version       - версия заказа
+     * @param sale          - акции к заказу, если она есть
      * @return созданный заказ и его версия в паре
      */
     Pair<Order, OrderVersions> saveTireOrder(List<OrdersTire> ordersTire, Date startTime, Date endTime,
@@ -200,21 +200,21 @@ public interface OrderService {
      * Создание заказа мойки
      *
      * @param ordersWashings - набор услуг
-     * @param startTime - начальное время
-     * @param endTime - конечное время
-     * @param administrator - администратор заказа
-     * @param specialist - специалист (мойщик) заказа
-     * @param boxNumber - номер бокса этого заказа
-     * @param bonuses - набор бонусов этого заказа
-     * @param comments - комментарии к заказу
-     * @param autoNumber - номер автомобиля для полировки
-     * @param autoType - тип кузова автомобиля
-     * @param userContacts - контакты пользователя
-     * @param user - сущность пользователя из БД
-     * @param price - цена заказа
-     * @param currentStatus - текущей статус оплаты и готовности заказа
-     * @param version - версия заказа
-     * @param sale - акции к заказу, если она есть
+     * @param startTime      - начальное время
+     * @param endTime        - конечное время
+     * @param administrator  - администратор заказа
+     * @param specialist     - специалист (мойщик) заказа
+     * @param boxNumber      - номер бокса этого заказа
+     * @param bonuses        - набор бонусов этого заказа
+     * @param comments       - комментарии к заказу
+     * @param autoNumber     - номер автомобиля для полировки
+     * @param autoType       - тип кузова автомобиля
+     * @param userContacts   - контакты пользователя
+     * @param user           - сущность пользователя из БД
+     * @param price          - цена заказа
+     * @param currentStatus  - текущей статус оплаты и готовности заказа
+     * @param version        - версия заказа
+     * @param sale           - акции к заказу, если она есть
      * @return созданный заказ и его версия в паре
      */
     Pair<Order, OrderVersions> saveWashingOrder(List<OrdersWashing> ordersWashings, Date startTime,
@@ -229,9 +229,9 @@ public interface OrderService {
      * интервал времени
      *
      * @param startTime - начальное время
-     * @param endTime - конечное время
-     * @param box - номер бокса
-     * @param flag - если передано true - то учитываем отменённые заказа
+     * @param endTime   - конечное время
+     * @param box       - номер бокса
+     * @param flag      - если передано true - то учитываем отменённые заказа
      * @return набор всех последних версий заказов в этом интервале
      */
     List<OrderVersions> getOrdersInTimeInterval(Date startTime, Date endTime, Integer box, boolean flag);
@@ -239,9 +239,9 @@ public interface OrderService {
     /**
      * Получение заказов, созданных в этот интервал времени
      *
-     * @param firstDate - начальная дата
+     * @param firstDate  - начальная дата
      * @param secondDate - конечная дата
-     * @param flag - если передано true - то учитываем отменённые заказа
+     * @param flag       - если передано true - то учитываем отменённые заказа
      * @return набор всех последних версий заказов
      */
     List<OrderVersions> getOrdersCreatedAt(Date firstDate, Date secondDate, boolean flag);
@@ -250,7 +250,7 @@ public interface OrderService {
      * Получение всех не сделанных заказов
      *
      * @param flag - если передано true - то учитываем отменённые заказа
-     * @return  набор всех последних версий заказов
+     * @return набор всех последних версий заказов
      */
     List<OrderVersions> getNotMadeOrders(boolean flag);
 

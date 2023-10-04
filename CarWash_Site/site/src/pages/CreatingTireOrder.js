@@ -2,13 +2,13 @@ import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import '../css/CreatingOrder.css';
 import '../css/NewStyles.css';
+import '../css/CommonStyles.css';
 import {DatePicker, Divider, InputNumber, InputPicker, Notification, useToaster} from 'rsuite';
 
 import addDays from 'date-fns/addDays';
 
 import 'rsuite/dist/rsuite.css';
 
-import Modal from "react-bootstrap/Modal";
 import InputField from "../model/InputField";
 import {createTireOrder, getAllTireServicesWithPriceAndTime, getPriceAndFreeTime} from "../http/orderAPI";
 import socketStore from "../store/SocketStore";
@@ -19,66 +19,17 @@ import {format, parseISO} from "date-fns";
 import currentOrderStatusMapFromRus from "../model/map/CurrentOrderStatusMapFromRus";
 import InputFieldNear from "../model/InputFieldNear";
 import saleStore from "../store/SaleStore";
-
-const orderStatusArray = [
-    "Отменён",
-    "Не оплачен и не сделан",
-    "Оплачен на 5 процентов и не сделан",
-    "Оплачен на 10 процентов и не сделан",
-    "Оплачен на 20 процентов и не сделан",
-    "Оплачен на 30 процентов и не сделан",
-    "Оплачен на 40 процентов и не сделан",
-    "Оплачен на 50 процентов и не сделан",
-    "Оплачен на 60 процентов и не сделан",
-    "Оплачен на 70 процентов и не сделан",
-    "Оплачен на 80 процентов и не сделан",
-    "Оплачен на 90 процентов и не сделан",
-    "Полностью оплачен и не сделан",
-    "Не оплачен, но сделан",
-    "Оплачен на 5 процентов и сделан",
-    "Оплачен на 10 процентов и сделан",
-    "Оплачен на 20 процентов и сделан",
-    "Оплачен на 30 процентов и сделан",
-    "Оплачен на 40 процентов и сделан",
-    "Оплачен на 50 процентов и сделан",
-    "Оплачен на 60 процентов и сделан",
-    "Оплачен на 70 процентов и сделан",
-    "Оплачен на 80 процентов и сделан",
-    "Оплачен на 90 процентов и сделан",
-    "Полностью оплачен и сделан"
-].map(item => ({label: item, value: item}));
-
-const inputStyle = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-const importantInputStyle = {
-    fontWeight: 'bold', display: 'flex', color: 'red',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-const smallInputStyle = {
-    display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-const styles = {
-    width: 500, display: 'block',
-    marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
-};
-
+import {orderStatusArray} from "../model/Constants";
+import MyCustomModal from "../model/MyCustomModal";
 
 const stylesForInput = {
     width: 190, marginBottom: 10, marginTop: 5
 };
 
-const inputStyleForPriceTime = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center',
-    margin: '5px', padding: '5px', border: '1px solid #ccc',
-    backgroundColor: '#fff', borderRadius: '5px', boxSizing: 'border-box'
+const styles = {
+    width: 500, display: 'block',
+    marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
 };
-
 
 const wheelSizeArray = [
     'R13', 'R14', 'R15', 'R16', 'R17', 'R18', 'R19', 'R20', 'R21', 'R22'].map(item => ({label: item, value: item}));
@@ -496,168 +447,159 @@ const CreatingTireOrder = observer(() => {
     ];
     return (
         <>
-            <p style={{...inputStyle, marginTop: '15px'}}>Страница добавления заказов на шиномонтаж</p>
-            <p style={smallInputStyle}>Здесь вы можете сами создать какой-то заказ
+            <p className="input-style-modified">Страница добавления заказов на шиномонтаж</p>
+            <p className="small-input-style">Здесь вы можете сами создать какой-то заказ
                 на шиномонтаж из всех актуальных услуг, а потом получить всю информацию о нём</p>
-            <p style={smallInputStyle}> &nbsp;<strong>Обязательно</strong>&nbsp;выберите время заказа, диаметр колёс,
-                набор услуг и состояние заказа</p>
+            <p className="small-input-style"> &nbsp;<strong>Обязательно</strong>&nbsp;выберите все элементы под красным
+                текстом</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
                 Выберите услуги
             </Button>
-            <Modal show={showModal}
-                   onHide={handleCloseModal}
-                   dialogClassName="custom-modal-dialog-tire"
-                   className="">
-                <Modal.Header closeButton>
-                    <Modal.Title>Выберите заказы</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {mainOrders.map((item, index) => (
-                        <div key={index} style={{
-                            fontSize: '16px',
-                            borderBottom: '1px solid lightgray',
-                            paddingBottom: '10px',
-                            paddingTop: '10px'
+            <MyCustomModal
+                show={showModal}
+                handleClose={handleCloseModal}
+                title="Выберите заказы">
+
+                {mainOrders.map((item, index) => (
+                    <div key={index} style={{
+                        fontSize: '16px',
+                        borderBottom: '1px solid lightgray',
+                        paddingBottom: '10px',
+                        paddingTop: '10px'
+                    }}>
+                        <div style={{textAlign: 'center'}}>
+                            <span>{item.name}</span>
+                        </div>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'auto 1fr',
+                            gap: '10px',
+                            alignItems: 'center'
                         }}>
-                            <div style={{textAlign: 'center'}}>
-                                <span>{item.name}</span>
-                            </div>
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'auto 1fr',
-                                gap: '10px',
-                                alignItems: 'center'
-                            }}>
-                                <div style={{color: 'green'}}>Размеры:</div>
-                                <div style={{display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '10px'}}>
-                                    <div>R13</div>
-                                    <div>R14</div>
-                                    <div>R15</div>
-                                    <div>R16</div>
-                                    <div>R17</div>
-                                    <div>R18</div>
-                                    <div>R19</div>
-                                    <div>R20</div>
-                                    <div>R21</div>
-                                    <div>R22</div>
-                                </div>
-                            </div>
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'auto 1fr',
-                                gap: '10px',
-                                alignItems: 'center'
-                            }}>
-                                <div style={{color: 'blue', gridColumn: '1'}}>Время:</div>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(10, 1fr)',
-                                    gap: '10px',
-                                    gridColumn: '2'
-                                }}>
-                                    <div
-                                        style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_13}</div>
-                                    <div
-                                        style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_14}</div>
-                                    <div
-                                        style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_15}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0'}{item.time_r_16}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_17}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_18}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_19}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_20}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.time_r_21}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.time_r_22}</div>
-                                </div>
-                            </div>
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'auto 1fr',
-                                gap: '10px',
-                                alignItems: 'center'
-                            }}>
-                                <div style={{color: 'red', gridColumn: '1'}}>Цены:</div>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(10, 1fr)',
-                                    gap: '10px',
-                                    gridColumn: '2'
-                                }}>
-                                    <div
-                                        style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_13}</div>
-                                    <div
-                                        style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_14}</div>
-                                    <div
-                                        style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_15}</div>
-                                    <div
-                                        style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_16}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_17}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_18}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_19}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_20}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.price_r_21}</div>
-                                    <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.price_r_22}</div>
-                                </div>
-                            </div>
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'center'
-                            }}>
-                                <InputNumber
-                                    size="sm"
-                                    placeholder="sm"
-                                    style={Object.assign({}, stylesForInput, {margin: '0 auto', marginTop: '10px'})}
-                                    min={0}
-                                    onChange={value => handleItemChange(item.name, value)}
-                                    value={getItemValueByName(item.name) || 0}
-                                />
+                            <div style={{color: 'green'}}>Размеры:</div>
+                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '10px'}}>
+                                <div>R13</div>
+                                <div>R14</div>
+                                <div>R15</div>
+                                <div>R16</div>
+                                <div>R17</div>
+                                <div>R18</div>
+                                <div>R19</div>
+                                <div>R20</div>
+                                <div>R21</div>
+                                <div>R22</div>
                             </div>
                         </div>
-                    ))}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant='secondary' onClick={handleCloseModal}>
-                        Закрыть
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-            {
-                selectedItems.length > 0 ? (
-                    <div className="selected-items-container text-center">
-                        <Form.Label style={{fontWeight: "bold", fontSize: "1.2em"}}>
-                            Доп услуги:
-                        </Form.Label>
-                        <div className="selected-items">
-                            {selectedItems
-                                .filter((item, index) => selectedItems.indexOf(item) === index)
-                                .map((item) => {
-                                    if (getItemValueByName(item) > 0) {
-                                        return (
-                                            <span key={item} className="item">
-                  {`${item} (${getItemValueByName(item)})`}
-                </span>
-                                        );
-                                    }
-                                    return null;
-                                })}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'auto 1fr',
+                            gap: '10px',
+                            alignItems: 'center'
+                        }}>
+                            <div style={{color: 'blue', gridColumn: '1'}}>Время:</div>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(10, 1fr)',
+                                gap: '10px',
+                                gridColumn: '2'
+                            }}>
+                                <div
+                                    style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_13}</div>
+                                <div
+                                    style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_14}</div>
+                                <div
+                                    style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_15}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0'}{item.time_r_16}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_17}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_18}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_19}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_20}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.time_r_21}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.time_r_22}</div>
+                            </div>
+                        </div>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'auto 1fr',
+                            gap: '10px',
+                            alignItems: 'center'
+                        }}>
+                            <div style={{color: 'red', gridColumn: '1'}}>Цены:</div>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(10, 1fr)',
+                                gap: '10px',
+                                gridColumn: '2'
+                            }}>
+                                <div
+                                    style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_13}</div>
+                                <div
+                                    style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_14}</div>
+                                <div
+                                    style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_15}</div>
+                                <div
+                                    style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_16}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_17}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_18}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_19}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_20}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.price_r_21}</div>
+                                <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.price_r_22}</div>
+                            </div>
+                        </div>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center'
+                        }}>
+                            <InputNumber
+                                size="sm"
+                                placeholder="sm"
+                                style={Object.assign({}, stylesForInput, {margin: '0 auto', marginTop: '10px'})}
+                                min={0}
+                                onChange={value => handleItemChange(item.name, value)}
+                                value={getItemValueByName(item.name) || 0}
+                            />
                         </div>
                     </div>
-                ) : (
+                ))}
+            </MyCustomModal>
+
+            {selectedItems.length > 0 ? (
+                <div className="selected-items-container text-center">
+                    <Form.Label style={{fontWeight: "bold", fontSize: "1.2em"}}>
+                        Доп услуги:
+                    </Form.Label>
+                    <div className="selected-items">
+                        {selectedItems
+                            .filter((item, index) => selectedItems.indexOf(item) === index)
+                            .map((item) => {
+                                if (getItemValueByName(item) > 0) {
+                                    return (
+                                        <span key={item} className="item">
+                  {`${item} (${getItemValueByName(item)})`}
+                </span>
+                                    );
+                                }
+                                return null;
+                            })}
+                    </div>
+                </div>
+            ) : (
+                <div className='selected-items-container text-center'>
+                    <Form.Label style={{fontWeight: 'bold', fontSize: '1.2em'}}>
+                        Дополнительные услуги:
+                    </Form.Label>
                     <div className='selected-items-container text-center'>
-                        <Form.Label style={{fontWeight: 'bold', fontSize: '1.2em'}}>
-                            Дополнительные услуги:
-                        </Form.Label>
-                        <div className='selected-items-container text-center'>
                         <span className='empty-list' style={{fontSize: '1.1em'}}>
                             Нет дополнительных услуг
                         </span>
-                        </div>
                     </div>
-                )
+                </div>
+            )
             }
             <Divider></Divider>
-            <p style={importantInputStyle}>Выберите размер колёс</p>
+            <p className="important-input-style">Выберите размер колёс</p>
             <InputPicker
                 data={wheelSizeArray}
                 value={wheelR}
@@ -666,7 +608,7 @@ const CreatingTireOrder = observer(() => {
                 menuStyle={{fontSize: "17px"}}
             />
 
-            <p style={importantInputStyle}>Выберите день заказа</p>
+            <p className="important-input-style">Выберите день заказа</p>
             <DatePicker
                 isoWeek
                 locale={{
@@ -710,19 +652,19 @@ const CreatingTireOrder = observer(() => {
                     label='Цена услуги:'
                     id='price'
                     value={price}
-                    inputStyle={inputStyleForPriceTime}
+                    className="input-style-for-price-time"
                     onChange={setPrice}
                 />
                 <InputFieldNear
                     label='Время выполнения:'
                     id='time'
                     value={orderTime}
-                    inputStyle={inputStyleForPriceTime}
+                    className="input-style-for-price-time"
                     onChange={setOrderTime}
                 />
             </div>
 
-            <p style={importantInputStyle}>Расписание с доступным временем</p>
+            <p className="important-input-style">Расписание с доступным временем</p>
 
             <InputPicker
                 data={stringTimeForCurrentDay.sort(compareTimeIntervals).map((item) => ({label: item, value: item}))}
@@ -748,19 +690,19 @@ const CreatingTireOrder = observer(() => {
                 <InputField
                     label='Номер телефона клиента:'
                     id='name'
+                    className="input-style"
                     value={userContacts}
-                    inputStyle={inputStyle}
                     onChange={setUserContacts}
                 />
                 <InputField
                     label='Номер автомобиля:'
                     id='carNumber'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={carNumber}
                     onChange={setCarNumber}
                 />
 
-                <p style={importantInputStyle}>Выберите состояние заказа</p>
+                <p className="important-input-style">Выберите состояние заказа</p>
 
                 <InputPicker
                     data={orderStatusArray}
@@ -770,11 +712,10 @@ const CreatingTireOrder = observer(() => {
                     menuStyle={{fontSize: "17px"}}
                 />
 
-                <p style={inputStyle}>Выберите акцию, если необходимо</p>
+                <p className="input-style">Выберите акцию, если необходимо</p>
 
                 <InputPicker
                     data={filesOptions}
-                    inputStyle={inputStyle}
                     style={{...styles, WebkitTextFillColor: "#000000"}}
                     value={selectedSaleDescription}
                     menuStyle={{fontSize: "17px"}}
@@ -787,7 +728,7 @@ const CreatingTireOrder = observer(() => {
 
                 <InputField
                     label='Специалист:'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     id='specialist'
                     value={specialist}
                     onChange={setSpecialist}
@@ -795,21 +736,21 @@ const CreatingTireOrder = observer(() => {
                 <InputField
                     label='Администратор:'
                     id='administrator'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={administrator}
                     onChange={setAdministrator}
                 />
                 <InputField
                     label='Количество использованных бонусов:'
                     id='bonuses'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={bonuses}
                     onChange={setBonuses}
                 />
                 <InputField
                     label='Комментарии:'
                     id='comments'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={comments}
                     onChange={setComments}
                 />

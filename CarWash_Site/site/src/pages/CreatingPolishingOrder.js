@@ -5,6 +5,8 @@ import '../css/NewStyles.css';
 import {DatePicker, Divider, InputNumber, InputPicker, Notification, useToaster} from 'rsuite';
 import addDays from 'date-fns/addDays';
 import 'rsuite/dist/rsuite.css';
+import '../css/CommonStyles.css';
+
 
 import Modal from "react-bootstrap/Modal";
 import InputField from "../model/InputField";
@@ -17,72 +19,15 @@ import {format, parseISO} from "date-fns";
 import currentOrderStatusMapFromRus from "../model/map/CurrentOrderStatusMapFromRus";
 import InputFieldNear from "../model/InputFieldNear";
 import saleStore from "../store/SaleStore.js";
-
-
-const carTypesArray = [
-    '1 тип - седан',
-    '2 тип - кроссовер',
-    '3 тип - джип',
-    'Неизвестно'
-].map(item => ({label: item, value: item}));
-
-const importantInputStyle = {
-    fontWeight: 'bold', display: 'flex', color: 'red',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-
-const orderStatusArray = [
-    "Отменён",
-    "Не оплачен и не сделан",
-    "Оплачен на 5 процентов и не сделан",
-    "Оплачен на 10 процентов и не сделан",
-    "Оплачен на 20 процентов и не сделан",
-    "Оплачен на 30 процентов и не сделан",
-    "Оплачен на 40 процентов и не сделан",
-    "Оплачен на 50 процентов и не сделан",
-    "Оплачен на 60 процентов и не сделан",
-    "Оплачен на 70 процентов и не сделан",
-    "Оплачен на 80 процентов и не сделан",
-    "Оплачен на 90 процентов и не сделан",
-    "Полностью оплачен и не сделан",
-    "Не оплачен, но сделан",
-    "Оплачен на 5 процентов и сделан",
-    "Оплачен на 10 процентов и сделан",
-    "Оплачен на 20 процентов и сделан",
-    "Оплачен на 30 процентов и сделан",
-    "Оплачен на 40 процентов и сделан",
-    "Оплачен на 50 процентов и сделан",
-    "Оплачен на 60 процентов и сделан",
-    "Оплачен на 70 процентов и сделан",
-    "Оплачен на 80 процентов и сделан",
-    "Оплачен на 90 процентов и сделан",
-    "Полностью оплачен и сделан"
-].map(item => ({label: item, value: item}));
-
-const smallInputStyle = {
-    display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-const styles = {
-    width: 500, display: 'block',
-    marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
-};
+import {carTypesArray, orderStatusArray} from "../model/Constants";
 
 const stylesForInput = {
     width: 190, marginBottom: 10, marginTop: 5
 };
 
-const inputStyle = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-const inputStyleForPriceTime = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center',
-    margin: '5px', padding: '5px', border: '1px solid #ccc',
-    backgroundColor: '#fff', borderRadius: '5px', boxSizing: 'border-box'
+const styles = {
+    width: 500, display: 'block',
+    marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
 };
 
 const CreatingPolishingOrder = observer(() => {
@@ -504,11 +449,11 @@ const CreatingPolishingOrder = observer(() => {
 
     return (
         <>
-            <p style={{...inputStyle, marginTop: '15px'}}>Страница добавления заказов на полировку</p>
-            <p style={smallInputStyle}>Здесь вы можете сами создать какой-то заказ
+            <p className="input-style-modified">Страница добавления заказов на полировку</p>
+            <p className="small-input-style">Здесь вы можете сами создать какой-то заказ
                 на полировку из всех актуальных услуг, а потом получить всю информацию о нём</p>
-            <p style={smallInputStyle}> &nbsp;<strong>Обязательно</strong>&nbsp;выберите время заказа, тип кузова,
-                набор услуг и состояние заказа</p>
+            <p className="small-input-style"> &nbsp;<strong>Обязательно</strong>&nbsp;выберите все элементы под красным
+                текстом</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
                 Выберите услуги
@@ -594,17 +539,17 @@ const CreatingPolishingOrder = observer(() => {
             )
             }
             <Divider></Divider>
-            <p style={importantInputStyle}>Выберите тип кузова</p>
+            <p className="important-input-style">Выберите тип кузова</p>
 
             <InputPicker
                 data={carTypesArray}
                 value={carTypeMap}
-                onChange={setCarTypeMap}
                 style={{...styles, WebkitTextFillColor: "#000000"}}
+                onChange={setCarTypeMap}
                 menuStyle={{fontSize: "17px"}}
             />
 
-            <p style={importantInputStyle}>Выберите день заказа</p>
+            <p className="important-input-style">Выберите день заказа</p>
             <DatePicker
                 isoWeek
                 locale={{
@@ -646,20 +591,20 @@ const CreatingPolishingOrder = observer(() => {
                 <InputFieldNear
                     label='Цена услуги:'
                     id='price'
+                    className="input-style-for-price-time"
                     value={price}
-                    inputStyle={inputStyleForPriceTime}
                     onChange={setPrice}
                 />
                 <InputFieldNear
                     label='Время выполнения:'
                     id='time'
+                    className="input-style-for-price-time"
                     value={orderTime}
-                    inputStyle={inputStyleForPriceTime}
                     onChange={setOrderTime}
                 />
             </div>
 
-            <p style={importantInputStyle}>Расписание с доступным временем</p>
+            <p className="important-input-style">Расписание с доступным временем</p>
 
             <InputPicker
                 data={stringTimeForCurrentDay.sort(compareTimeIntervals).map((item) => ({label: item, value: item}))}
@@ -686,17 +631,17 @@ const CreatingPolishingOrder = observer(() => {
                     label='Номер телефона клиента:'
                     id='name'
                     value={userContacts}
-                    inputStyle={inputStyle}
+                    className="input-style"
                     onChange={setUserContacts}
                 />
                 <InputField
                     label='Номер автомобиля:'
                     id='carNumber'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={carNumber}
                     onChange={setCarNumber}
                 />
-                <p style={importantInputStyle}>Выберите состояние заказа</p>
+                <p className="important-input-style">Выберите состояние заказа</p>
 
                 <InputPicker
                     data={orderStatusArray}
@@ -706,11 +651,10 @@ const CreatingPolishingOrder = observer(() => {
                     menuStyle={{fontSize: "17px"}}
                 />
 
-                <p style={inputStyle}>Выберите акцию, если необходимо</p>
+                <p className="input-style">Выберите акцию, если необходимо</p>
 
                 <InputPicker
                     data={filesOptions}
-                    inputStyle={inputStyle}
                     style={{...styles, WebkitTextFillColor: "#000000"}}
                     value={selectedSaleDescription}
                     menuStyle={{fontSize: "17px"}}
@@ -723,7 +667,7 @@ const CreatingPolishingOrder = observer(() => {
 
                 <InputField
                     label='Специалист:'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     id='specialist'
                     value={specialist}
                     onChange={setSpecialist}
@@ -731,21 +675,21 @@ const CreatingPolishingOrder = observer(() => {
                 <InputField
                     label='Администратор:'
                     id='administrator'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={administrator}
                     onChange={setAdministrator}
                 />
                 <InputField
                     label='Количество использованных бонусов:'
                     id='bonuses'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={bonuses}
                     onChange={setBonuses}
                 />
                 <InputField
                     label='Комментарии:'
                     id='comments'
-                    inputStyle={inputStyle}
+                    className="input-style"
                     value={comments}
                     onChange={setComments}
                 />

@@ -24,11 +24,11 @@ public interface OrdersPolishingRepository extends JpaRepository<OrdersPolishing
             "time_third_type = COALESCE(:TimeThirdType,time_third_type)" +
             "WHERE name = :Name", nativeQuery = true)
     void updatePolishingOrder(@Param("Name") String name, @Param("NewPrice") Integer priceFirst,
-                                @Param("PriceSecondType") Integer priceSecond, @Param("PriceThirdType") Integer priceThirdType,
-                                @Param("TimeFirstType") Integer timeFirst, @Param("TimeSecondType") Integer timeSecond,
-                                @Param("TimeThirdType") Integer timeThird);
+                              @Param("PriceSecondType") Integer priceSecond, @Param("PriceThirdType") Integer priceThirdType,
+                              @Param("TimeFirstType") Integer timeFirst, @Param("TimeSecondType") Integer timeSecond,
+                              @Param("TimeThirdType") Integer timeThird);
 
     @Transactional
-    @Query(value = "SELECT name FROM orders_polishing",nativeQuery = true)
+    @Query(value = "SELECT name FROM orders_polishing", nativeQuery = true)
     Optional<List<String>> getActualOrders();
 }

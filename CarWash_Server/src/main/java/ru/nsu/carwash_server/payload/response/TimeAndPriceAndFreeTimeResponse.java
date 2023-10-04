@@ -17,6 +17,6 @@ public class TimeAndPriceAndFreeTimeResponse {
     private Integer time;
     private List<TimeIntervals> availableTime;
 
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date currentTime;
 }

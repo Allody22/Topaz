@@ -13,8 +13,8 @@ CREATE TABLE user_version
     email         VARCHAR(255),
     bonuses       INT,
     password      VARCHAR(255) NOT NULL,
-    full_name      VARCHAR(255),
-    admin_note     TEXT,
+    full_name     VARCHAR(255),
+    admin_note    TEXT,
     comments      TEXT,
     version       INT,
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -37,7 +37,7 @@ CREATE TABLE user_roles
 
 CREATE TABLE refresh_token
 (
-    id            SERIAL PRIMARY KEY,
+    id          SERIAL PRIMARY KEY,
     user_id     BIGINT,
     token       VARCHAR(255) NOT NULL UNIQUE,
     expiry_date TIMESTAMP    NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE orders
 
 CREATE TABLE orders_washing
 (
-    id            SERIAL PRIMARY KEY,
+    id                SERIAL PRIMARY KEY,
     creation_time     TIMESTAMP,
     name              VARCHAR(255) NOT NULL UNIQUE,
     price_first_type  INT,
@@ -69,7 +69,7 @@ CREATE TABLE orders_washing
 
 CREATE TABLE orders_polishing
 (
-    id            SERIAL PRIMARY KEY,
+    id                SERIAL PRIMARY KEY,
     creation_time     TIMESTAMP,
     name              VARCHAR(255) NOT NULL UNIQUE,
     price_first_type  INT,
@@ -112,15 +112,15 @@ CREATE TABLE orders_tire
 
 CREATE TABLE orders_versions
 (
-    id            SERIAL PRIMARY KEY,
-        order_id       BIGINT NOT NULL,
+    id             SERIAL PRIMARY KEY,
+    order_id       BIGINT NOT NULL,
     creation_time  TIMESTAMP,
     start_time     TIMESTAMP,
     end_time       TIMESTAMP,
     administrator  VARCHAR(255),
     specialist     VARCHAR(255),
     auto_number    VARCHAR(255),
-    sale    VARCHAR(255),
+    sale           VARCHAR(255),
 
     auto_type      INT,
     box_number     INT,
@@ -137,7 +137,7 @@ CREATE TABLE orders_versions
 
 CREATE TABLE orders_washing_link
 (
-    id SERIAL PRIMARY KEY,
+    id         SERIAL PRIMARY KEY,
     order_id   BIGINT,
     washing_id BIGINT,
     FOREIGN KEY (order_id) REFERENCES orders_versions (id),
@@ -147,7 +147,7 @@ CREATE TABLE orders_washing_link
 -- Таблица связи для orders_polishing
 CREATE TABLE orders_polishing_link
 (
-    id SERIAL PRIMARY KEY,
+    id           SERIAL PRIMARY KEY,
     order_id     BIGINT,
     polishing_id BIGINT,
     FOREIGN KEY (order_id) REFERENCES orders_versions (id),
@@ -157,7 +157,7 @@ CREATE TABLE orders_polishing_link
 -- Таблица связи для orders_tire
 CREATE TABLE orders_tire_link
 (
-    id SERIAL PRIMARY KEY,
+    id       SERIAL PRIMARY KEY,
     order_id BIGINT,
     tire_id  BIGINT,
     FOREIGN KEY (order_id) REFERENCES orders_versions (id),

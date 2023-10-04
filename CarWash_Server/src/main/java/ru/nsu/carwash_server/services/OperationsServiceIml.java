@@ -94,9 +94,6 @@ public class OperationsServiceIml implements OperationService {
         Random random = new Random();
         int randomNumber = 1000 + random.nextInt(8999);
 
-        //Отслеживаем рандомное число так, чтобы не тратить деньги на смс
-        System.out.println(randomNumber);
-
         LocalDateTime oneMinuteLater = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 

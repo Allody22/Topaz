@@ -20,7 +20,7 @@ public class UpdateOrderInfoResponse {
 
     private String name;
 
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime;
 
     private String administrator;
@@ -37,6 +37,6 @@ public class UpdateOrderInfoResponse {
 
     private boolean executed;
 
-    @JsonFormat(timezone="Asia/Novosibirsk")
+    @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime;
 }

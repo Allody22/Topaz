@@ -20,7 +20,7 @@ import CreatingWashingOrder from "./pages/CreatingWashingOrder";
 import CreatingPolishingOrder from "./pages/CreatingPolishingOrder";
 import CreatingTireOrder from "./pages/CreatingTireOrder";
 import UpdateOrderInfo from "./pages/UpdateOrderInfo";
-import ChangeServiceInfoFromEng from "./pages/ChangeServiceInfoFromEng";
+import ChangeServiceInfo from "./pages/ChangeServiceInfo";
 import AddNewService from "./pages/AddNewService";
 import SalePage from "./pages/SalePage";
 import OperationsTable from "./pages/OperationsTable";
@@ -61,7 +61,7 @@ export const authRoutes = [
     },
     {
         path: CHANGE_SERVICE_INFO,
-        Component: ChangeServiceInfoFromEng
+        Component: ChangeServiceInfo
     },
     {
         path: CREATE_NEW_SERVICE,

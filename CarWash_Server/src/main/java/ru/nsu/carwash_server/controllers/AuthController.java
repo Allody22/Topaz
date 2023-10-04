@@ -47,10 +47,8 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -112,7 +110,8 @@ public class AuthController {
 
         // Проверка ответа от SMS сервера
         if (smsResponse.getStatusCode() == HttpStatus.OK) {
-            System.out.println(resultOfSmsCreating.getSecond());
+            //Отслеживаем рандомное число так, чтобы не тратить деньги на смс
+            System.out.println("random number is: " + resultOfSmsCreating.getSecond());
             String operationName = "User_get_phone_code";
             String descriptionMessage = "Номер телефона:'" + number + "' получил код:" + resultOfSmsCreating.getSecond();
             operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
@@ -189,30 +188,9 @@ public class AuthController {
         userFirstVersion.setDateOfCreation(new Date());
         userFirstVersion.setPhone(signUpRequest.getPhone());
 
-        Set<String> strRoles = signUpRequest.getRole();
-        if (strRoles == null || strRoles.isEmpty()) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new NotInDataBaseException("ролей не найдена роль: ", ERole.ROLE_USER.name()));
-            roles.add(userRole);
-        } else {
-            Set<ERole> rolesList = EnumSet.allOf(ERole.class);
-            roles = strRoles.stream().map(role -> {
-                Optional<ERole> enumRole = rolesList.stream()
-                        .filter(r -> r.name().equalsIgnoreCase(role))
-                        .findAny();
-                if (enumRole.isPresent()) {
-                    return roleRepository.findByName(enumRole.get())
-                            .orElseThrow(() -> new NotInDataBaseException("ролей не найдена роль: ", enumRole.get().name()));
-                } else {
-                    throw new RuntimeException("Error: Invalid role.");
-                }
-            }).collect(Collectors.toSet());
-
-            // Добавление роли пользователя, если ее нет в списке ролей
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new NotInDataBaseException("ролей не найдена роль: ", ERole.ROLE_USER.name()));
-            roles.add(userRole);
-        }
+        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                .orElseThrow(() -> new NotInDataBaseException("ролей не найдена роль: ", ERole.ROLE_USER.name()));
+        roles.add(userRole);
 
         userService.saveNewUser(user, roles, 1, userFirstVersion);
 

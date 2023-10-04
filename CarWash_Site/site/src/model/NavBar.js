@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext} from 'react';
 import {Context} from "../index";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
@@ -9,8 +9,6 @@ import Container from "react-bootstrap/Container";
 import {NavLink, useHistory} from 'react-router-dom'
 import {signOut} from "../http/userAPI";
 import socketStore from "../store/SocketStore";
-import orderTypeMap from "./map/OrderTypeMapFromEnglish";
-import {format, parseISO} from "date-fns";
 import '../css/CreatingOrder.css';
 
 
@@ -19,25 +17,9 @@ const NavBar = observer(() => {
     const history = useHistory()
 
 
-    useEffect(() => {
-        if (socketStore.message) {
-            const id = JSON.parse(socketStore.message).id;
-            const orderType = orderTypeMap[JSON.parse(socketStore.message).orderType]
-            const startTime = format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')
-            const endTime = format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')
-
-            const newOrder = {orderType, startTime, endTime, id};
-
-            setDetectedOrders(prevOrders => [...prevOrders, newOrder]);
-        }
-
-    }, [socketStore.message]);
-
-
     const logOut = async () => {
         user.setUser({})
         user.setIsAuth(false)
-        setDetectedOrders([])
         socketStore.disconnect()
         await signOut();
     }

@@ -17,19 +17,11 @@ const rolesArray = [
     'Модератор',
 ].map(item => ({label: item, value: item}));
 
-const inputStyle = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
-const smallInputStyle = {
-    display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
 const styles = {
     width: 500, display: 'block',
     marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
 };
+
 
 const ChangeUserInfo = observer(() => {
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -260,32 +252,25 @@ const ChangeUserInfo = observer(() => {
 
     return (
         <>
-            <p style={{...inputStyle, marginTop: '15px'}}>Страница изменения информации о человеке в базе данных</p>
-            <p style={{...inputStyle, marginTop: '15px'}}>Человек с ролью администратор и выше может пользоваться
+            <p className="input-style-modified">Страница изменения информации о человеке в базе данных</p>
+            <p className="input-style-modified">Человек с ролью администратор и выше может пользоваться
                 сайтом</p>
 
-            <p style={{...inputStyle, marginTop: '15px'}}>Выберите роли пользователя</p>
-            <p style={smallInputStyle}>От этого зависит, смогут ли они пользоваться приложением и сайтом</p>
+            <p className="input-style-modified">Выберите роли пользователя</p>
+            <p className="small-input-style">От этого зависит, смогут ли они пользоваться приложением и сайтом</p>
             <TagPicker
                 data={rolesArray}
                 block
                 value={selectedRoles}
                 onChange={value => setSelectedRoles(value)}
                 onClose={handleTagRemoved}
-                style={{
-                    width: '500px',
-                    display: 'block',
-                    marginBottom: 10,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                    marginTop: 10,
-                    WebkitTextFillColor: "#000000"
-                }}
+                className="styles"
+                style={{WebkitTextFillColor: "#000000"}}
             />
 
             <Form onSubmit={handleSubmit}>
 
-                <p style={{...inputStyle, marginTop: '15px'}}>Все пользователи приложения</p>
+                <p className="input-style-modified">Все пользователи приложения</p>
                 <InputPicker
                     data={usersArray.map(item => ({label: item, value: item}))}
                     value={username}
@@ -295,7 +280,7 @@ const ChangeUserInfo = observer(() => {
                 />
 
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Имя и фамилия'
                     id='fullName'
                     value={fullName}
@@ -303,7 +288,6 @@ const ChangeUserInfo = observer(() => {
                 />
 
                 <InputField
-                    inputStyle={inputStyle}
                     label='Почта'
                     id='email'
                     value={email}
@@ -311,14 +295,14 @@ const ChangeUserInfo = observer(() => {
                 />
 
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Ваша заметка о человеке '
                     id='adminNote'
                     value={adminNote}
                     onChange={setAdminNote}
                 />
                 <InputField
-                    inputStyle={inputStyle}
+                    className="input-style"
                     label='Комментарии самого пользователя (возможно, более точная информация о машине и тп)'
                     id='userNote'
                     value={userNote}
@@ -327,7 +311,7 @@ const ChangeUserInfo = observer(() => {
                 {showConfirmation && (
                     <div className='confirmation-container'>
                         <div className='confirmation-message'>
-                            <p style={inputStyle}>Вы уверены, что хотите отправить запрос?</p>
+                            <p className="input-style">Вы уверены, что хотите отправить запрос?</p>
                             <p>Это изменит информацию об этом человеке ВО ВСЕЙ базе данных для ВСЕХ</p>
                             <div className='confirmation-buttons'>
                                 <Button onClick={() => setShowConfirmation(false)}

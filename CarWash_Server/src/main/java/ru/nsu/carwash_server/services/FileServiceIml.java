@@ -78,7 +78,7 @@ public class FileServiceIml implements FileService {
 
             Optional<File> previousVersion = findLatestVersionByStatus(status);
 
-            if(previousVersion.isPresent()) {
+            if (previousVersion.isPresent()) {
                 newVersion = previousVersion.get().getVersion() + 1;
             }
             String newFileName = status + "_v" + newVersion + "." + extension;
