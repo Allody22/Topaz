@@ -166,11 +166,12 @@ export const updateOrderInfo = async (orderId, userPhone, orderType,
 export const createWashingOrder = async (orders, userContacts, startTime,
                                          endTime, administrator, specialist, boxNumber,
                                          bonuses, comments, autoNumber, autoType,
-                                         price, currentStatus) => {
+                                         price, currentStatus, sale) => {
     const requestBody = {
         orders: orders,
         userContacts: userContacts,
         startTime: startTime,
+        sale: sale,
         endTime: endTime,
         administrator: administrator,
         specialist: specialist,

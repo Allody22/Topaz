@@ -83,7 +83,6 @@ public class FileServiceIml implements FileService {
             }
             String newFileName = status + "_v" + newVersion + "." + extension;
 
-
             Path targetPath = this.root.resolve(newFileName);
 
             Files.copy(file.getInputStream(), targetPath);

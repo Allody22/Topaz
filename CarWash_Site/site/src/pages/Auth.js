@@ -102,15 +102,24 @@ const Auth = observer(() => {
                 </Form>
 
             </Card>
-            <div
-
-                style={{
-                    display: 'flex', alignItems: "center", justifyContent: "center",
-                    textAlign: "left", fontFamily: "Arial, sans-serif",
-                    position: "absolute", bottom: "10px", width: "90%",
-                    height: "70px", backgroundColor: "white", color: "black",
-                    border: "1px solid black", boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.2)", padding: "10px",
-                }}>
+            <div style={{
+                display: 'flex',
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "left",
+                fontFamily: "Arial, sans-serif",
+                position: "absolute",
+                bottom: "10px",
+                width: "90%",
+                height: "auto", // Автоматическая высота, чтобы контейнер мог расширяться
+                minHeight: "70px", // Минимальная высота, которую мы хотели бы сохранить
+                backgroundColor: "white",
+                color: "black",
+                border: "1px solid black",
+                boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.2)",
+                padding: "10px",
+                marginBottom: "20px", // Отступ снизу для некоторого пространства между контейнером и нижним краем экрана или другим элементом
+            }}>
                 Если вы считаете, что у вас должны быть права, чтобы пользоваться этой страницей, но вы почему-то не
                 можете на неё зайти,
                 то, вам нужно обратиться к своему начальнику, чтобы он дал вам доступ. <br/>

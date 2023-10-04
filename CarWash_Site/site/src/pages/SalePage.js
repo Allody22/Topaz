@@ -11,7 +11,7 @@ import socketStore from "../store/SocketStore";
 import {BrowserRouter as Router} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
-import {uploadImage} from "../http/userAPI";
+import {getAllSales, uploadImage} from "../http/userAPI";
 import StatusFileMap from "../model/map/StatusFileMapFromEnd";
 import Modal from "react-bootstrap/Modal";
 import InputField from "../model/InputField";
@@ -123,6 +123,25 @@ const SalePage = observer(() => {
     const [status, setStatus] = useState("");
 
 
+    const [files, setFiles] = useState([]);
+
+    async function getAllImages() {
+        try {
+            const response = await getAllSales();
+            setFiles(response);
+        } catch (error) {
+            if (error.response) {
+                alert(error.response.data.message)
+            } else {
+                alert("Системная ошибка, попробуйте позже")
+            }
+        }
+    }
+
+    useEffect(() => {
+        getAllImages();
+    }, []);
+
     const newOrderMessage = (
         <Router>
             <Notification
@@ -156,8 +175,6 @@ const SalePage = observer(() => {
         }
     }, [socketStore.message]);
 
-
-    const [files, setFiles] = useState([]);
 
     useEffect(() => {
         if (saleStore?.error) {
@@ -203,13 +220,14 @@ const SalePage = observer(() => {
                 setStatus(null)
                 setUploadedFile(null)
                 handleRefreshDiscounts()
+                await getAllSales();
             } catch (error) {
                 if (error.response) {
                     let messages = [];
                     for (let key in error.response.data) {
                         messages.push(error.response.data[key]);
                     }
-                    setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                    setErrorResponse(messages.join(', '));
                     setErrorFlag(flag => !flag);
 
                 } else {
@@ -220,7 +238,6 @@ const SalePage = observer(() => {
             }
         }
     };
-
 
     const errorResponseMessage = (
         <Notification
@@ -267,7 +284,7 @@ const SalePage = observer(() => {
         setShowModal(true);
     };
 
-    const handleCloseModal = (file) => {
+    const handleCloseModal = () => {
         setDescription(null)
         setStatus(null)
         setUploadedFile(null)

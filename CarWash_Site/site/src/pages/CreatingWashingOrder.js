@@ -31,12 +31,6 @@ const styles = {
     marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
 };
 
-
-const inputStyle = {
-    fontWeight: 'bold', display: 'flex',
-    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
-}
-
 const CreatingWashingOrder = observer(() => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitTime, setSubmitTime] = useState(0);
@@ -69,6 +63,7 @@ const CreatingWashingOrder = observer(() => {
     const [selectedSaleDescription, setSelectedSaleDescription] = useState('');
     const [files, setFiles] = useState([]);
 
+    const [selectedFileId, setSelectedFileId] = useState(null);
 
     const [orderTime, setOrderTime] = useState(0);
     const [bonuses, setBonuses] = useState(0);
@@ -322,9 +317,7 @@ const CreatingWashingOrder = observer(() => {
 
         getAllService();
     }, []);
-
-    const history = useHistory()
-
+    useHistory();
     const newOrderMessage = (
         <Router>
             <Notification
@@ -409,7 +402,7 @@ const CreatingWashingOrder = observer(() => {
             const response = await createWashingOrder(selectedItems.map(i => i.replace(/ /g, '_')),
                 userContacts, requestStartTime.toISOString(), requestEndTime.toISOString(),
                 administrator, specialist, boxNumber, bonuses, comments,
-                carNumber, carType, price, currentOrderStatusMapFromRus[currentStatus]);
+                carNumber, carType, price, currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription);
 
             setSuccessResponse(null)
 
@@ -743,13 +736,12 @@ const CreatingWashingOrder = observer(() => {
 
                 <InputPicker
                     data={filesOptions}
-                    inputStyle={inputStyle}
                     style={{...styles, WebkitTextFillColor: "#000000"}}
-                    value={selectedSaleDescription}
+                    value={selectedFileId} // здесь изменено на selectedFileId
                     menuStyle={{fontSize: "17px"}}
-
                     onChange={(selectedValue) => {
                         const selectedFile = files.find(file => file.id === selectedValue);
+                        setSelectedFileId(selectedValue); // сохраняем ID файла
                         setSelectedSaleDescription(selectedFile.description);
                     }}
                 />

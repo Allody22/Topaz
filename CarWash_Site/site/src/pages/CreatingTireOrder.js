@@ -38,6 +38,7 @@ const CreatingTireOrder = observer(() => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitTime, setSubmitTime] = useState(0);
     const [showModal, setShowModal] = useState(false);
+    const [selectedFileId, setSelectedFileId] = useState(null);
 
     const [itemsCount, setItemsCount] = useState([{name: '', value: 0}]);
     const [newTime, setNewTime] = useState([{startTime: null, endTime: null, box: 0}]);
@@ -717,11 +718,11 @@ const CreatingTireOrder = observer(() => {
                 <InputPicker
                     data={filesOptions}
                     style={{...styles, WebkitTextFillColor: "#000000"}}
-                    value={selectedSaleDescription}
+                    value={selectedFileId} // здесь изменено на selectedFileId
                     menuStyle={{fontSize: "17px"}}
-
                     onChange={(selectedValue) => {
                         const selectedFile = files.find(file => file.id === selectedValue);
+                        setSelectedFileId(selectedValue); // сохраняем ID файла
                         setSelectedSaleDescription(selectedFile.description);
                     }}
                 />

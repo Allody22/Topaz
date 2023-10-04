@@ -52,6 +52,8 @@ const CreatingPolishingOrder = observer(() => {
     const [currentStatus, setCurrentStatus] = useState('');
     const [price, setPrice] = useState(0);
 
+    const [selectedFileId, setSelectedFileId] = useState(null);
+
 
     const [orderTime, setOrderTime] = useState(0);
     const [bonuses, setBonuses] = useState(0);
@@ -656,11 +658,11 @@ const CreatingPolishingOrder = observer(() => {
                 <InputPicker
                     data={filesOptions}
                     style={{...styles, WebkitTextFillColor: "#000000"}}
-                    value={selectedSaleDescription}
+                    value={selectedFileId} // здесь изменено на selectedFileId
                     menuStyle={{fontSize: "17px"}}
-
                     onChange={(selectedValue) => {
                         const selectedFile = files.find(file => file.id === selectedValue);
+                        setSelectedFileId(selectedValue); // сохраняем ID файла
                         setSelectedSaleDescription(selectedFile.description);
                     }}
                 />
