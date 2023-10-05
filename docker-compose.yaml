@@ -29,7 +29,7 @@ services:
       - POSTGRES_PASSWORD=NSU_UNIVERSITY_123_321_ZNAEM_VICHMAT
       - POSTGRES_USER=topaz_application
     volumes:
-      - misha-db-data:/var/lib/postgresql/data
+      - topaz-db-data:/var/lib/postgresql/data
 
   react_app:
     build:
@@ -50,4 +50,4 @@ networks:
     driver: bridge
 
 volumes:
-  misha-db-data:
+  topaz-db-data:
