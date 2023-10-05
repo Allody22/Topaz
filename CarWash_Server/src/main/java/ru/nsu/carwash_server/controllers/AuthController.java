@@ -2,6 +2,7 @@ package ru.nsu.carwash_server.controllers;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@Slf4j
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -111,7 +113,8 @@ public class AuthController {
         // Проверка ответа от SMS сервера
         if (smsResponse.getStatusCode() == HttpStatus.OK) {
             //Отслеживаем рандомное число так, чтобы не тратить деньги на смс
-            System.out.println("random number is: " + resultOfSmsCreating.getSecond());
+            log.info("generate_code_v1 .Random number is: " + resultOfSmsCreating.getSecond());
+
             String operationName = "User_get_phone_code";
             String descriptionMessage = "Номер телефона:'" + number + "' получил код:" + resultOfSmsCreating.getSecond();
             operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
@@ -133,6 +136,7 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         if (!userService.existByPhone(loginRequest.getPhone())) {
+            log.warn("SignIp_v1.LogIn failed: Phone " + loginRequest.getPhone() + " is not registered");
             return ResponseEntity.badRequest().body(new MessageResponse("Error: такого пользователя не существует!"));
         }
 
@@ -160,7 +164,7 @@ public class AuthController {
                 .type("Bearer")
                 .refreshToken(refreshToken.getToken())
                 .id(userDetails.getId())
-                .username(userDetails.getUsername())
+                .phone(userDetails.getUsername())
                 .fullName(userService.getActualUserVersionById(user.getId()).getFullName())
                 .roles(roles)
                 .build();
@@ -172,10 +176,12 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userService.existByPhone(signUpRequest.getPhone())) {
+            log.warn("SignUp_v1.Registration failed: Phone " + signUpRequest.getPhone() + " is already taken");
             return ResponseEntity.badRequest().body(new MessageResponse("Такой телефон уже занят!"));
         }
 
         if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(signUpRequest.getPhone()) + "")) {
+            log.warn("SignUp_v1.Registration failed: Confirmation code for phone " + signUpRequest.getPhone() + " does not match");
             return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
         }
 
@@ -197,6 +203,8 @@ public class AuthController {
         String operationName = "User_sign_up";
         String descriptionMessage = "Клиент с логином '" + signUpRequest.getPhone() + "' зарегистрировался";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+
+        log.info("SignUp_v1.User with phone " + signUpRequest.getPhone() + " registered successfully");
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
@@ -268,7 +276,7 @@ public class AuthController {
                 .type("Bearer")
                 .refreshToken(refreshToken.getToken())
                 .id(userDetails.getId())
-                .username(userDetails.getUsername())
+                .phone(userDetails.getUsername())
                 .roles(roles)
                 .build();
 

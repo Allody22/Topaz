@@ -1,8 +1,7 @@
 package ru.nsu.carwash_server.controllers;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,6 @@ import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
 import ru.nsu.carwash_server.models.secondary.constants.OrderTypes;
-import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
 import ru.nsu.carwash_server.payload.request.BookingTireOrderRequest;
@@ -50,6 +48,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @ControllerAdvice
+@Slf4j
 @RequestMapping("/api/orders/new")
 public class OrderCreatingController {
 
@@ -62,8 +61,6 @@ public class OrderCreatingController {
     private final OrderService orderService;
 
     private SimpMessagingTemplate simpMessagingTemplate;
-
-    private static final Logger logger = LoggerFactory.getLogger(OrderCreatingController.class);
 
     private final OperationsServiceIml operationsService;
 
@@ -92,14 +89,17 @@ public class OrderCreatingController {
     @PostMapping("/bookWashingOrder_v1")
     @SendTo(DestinationPrefixes.NOTIFICATIONS)
     public ResponseEntity<?> newWashingOrder(@Valid @RequestBody BookingWashingPolishingOrderRequest bookingOrderRequest) {
-
         if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
+            log.warn("bookWashingOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
+                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
         }
 
         if (bookingOrderRequest.getBoxNumber() < 1 || bookingOrderRequest.getBoxNumber() > 3) {
+            log.warn("bookWashingOrder_v1. Booking attempt failed: Box number {} cannot be used for washing.", bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Этот бокс не может быть использован для мойки"));
         }
+
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
 
@@ -140,6 +140,8 @@ public class OrderCreatingController {
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
+        log.info("bookWashingOrder_v1. User with phone '{}' booked a car wash order.", lastUserVersion.getPhone());
+
         return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
                 bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(),
                 bookingOrderRequest.getAdministrator(), bookingOrderRequest.getSpecialist(),
@@ -151,16 +153,14 @@ public class OrderCreatingController {
     @Transactional
     @PostMapping("/bookPolishingOrder_v1")
     public ResponseEntity<?> newPolishingOrder(@Valid @RequestBody BookingWashingPolishingOrderRequest bookingOrderRequest) {
-
-        logger.info("Processing new polishing order request for time: {} to {}", bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime());
-
         if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
-            logger.warn("Time is not available for box: {}", bookingOrderRequest.getBoxNumber());
+            log.warn("bookPolishingOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
+                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
-
         }
 
         if (bookingOrderRequest.getBoxNumber() != 5) {
+            log.warn("bookPolishingOrder_v1. Booking attempt failed: Box number {} cannot be used for polishing.", bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Этот бокс не может быть использован для полировки"));
         }
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -203,6 +203,8 @@ public class OrderCreatingController {
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
+        log.info("bookPolishingOrder_v1. User with phone '{}' booked a car wash order.", lastUserVersion.getPhone());
+
         return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
                 bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getAdministrator(),
                 bookingOrderRequest.getSpecialist(), bookingOrderRequest.getBoxNumber(), bookingOrderRequest.getAutoNumber(),
@@ -214,10 +216,13 @@ public class OrderCreatingController {
     @PostMapping("/bookTireOrder_v1")
     public ResponseEntity<?> newTireOrder(@Valid @RequestBody BookingTireOrderRequest bookingOrderRequest) {
         if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
+            log.warn("bookTireOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
+                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
         }
 
         if (bookingOrderRequest.getBoxNumber() != 0) {
+            log.warn("bookTireOrder_v1. Booking attempt failed: Box number {} cannot be used for tire.", bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Этот бокс не может быть использован для шиномонтажа"));
         }
 
@@ -262,7 +267,7 @@ public class OrderCreatingController {
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-
+        log.info("bookTireOrder_v1. User with phone '{}' booked a car wash order.", lastUserVersion.getPhone());
         return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
                 bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getAdministrator(),
                 bookingOrderRequest.getSpecialist(), bookingOrderRequest.getBoxNumber(), bookingOrderRequest.getAutoNumber(),
@@ -275,6 +280,8 @@ public class OrderCreatingController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<?> creatingWashingOrder(@Valid @RequestBody CreatingWashingOrder bookingOrderRequest) {
         if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
+            log.warn("createWashingOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
+                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
         }
 
@@ -315,7 +322,7 @@ public class OrderCreatingController {
         String descriptionMessage = "Админ с логином '" + user.getPhone() + "' создал заказ на автомойку";
 
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
-
+        log.info("createWashingOrder_v1. Admin with login '{}' created a car wash order.", user.getPhone());
 
         return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
                 orderVersions.getStartTime(), orderVersions.getEndTime(), orderVersions.getAdministrator(), bookingOrderRequest.getSpecialist(),
@@ -331,6 +338,8 @@ public class OrderCreatingController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<?> creatingPolishingOrder(@Valid @RequestBody CreatingPolishingOrder bookingOrderRequest) {
         if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
+            log.warn("createPolishingOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
+                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
         }
 
@@ -376,6 +385,8 @@ public class OrderCreatingController {
 
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
+        log.info("createPolishingOrder_v1. Admin with login '{}' created a polishing order.", user.getPhone());
+
         return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
                 newOrderVersion.getStartTime(), newOrderVersion.getEndTime(),
                 newOrderVersion.getAdministrator(), newOrderVersion.getSpecialist(),
@@ -390,6 +401,8 @@ public class OrderCreatingController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<?> createTireOrder(@Valid @RequestBody CreatingTireOrderRequest bookingOrderRequest) {
         if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
+            log.warn("createTireOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
+                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
             return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
         }
         if (bookingOrderRequest.getBoxNumber() != 0) {
@@ -433,6 +446,7 @@ public class OrderCreatingController {
         String descriptionMessage = "Админ с логином '" + user.getPhone() + "' создал заказ на шиномонтаж";
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
+        log.info("createTireOrder_v1. Admin with login '{}' created a tire order.", user.getPhone());
 
         return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
                 newOrderVersion.getStartTime(), newOrderVersion.getEndTime(), newOrderVersion.getAdministrator(),
@@ -492,154 +506,6 @@ public class OrderCreatingController {
         }
         return price;
     }
-
-    public TimeAndPrice polishingOrderPriceTime(List<String> orderArray, int bodyType) {
-        int price = 0;
-        int time = 15;
-        if (bodyType == 1) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceFirstType();
-                time += currentOrder.getTimeFirstType();
-            }
-        } else if (bodyType == 2) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceSecondType();
-                time += currentOrder.getTimeSecondType();
-            }
-
-        } else if (bodyType == 3) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceThirdType();
-                time += currentOrder.getTimeThirdType();
-            }
-        }
-        return new TimeAndPrice(time, price);
-    }
-
-
-    public TimeAndPrice washingOrderPriceTime(List<String> orderArray, int bodyType) {
-        int price = 0;
-        int time = 15;
-        if (bodyType == 1) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceFirstType();
-                time += currentOrder.getTimeFirstType();
-            }
-        } else if (bodyType == 2) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceSecondType();
-                time += currentOrder.getTimeSecondType();
-            }
-
-        } else if (bodyType == 3) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceThirdType();
-                time += currentOrder.getTimeThirdType();
-            }
-        }
-        return new TimeAndPrice(time, price);
-    }
-
-    public TimeAndPrice tireOrderTimePrice(List<String> orderArray, String wheelR) {
-        int price = 0;
-        int time = 15;
-        switch (wheelR) {
-            case "R13":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_13();
-                    time += currentOrder.getTime_r_13();
-                }
-                break;
-            case "R14":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_14();
-                    time += currentOrder.getTime_r_14();
-                }
-                break;
-            case "R15":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_15();
-                    time += currentOrder.getTime_r_15();
-                }
-                break;
-            case "R16":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_16();
-                    time += currentOrder.getTime_r_16();
-                }
-                break;
-            case "R17":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_17();
-                    time += currentOrder.getTime_r_17();
-                }
-                break;
-            case "R18":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_18();
-                    time += currentOrder.getTime_r_18();
-                }
-                break;
-            case "R19":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_19();
-                    time += currentOrder.getTime_r_19();
-                }
-                break;
-            case "R20":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_20();
-                    time += currentOrder.getTime_r_20();
-                }
-                break;
-            case "R21":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_21();
-                    time += currentOrder.getTime_r_21();
-                }
-                break;
-            case "R22":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_22();
-                    time += currentOrder.getTime_r_22();
-                }
-                break;
-        }
-        return new TimeAndPrice(time, price);
-    }
-
 
     public int tireOrderPrice(List<String> orderArray, String wheelR) {
         int price = 0;

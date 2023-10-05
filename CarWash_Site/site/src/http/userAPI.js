@@ -38,7 +38,7 @@ export const uploadImage = async (file, description, status) => {
     };
 
     try {
-        const response = await $authHost.post('/api/files/upload', formData, config);
+        const response = await $authHost.post('/api/files/upload_file_v1', formData, config);
         return response.data;
     } catch (error) {
         console.error("Ошибка при загрузке изображения:", error);

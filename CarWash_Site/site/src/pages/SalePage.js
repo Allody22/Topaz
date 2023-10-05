@@ -127,6 +127,7 @@ const SalePage = observer(() => {
 
     async function getAllImages() {
         try {
+            setStatus("Акция на понедельник")
             const response = await getAllSales();
             setFiles(response);
         } catch (error) {

@@ -1,5 +1,6 @@
 package ru.nsu.carwash_server.advice;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
@@ -19,6 +20,7 @@ import java.util.Map;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @Autowired
@@ -34,12 +36,14 @@ public class GlobalExceptionHandler {
             String errorMessage = messageSource.getMessage(error, locale);
             errors.put(fieldName, errorMessage);
         });
+        log.error("Validation exception occurred: {}", ex.getMessage());
         return errors;
     }
 
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     public ErrorResponse onThrowable(final Throwable e) {
+        log.error("Unexpected server error", e);
         return ErrorResponse.builder().error("Неожиданная ошибка на сервере: " + e.getMessage()).build();
     }
 }

@@ -2,6 +2,7 @@ package ru.nsu.carwash_server.controllers;
 
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +36,7 @@ import java.util.StringJoiner;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@Slf4j
 @RequestMapping("/api/admin/services")
 @AllArgsConstructor
 public class ServiceChangingController {
@@ -77,6 +79,7 @@ public class ServiceChangingController {
         String operationName = "Create_new_service_by_admin";
         User user = userService.getFullUserById(userId);
 
+        String userPhone = userService.getActualUserVersionById(userId).getPhone();
         switch (newServiceRequest.getServiceType()) {
             case "wash" -> {
                 StringJoiner joiner = new StringJoiner(";");
@@ -121,6 +124,7 @@ public class ServiceChangingController {
                         newTimeFirstType + newTimeSecondType + newTimeThirdType;
 
                 operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+                log.info("createNewService_v1. User with phone '{}' created new washing service.", userPhone);
 
                 return (ResponseEntity.ok(response));
             }
@@ -153,6 +157,7 @@ public class ServiceChangingController {
                 String descriptionMessage = "Создана услуга шиномонтажа'" + newServiceRequest.getName().replace("_", " ");
 
                 operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+                log.info("createNewService_v1. User with phone '{}' created new tire service.", userPhone);
 
                 return (ResponseEntity.ok(response));
 
@@ -193,6 +198,8 @@ public class ServiceChangingController {
                         newTimeFirstType + newTimeSecondType + newTimeThirdType;
                 operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
+                log.info("createNewService_v1. User with phone '{}' created new polishing service.", userPhone);
+
                 return (ResponseEntity.ok(response));
             }
         }
@@ -215,7 +222,7 @@ public class ServiceChangingController {
 
 
             User user = userService.getFullUserById(userId);
-
+            String userPhone = userService.getActualUserVersionById(userId).getPhone();
             String operationName = "Update_washing_service_by_admin";
 
             String newPriceFirstType = (updateWashingServiceRequest.getPriceFirstType() != null) ?
@@ -241,6 +248,8 @@ public class ServiceChangingController {
                     + "' получила " + newPriceFirstType + newPriceSecondType + newPriceThirdType +
                     newTimeFirstType + newTimeSecondType + newTimeThirdType;
 
+            log.info("updateWashingService_v1. User with phone '{}' updated washing service.", userPhone);
+
             operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
             return ResponseEntity.ok(new MessageResponse(descriptionMessage));
@@ -264,6 +273,8 @@ public class ServiceChangingController {
                     updatePolishingServiceRequest.getTimeThirdType());
 
             User user = userService.getFullUserById(userId);
+
+            String userPhone = userService.getActualUserVersionById(userId).getPhone();
 
             String operationName = "Update_polishing_service_by_admin";
 
@@ -291,6 +302,7 @@ public class ServiceChangingController {
                     newTimeFirstType + newTimeSecondType + newTimeThirdType;
 
             operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+            log.info("updatePolishingService_v1. User with phone '{}' updated polishing service.", userPhone);
 
             return ResponseEntity.ok(new MessageResponse("Услуга " + updatePolishingServiceRequest.getName().replace("_", " ") + " изменена"));
         } else {
@@ -322,11 +334,13 @@ public class ServiceChangingController {
             String operationName = "Update_tire_service_by_admin";
 
             User user = userService.getFullUserById(userId);
+            String userPhone = userService.getActualUserVersionById(userId).getPhone();
 
             String descriptionMessage = "Услуга '" + updateTireServiceRequest.getName().replace("_", " ")
                     + "' изменена";
 
             operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+            log.info("updatePolishingService_v1. User with phone '{}' updated tire service.", userPhone);
 
             return ResponseEntity.ok(new MessageResponse("Услуга " + updateTireServiceRequest.getName().replace("_", " ") + " изменена"));
         } else {

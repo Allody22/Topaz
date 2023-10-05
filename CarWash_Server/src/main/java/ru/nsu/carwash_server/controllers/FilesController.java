@@ -1,5 +1,6 @@
 package ru.nsu.carwash_server.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +34,7 @@ import java.util.Set;
 
 @Controller
 @CrossOrigin(origins = "*", maxAge = 3600)
+@Slf4j
 @RequestMapping("/api/files")
 public class FilesController {
 
@@ -43,7 +45,7 @@ public class FilesController {
         this.fileService = fileService;
     }
 
-    @PostMapping("/upload")
+    @PostMapping("/upload_file_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<?> uploadImage(@Valid @RequestParam("file") MultipartFile file,
@@ -57,6 +59,9 @@ public class FilesController {
                 StandardCharsets.UTF_8);
 
         fileService.saveByStatus(file, decodedDescription, decodedStatus);
+
+        log.info("upload_file_v1.Image with description: '" + decodedDescription +
+                "'. And status: '" + decodedStatus + " 'successfully uploaded");
 
         return ResponseEntity.ok(new MessageResponse("Изображение успешно добавлено"));
     }

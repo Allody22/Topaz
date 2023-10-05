@@ -13,7 +13,7 @@ public class UpdateUserPasswordRequest {
 
     private String password = null;
 
-    private String username = null;
+    private String phone = null;
 
     private String secretCode = null;
 

@@ -2,13 +2,13 @@ package ru.nsu.carwash_server.controllers;
 
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,7 +54,7 @@ import java.util.Objects;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@ControllerAdvice
+@Slf4j
 @RequestMapping("/api/orders/management")
 @AllArgsConstructor
 public class OrderManagementController {
@@ -89,7 +89,7 @@ public class OrderManagementController {
 
     @PostMapping("/deleteOrder_v1")
     @Transactional
-    public ResponseEntity<?> deleteOrder(@Valid @RequestParam(name = "orderId", required = true) Long id) {
+    public ResponseEntity<?> deleteOrder(@Valid @RequestParam(name = "orderId") Long id) {
         var order = orderServiceImp.findById(id);
         if (order != null) {
             Pair<Boolean, String> result = orderServiceImp.deleteOrder(id);
@@ -108,6 +108,8 @@ public class OrderManagementController {
             String operationName = "Delete_order";
             String descriptionMessage = "Заказ с айди'" + id + "' отменён";
             operationsService.SaveUserOperation(operationName, userLatestVersion.getUser(), descriptionMessage, 1);
+
+            log.info("deleteOrder_v1. User with phone '{}' cancelled order with id '{}'.", userLatestVersion.getPhone(), id);
 
             return ResponseEntity.ok(new MessageResponse("Заказ с айди " + id.toString() + " успешно удалён"));
         } else {
@@ -205,6 +207,8 @@ public class OrderManagementController {
                 newWheelR + newUserPhone + newOrderType + newPrice + newStartTime + newEndTime +
                 newAdministrator + newAutoType + newAutoNumber + newSpecialist + newBoxNumber +
                 newBoxNumber + newComments + newOrders + newCurrentStatus;
+
+        log.info("updateOrderInfo_v1. User with phone '{}' updated order with id '{}'.", userLatestVersion.getPhone(), updateOrderInfoRequest.getOrderId());
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
@@ -491,15 +495,9 @@ public class OrderManagementController {
     public ResponseEntity<?> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
         TimeAndPrice timeAndPrice = new TimeAndPrice(0, 0);
         switch (ordersArrayPriceTimeRequest.getOrderType()) {
-            case "wash" -> {
-                timeAndPrice = washingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
-            }
-            case "tire" -> {
-                timeAndPrice = tireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
-            }
-            case "polishing" -> {
-                timeAndPrice = polishingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
-            }
+            case "wash" -> timeAndPrice = washingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+            case "tire" -> timeAndPrice = tireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
+            case "polishing" -> timeAndPrice = polishingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
         }
         return ResponseEntity.ok(new TimeAndPriceResponse(timeAndPrice.getPrice(), timeAndPrice.getTime()));
     }

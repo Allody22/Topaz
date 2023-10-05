@@ -1,6 +1,7 @@
 package ru.nsu.carwash_server.controllers;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@Slf4j
 @RequestMapping("/api/admin/users")
 public class AdminController {
 
@@ -118,7 +120,6 @@ public class AdminController {
         var latestUserVersion = userService.getActualUserVersionByPhone(updateUserInfoRequest.getPhone());
 
         User user = latestUserVersion.getUser();
-        Long userId = user.getId();
         Set<Role> roles;
         Set<String> strRoles = updateUserInfoRequest.getRoles();
 
@@ -154,6 +155,8 @@ public class AdminController {
         String descriptionMessage = getString(updateUserInfoRequest, newVersion);
 
         operationsService.SaveUserOperation(operationName, userAdmin.getUser(), descriptionMessage, 1);
+
+        log.info("updateUserInfo_v1 By Admin '{}'. User with phone '{}' now with new profile.", userAdmin.getPhone(), updateUserInfoRequest.getPhone());
 
         return ResponseEntity.ok(new MessageResponse(descriptionMessage));
     }

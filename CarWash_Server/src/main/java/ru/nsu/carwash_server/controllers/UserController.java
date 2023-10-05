@@ -1,5 +1,6 @@
 package ru.nsu.carwash_server.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@Slf4j
 @RequestMapping("/api/user")
 public class UserController {
 
@@ -65,7 +67,7 @@ public class UserController {
     public ResponseEntity<?> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
 
         if (!updateUserPasswordRequest.getSecretCode().equals(operationsService
-                .getLatestCodeByPhoneNumber(updateUserPasswordRequest.getUsername()) + "")) {
+                .getLatestCodeByPhoneNumber(updateUserPasswordRequest.getPhone()) + "")) {
             return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
         }
 
@@ -74,18 +76,19 @@ public class UserController {
 
         User user = userService.getFullUserById(userId);
 
-        var latestUserVersion = userService.getActualUserVersionByPhone(updateUserPasswordRequest.getUsername());
+        var latestUserVersion = userService.getActualUserVersionByPhone(updateUserPasswordRequest.getPhone());
 
-        UserVersions newVersion = new UserVersions(latestUserVersion, updateUserPasswordRequest.getPassword(), updateUserPasswordRequest.getUsername());
+        UserVersions newVersion = new UserVersions(latestUserVersion, updateUserPasswordRequest.getPassword(), updateUserPasswordRequest.getPhone());
         user.addUserVersion(newVersion);
 
         String operationName = "Update_user_info_by_user";
 
-        String descriptionMessage = "Пользователь " + updateUserPasswordRequest.getUsername() + " получил новый пароль";
+        String descriptionMessage = "Пользователь " + updateUserPasswordRequest.getPhone() + " получил новый пароль";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
+        log.info("updateUserPassword_v1. User with phone '{}' updated password.", updateUserPasswordRequest.getPhone());
         return ResponseEntity.ok(new MessageResponse("Пользователь с айди '" + userId
-                + "' с телефоном " + updateUserPasswordRequest.getUsername() + "обновил пароль или телефон"));
+                + "' с телефоном " + updateUserPasswordRequest.getPhone() + "обновил пароль или телефон"));
     }
 
     @Transactional
@@ -128,6 +131,7 @@ public class UserController {
 
         String descriptionMessage = getString(updateUserInfoRequest, newVersion.getPhone());
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+        log.info("updateUserInfo_v1. User with phone '{}' updated his profile.", updateUserInfoRequest.getPhone());
 
         return ResponseEntity.ok(new MessageResponse("Пользователь с айди '" + userId
                 + "' и с телефоном " + updateUserInfoRequest.getPhone() + "изменил информацию о себе"));
