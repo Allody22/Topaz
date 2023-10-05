@@ -12,6 +12,6 @@ public class NotInDataBaseException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public NotInDataBaseException(String message, String name) {
-        super(String.format("В базе данных " + message + name, message, name));
+        super(String.format("Ошибка! В базе данных " + message + name, message, name));
     }
 }

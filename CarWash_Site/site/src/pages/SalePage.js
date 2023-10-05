@@ -46,9 +46,9 @@ const modalText = {
     fontSize: '18px',
     maxWidth: '100%',
     display: 'flex',
-    justifyContent: 'center', // заменено на camelCase
-    alignItems: 'center',     // заменено на camelCase
-    textAlign: 'center'      // заменено на camelCase
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center'
 };
 
 const confirmationStyle = {
@@ -120,14 +120,13 @@ const SalePage = observer(() => {
     const [uploadedFile, setUploadedFile] = useState(null);
 
     const [description, setDescription] = useState("");
-    const [status, setStatus] = useState("");
 
+    const [status, setStatus] = useState("");
 
     const [files, setFiles] = useState([]);
 
     async function getAllImages() {
         try {
-            setStatus("Акция на понедельник")
             const response = await getAllSales();
             setFiles(response);
         } catch (error) {
@@ -217,8 +216,8 @@ const SalePage = observer(() => {
             try {
                 const response = await uploadImage(uploadedFile, description, StatusFileMapFromRus[status]);
                 setSuccessResponse(response.message)
-                setDescription(null)
-                setStatus(null)
+                setDescription("")
+                setStatus("")
                 setUploadedFile(null)
                 handleRefreshDiscounts()
                 await getAllSales();
@@ -280,14 +279,19 @@ const SalePage = observer(() => {
     }, [successResponse]);
 
     const handleOpenModal = (file) => {
-        setDescription(file.description)
-        setStatus(file.status)
+        if (file) {
+            setDescription(file.description);
+            setStatus(StatusFileMap[file.status])
+        } else {
+            setDescription("");
+            setStatus("");
+        }
         setShowModal(true);
     };
 
+
     const handleCloseModal = () => {
-        setDescription(null)
-        setStatus(null)
+        setDescription("")
         setUploadedFile(null)
         setShowModal(false);
     };
@@ -355,6 +359,7 @@ const SalePage = observer(() => {
                         <Modal.Title>Информация о новой версии файла</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
+
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
@@ -366,7 +371,9 @@ const SalePage = observer(() => {
                                 marginRight: 'auto',
                                 marginTop: 10,
                                 WebkitTextFillColor: "#000000"
-                            }}>
+                            }}
+                        >
+                            <option value="" disabled selected>ВЫБРАТЬ ДЕНЬ</option>
                             {saleDay.map((item) => (
                                 <option key={item.value} value={item.value}>
                                     {item.label}
@@ -381,8 +388,8 @@ const SalePage = observer(() => {
                             value={description}
                             onChange={setDescription}
                         />
-                        <input type="file" onChange={handleFileChange} style={inputFileStyle}/>
 
+                        <input type="file" onChange={handleFileChange} style={inputFileStyle}/>
                         {uploadedFile ? <img src={URL.createObjectURL(uploadedFile)} alt="Uploaded"
                                              style={{width: '100%', margin: '20px 0'}}/> : null}
 

@@ -16,15 +16,11 @@ const InputField = ({label, id, value, onChange, className, style}) => {
         setHasValue(value !== "");
     };
 
-    // Объект стилей для <input>
     const inputStyle = {
         fontSize: '17px',
-        border: '1px solid #000', // Жирная рамка вокруг поля для ввода текста
-        padding: '5px 10px', // Добавляем отступ вокруг текста внутри поля
-        ...style, // Объединяем с переданными стилями
-
-        // Дополнительные стили по вашему усмотрению
-        // Например, можно добавить стили для фокусированного input
+        border: '1px solid #000',
+        padding: '5px 10px',
+        ...style,
     };
 
     return (

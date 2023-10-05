@@ -103,7 +103,7 @@ public class FileServiceIml implements FileService {
             fileRepository.save(entity);
         } catch (Exception e) {
             if (e instanceof FileAlreadyExistsException) {
-                throw new RuntimeException("A file of that name already exists.");
+                throw new RuntimeException("Файл с таким именем уже существует.");
             }
 
             throw new RuntimeException(e.getMessage());

@@ -34,30 +34,30 @@
 }
 
 
-.transparent-button {
-    background-color: transparent;
-    display: block;
-    border: none;
-    color: #333; /* измените цвет текста на ваши нужды */
-    font-weight: bold; /* измените стиль текста на ваши нужды */
-    font-size: 17px;
-    /* центрируем блок по горизонтали */
-    justify-content: center;
-    align-items: center;
-    margin: 15px auto 0;
-}
+/*.transparent-button {*/
+/*    background-color: transparent;*/
+/*    display: block;*/
+/*    border: none;*/
+/*    color: #333; !* измените цвет текста на ваши нужды *!*/
+/*    font-weight: bold; !* измените стиль текста на ваши нужды *!*/
+/*    font-size: 17px;*/
+/*    !* центрируем блок по горизонтали *!*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    margin: 15px auto 0;*/
+/*}*/
 
-.my-button {
-    background-color: transparent;
-    border: none;
-    display: flex;
-    font-size: 17px;
-    font-weight: bold;
-    justify-content: center;
-    align-items: center;
-    margin-top: 15px;
-    color: #333;
-}
+/*.my-button {*/
+/*    background-color: transparent;*/
+/*    border: none;*/
+/*    display: flex;*/
+/*    font-size: 17px;*/
+/*    font-weight: bold;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    margin-top: 15px;*/
+/*    color: #333;*/
+/*}*/
 
 .MyTable th {
     background-color: #4CAF50;

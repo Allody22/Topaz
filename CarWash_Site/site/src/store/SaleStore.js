@@ -1,38 +1,53 @@
-import {action, makeAutoObservable} from "mobx";
+import {makeAutoObservable} from "mobx";
 import {getAllSales} from "../http/userAPI";
 
 class SaleStore {
     discounts = [];
     isLoading = false;
     error = null;
-    loadDiscounts = action(async () => {
-        this.isLoading = true;
-        this.error = null;
+
+    constructor() {
+        makeAutoObservable(this);
+    }
+
+    loadDiscounts = async () => {
+        this.setLoading(true);
+        this.setError(null);
 
         try {
             const response = await getAllSales();
-            this.discounts = response.map(sale => ({
+            this.setDiscounts(response.map(sale => ({
                 name: sale.name,
                 description: sale.description
-            }));
+            })));
 
         } catch (error) {
+            let errorMessage = "Системная ошибка, попробуйте позже.";
+
             if (error.response) {
                 let messages = [];
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                this.error = messages.join(', '); // Обновляем свойство error
-            } else {
-                this.error = "Системная ошибка, попробуйте позже.";
+                errorMessage = messages.join(', ');
             }
-        } finally {
-            this.isLoading = false;
-        }
-    });
 
-    constructor() {
-        makeAutoObservable(this);
+            this.setError(errorMessage);
+        } finally {
+            this.setLoading(false);
+        }
+    };
+
+    setDiscounts(discounts) {
+        this.discounts = discounts;
+    }
+
+    setLoading(isLoading) {
+        this.isLoading = isLoading;
+    }
+
+    setError(error) {
+        this.error = error;
     }
 
     refreshDiscounts = () => {

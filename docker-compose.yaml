@@ -16,6 +16,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/topaz_application
       - POSTGRES_USER=topaz_application
       - POSTGRES_PASSWORD=NSU_UNIVERSITY_123_321_ZNAEM_VICHMAT
+    volumes:
+      - ./CarWash_Server/uploads:/uploads
+
   db:
     image: postgres:13.7-alpine
     container_name: topaz-db

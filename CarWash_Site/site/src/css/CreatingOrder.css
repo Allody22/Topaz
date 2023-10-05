@@ -68,13 +68,13 @@
     opacity: 0.5;
 }
 
-.my-custom-class .modal-content {
-    width: 600px;
-}
+/*.my-custom-class .modal-content {*/
+/*    width: 600px;*/
+/*}*/
 
-.custom-modal {
-    width: 600px;
-}
+/*.custom-modal {*/
+/*    width: 600px;*/
+/*}*/
 
 .input-container {
     display: flex; /* задаем display: flex для flexbox layout'а */
@@ -85,32 +85,32 @@
     margin: 0 auto 1rem;
 }
 
-.dropdown-menu-custom {
-    position: absolute;
-    top: 40px;
-    left: 0;
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-    background-color: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    padding: 0.5rem 0;
-    z-index: 1000;
-}
+/*.dropdown-menu-custom {*/
+/*    position: absolute;*/
+/*    top: 40px;*/
+/*    left: 0;*/
+/*    width: 100%;*/
+/*    max-height: 200px;*/
+/*    overflow-y: auto;*/
+/*    background-color: #fff;*/
+/*    border: 1px solid rgba(0, 0, 0, 0.15);*/
+/*    padding: 0.5rem 0;*/
+/*    z-index: 1000;*/
+/*}*/
 
-/*
-Текст внутри имен заказов (то есть их имена)
- */
-.checkbox-custom {
-    display: flex;
-    align-items: center;
-    margin: 0.25rem 1rem;
-    cursor: pointer;
-}
+/*!**/
+/*Текст внутри имен заказов (то есть их имена)*/
+/* *!*/
+/*.checkbox-custom {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    margin: 0.25rem 1rem;*/
+/*    cursor: pointer;*/
+/*}*/
 
-.checked .checkmark {
-    background-color: #17A2B8;
-}
+/*.checked .checkmark {*/
+/*    background-color: #17A2B8;*/
+/*}*/
 
 /*
 Отображение полученной цены и времени
@@ -129,14 +129,14 @@
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.price-label,
-.order-time-label {
-    margin: 5px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    border-radius: 5px;
-}
+/*.price-label,*/
+/*.order-time-label {*/
+/*    margin: 5px;*/
+/*    padding: 5px;*/
+/*    border: 1px solid #ccc;*/
+/*    background-color: #fff;*/
+/*    border-radius: 5px;*/
+/*}*/
 
 /*
 Текст внутри модульного окна с типами заказов

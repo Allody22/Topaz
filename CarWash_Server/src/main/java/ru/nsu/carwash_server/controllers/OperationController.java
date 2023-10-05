@@ -86,7 +86,6 @@ public class OperationController {
             if (thisOperation.getUser() != null) {
                 currentOperation.setUsername(userService.getActualUserVersionById(thisOperation.getUser().getId()).getPhone());
             } else {
-                // Устанавливаем какое-либо значение по умолчанию или просто пропускаем
                 currentOperation.setUsername("Не зарегистрирован");
             }
             allOperationsInThisTime.add(currentOperation);

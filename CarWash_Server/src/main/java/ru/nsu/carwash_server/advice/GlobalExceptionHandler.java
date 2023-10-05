@@ -23,8 +23,12 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    GlobalExceptionHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -43,7 +47,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     public ErrorResponse onThrowable(final Throwable e) {
-        log.error("Unexpected server error", e);
+        log.error("Unexpected server error '{}'", e.toString());
         return ErrorResponse.builder().error("Неожиданная ошибка на сервере: " + e.getMessage()).build();
     }
 }

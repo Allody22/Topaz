@@ -495,9 +495,12 @@ public class OrderManagementController {
     public ResponseEntity<?> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
         TimeAndPrice timeAndPrice = new TimeAndPrice(0, 0);
         switch (ordersArrayPriceTimeRequest.getOrderType()) {
-            case "wash" -> timeAndPrice = washingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
-            case "tire" -> timeAndPrice = tireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
-            case "polishing" -> timeAndPrice = polishingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+            case "wash" ->
+                    timeAndPrice = washingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+            case "tire" ->
+                    timeAndPrice = tireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
+            case "polishing" ->
+                    timeAndPrice = polishingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
         }
         return ResponseEntity.ok(new TimeAndPriceResponse(timeAndPrice.getPrice(), timeAndPrice.getTime()));
     }

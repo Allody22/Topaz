@@ -1,7 +1,6 @@
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
-import {action, makeAutoObservable} from "mobx";
-import {getOrdersCreatedInOneDay} from "../http/orderAPI";
+import {makeAutoObservable} from "mobx";
 
 class SocketStore {
     socket = null;
@@ -20,7 +19,7 @@ class SocketStore {
             const socket = new SockJS(baseUrl + 'websockets');
             this.stompClient = Stomp.over(socket);
 
-            this.stompClient.connect({}, (frame) => {
+            this.stompClient.connect({}, () => {
                 this.isConnected = true;
 
                 this.stompClient.subscribe('/notifications/newOrder', (message) => {
@@ -29,34 +28,9 @@ class SocketStore {
                     this.message = messageFromServer;
                 });
 
-                // Вызовите этот метод после установления соединения
-                this.getOrdersCreatedAtThisDay();
             });
         }
     }
-
-    getOrdersCreatedAtThisDay = async () => {
-        const currentDate = new Date();
-
-        const startTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-        const endTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1);
-
-        endTime.setMilliseconds(endTime.getMilliseconds() - 1);
-        try {
-            const response = await getOrdersCreatedInOneDay(startTime.toISOString(), endTime.toISOString());
-            for (let i = 0; i < response.length; i++) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                action(() => {
-                    this.isAlreadyShown = true;
-                    this.message = JSON.stringify(response[i]);
-                })();
-            }
-        } catch (error) {
-            if (error.response) {
-                console.log(error)
-            }
-        }
-    };
 
     disconnect() {
         if (this.isConnected) {

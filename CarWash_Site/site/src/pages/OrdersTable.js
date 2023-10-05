@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import '../css/MyTable.css';
-import '../css/DatePicker.css';
 import {useSortBy, useTable} from 'react-table';
 import {format, parseISO} from 'date-fns';
 import {getNotMadeOrders, getOrdersBookedInOneDay, getOrdersCreatedInOneDay} from "../http/orderAPI";

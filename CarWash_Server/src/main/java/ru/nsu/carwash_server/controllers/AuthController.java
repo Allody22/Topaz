@@ -100,7 +100,7 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
         if (userService.existByPhone(number)) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: телефон уже занят!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Телефон уже занят!"));
         }
         String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
 
@@ -113,12 +113,14 @@ public class AuthController {
         // Проверка ответа от SMS сервера
         if (smsResponse.getStatusCode() == HttpStatus.OK) {
             //Отслеживаем рандомное число так, чтобы не тратить деньги на смс
-            log.info("generate_code_v1 .Random number is: " + resultOfSmsCreating.getSecond());
+            log.info("generate_code_v1 .Random number is: '{}'", resultOfSmsCreating.getSecond());
 
             String operationName = "User_get_phone_code";
             String descriptionMessage = "Номер телефона:'" + number + "' получил код:" + resultOfSmsCreating.getSecond();
             operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
         } else {
+            log.warn("generate_code_v1 .SmsInt failure");
+
             return ResponseEntity.badRequest().body(new MessageResponse("Ошибка на стороне сервера для отправки смс: "
                     + smsResponse.getBody()));
         }
@@ -136,8 +138,8 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         if (!userService.existByPhone(loginRequest.getPhone())) {
-            log.warn("SignIp_v1.LogIn failed: Phone " + loginRequest.getPhone() + " is not registered");
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: такого пользователя не существует!"));
+            log.warn("SignIp_v1.LogIn failed: Phone '{}' is not registered", loginRequest.getPhone());
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Такого пользователя не существует!"));
         }
 
         Authentication authentication = authenticationManager
@@ -153,10 +155,6 @@ public class AuthController {
                 .collect(Collectors.toList());
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-
-        String operationName = "User_sign_in";
-        String descriptionMessage = "Пользователь с логином '" + loginRequest.getPhone() + "' зашёл в аккаунт";
-        operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         JwtResponse jwtResponse = JwtResponse
                 .builder()
@@ -176,12 +174,12 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userService.existByPhone(signUpRequest.getPhone())) {
-            log.warn("SignUp_v1.Registration failed: Phone " + signUpRequest.getPhone() + " is already taken");
+            log.warn("SignUp_v1.Registration failed: Phone '{}' is already taken", signUpRequest.getPhone());
             return ResponseEntity.badRequest().body(new MessageResponse("Такой телефон уже занят!"));
         }
 
         if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(signUpRequest.getPhone()) + "")) {
-            log.warn("SignUp_v1.Registration failed: Confirmation code for phone " + signUpRequest.getPhone() + " does not match");
+            log.warn("SignUp_v1.Registration failed: Confirmation code for phone '{}'  does not match", signUpRequest.getPhone());
             return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
         }
 
@@ -204,7 +202,7 @@ public class AuthController {
         String descriptionMessage = "Клиент с логином '" + signUpRequest.getPhone() + "' зарегистрировался";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-        log.info("SignUp_v1.User with phone " + signUpRequest.getPhone() + " registered successfully");
+        log.info("SignUp_v1.User with phone '{}' registered successfully", signUpRequest.getPhone());
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
@@ -249,7 +247,7 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> signInAdmin(@Valid @RequestBody LoginRequest loginRequest) {
         if (!userService.existByPhone(loginRequest.getPhone())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: такого пользователя не существует!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Такого пользователя не существует!"));
         }
 
         Authentication authentication = authenticationManager
@@ -263,7 +261,7 @@ public class AuthController {
                 .collect(Collectors.toList());
 
         if (!roles.contains("ROLE_ADMIN") || !roles.contains("ROLE_MODERATOR") || !roles.contains("ROLE_ADMINISTRATOR")) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Не достаточно прав!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: Не достаточно прав!"));
         }
 
         String jwt = jwtUtils.generateJwtToken(userDetails);

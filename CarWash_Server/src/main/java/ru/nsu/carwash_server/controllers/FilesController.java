@@ -60,8 +60,7 @@ public class FilesController {
 
         fileService.saveByStatus(file, decodedDescription, decodedStatus);
 
-        log.info("upload_file_v1.Image with description: '" + decodedDescription +
-                "'. And status: '" + decodedStatus + " 'successfully uploaded");
+        log.info("upload_file_v1.Image with description: '{}' and status: '{}' successfully uploaded", decodedDescription, decodedStatus);
 
         return ResponseEntity.ok(new MessageResponse("Изображение успешно добавлено"));
     }
@@ -133,14 +132,14 @@ public class FilesController {
             boolean existed = fileService.delete(filename);
 
             if (existed) {
-                message = "Delete the file successfully: " + filename;
+                message = "Удаление файла прошло успешно: " + filename;
                 return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse(message));
             }
 
-            message = "The file does not exist!";
+            message = "Такой файл не существует!";
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse(message));
         } catch (Exception e) {
-            message = "Could not delete the file: " + filename + ". Error: " + e.getMessage();
+            message = "Невозможно удалить файл: " + filename + ". Ошибка: " + e.getMessage();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse(message));
         }
     }
