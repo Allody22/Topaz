@@ -8,8 +8,6 @@ import {DatePicker, Divider, InputNumber, InputPicker, Notification, useToaster}
 import addDays from 'date-fns/addDays';
 
 import 'rsuite/dist/rsuite.css';
-
-import Modal from "react-bootstrap/Modal";
 import InputField from "../model/InputField";
 import {createWashingOrder, getAllWashingServicesWithPriceAndTime, getPriceAndFreeTime,} from "../http/orderAPI";
 import socketStore from "../store/SocketStore";
@@ -21,6 +19,7 @@ import currentOrderStatusMapFromRus from "../model/map/CurrentOrderStatusMapFrom
 import InputFieldNear from "../model/InputFieldNear";
 import saleStore from "../store/SaleStore";
 import {carTypesArray, orderStatusArray} from "../model/Constants";
+import MyCustomModal from "../model/MyCustomModal";
 
 const stylesForInput = {
     width: 190, marginBottom: 10, marginTop: 5
@@ -485,19 +484,14 @@ const CreatingWashingOrder = observer(() => {
             <p className="input-style-modified">Страница добавления заказов на мойку</p>
             <p className="small-input-style">Здесь вы можете сами создать какой-то заказ мойки на автомойку из всех
                 актуальных услуг, а потом получить всю информацию о нём</p>
-            <p className="small-input-style"> &nbsp;<strong>Обязательно</strong>&nbsp;выберите все элементы с красными
+            <p className="small-input-style"><strong>Обязательно</strong> выберите все элементы с красными
                 под красным текстом</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
                 Основные услуги
             </Button>
-            <Modal show={showModal}
-                   onHide={handleCloseModal}
-                   dialogClassName="custom-modal-dialog">
-                <Modal.Header closeButton>
-                    <Modal.Title>Выберите заказы</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
+            <MyCustomModal show={showModal} handleClose={handleCloseModal} title="Выберите заказы">
+                <div style={{overflowY: 'auto', maxHeight: '80vh'}}>
                     {mainOrders.map(item => (
                         <div key={item.name} style={{
                             fontSize: '16px', borderBottom: '1px solid lightgray',
@@ -531,24 +525,19 @@ const CreatingWashingOrder = observer(() => {
                             </div>
                         </div>
                     ))}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant='secondary' onClick={handleCloseModal}>
-                        Закрыть
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+                </div>
+            </MyCustomModal>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModalB}>
                 Дополнительные услуги
             </Button>
-            <Modal show={showModalB}
-                   onHide={handleCloseModalB}
-                   dialogClassName="custom-modal-dialog">
-                <Modal.Header closeButton>
-                    <Modal.Title>Выберите заказы</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
+
+            <MyCustomModal
+                show={showModalB}
+                handleClose={handleCloseModalB}
+                title="Выберите заказы"
+            >
+                <div style={{overflowY: 'auto', maxHeight: '80vh'}}>
                     {additionalOrders.map(item => (
                         <div key={item.name} style={{
                             fontSize: '16px', borderBottom: '1px solid lightgray',
@@ -578,14 +567,8 @@ const CreatingWashingOrder = observer(() => {
                             </div>
                         </div>
                     ))}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant='secondary' onClick={handleCloseModalB}>
-                        Закрыть
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
+                </div>
+            </MyCustomModal>
             {selectedItems.length > 0 ? (
                 <div className="selected-items-container text-center">
                     <Form.Label style={{fontWeight: "bold", fontSize: "1.2em"}}>

@@ -59,15 +59,16 @@ public class UserServiceImp implements UserService {
         return usernames;
     }
 
-    public UserVersions getActualUserVersionByPhone(String username) {
+    public UserVersions getActualUserVersionByPhone(String phone) {
         var userVersionList = userVersionsRepository.findLatestVersionByUsername
-                (username);
+                (phone);
         UserVersions latestUserVersion;
+        System.out.println(userVersionList);
         if (!userVersionList.isEmpty()) {
             latestUserVersion = userVersionList.get(0);
         } else {
             throw new NotInDataBaseException("пользователей не найден" +
-                    " пользователь с именем: ", username);
+                    " пользователь с именем: ", phone);
         }
         return latestUserVersion;
     }

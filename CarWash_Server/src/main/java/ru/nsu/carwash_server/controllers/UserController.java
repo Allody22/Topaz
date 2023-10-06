@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
-import ru.nsu.carwash_server.models.secondary.constants.ERole;
 import ru.nsu.carwash_server.models.secondary.helpers.OrderMainInfo;
 import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
@@ -30,11 +28,8 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -101,27 +96,8 @@ public class UserController {
 
         var latestUserVersion = userService.getActualUserVersionByPhone(updateUserInfoRequest.getPhone());
         Set<Role> roles;
-        Set<String> strRoles = updateUserInfoRequest.getRoles();
 
-        if (strRoles == null) {
-            roles = latestUserVersion.getUser().getRoles();
-        } else {
-            Set<ERole> rolesList = EnumSet.allOf(ERole.class);
-            roles = strRoles.stream().map(role -> {
-                Optional<ERole> enumRole = rolesList.stream()
-                        .filter(r -> r.name().equalsIgnoreCase(role))
-                        .findAny();
-                if (enumRole.isPresent()) {
-                    return roleRepository.findByName(enumRole.get())
-                            .orElseThrow(() -> new NotInDataBaseException("ролей не найдена роль: ", enumRole.get().name()));
-                } else {
-                    throw new RuntimeException("Ошибка: Неправильная роль:" + strRoles);
-                }
-            }).collect(Collectors.toSet());
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new NotInDataBaseException("ролей не найдена роль: ", ERole.ROLE_USER.name()));
-            roles.add(userRole);
-        }
+        roles = latestUserVersion.getUser().getRoles();
         user.setRoles(roles);
 
         UserVersions newVersion = new UserVersions(latestUserVersion, updateUserInfoRequest);
@@ -165,9 +141,6 @@ public class UserController {
         String newFullName = (updateUserInfoRequest.getFullName() != null) ?
                 "новое ФИО: '" + updateUserInfoRequest.getFullName() + "'," : null;
 
-        String newRoles = (updateUserInfoRequest.getRoles() != null) ?
-                "новый набор ролей: " + updateUserInfoRequest.getRoles() + "'," : null;
-
         String newAdminNote = (updateUserInfoRequest.getAdminNote() != null) ?
                 "новую заметку от администратора: '" + updateUserInfoRequest.getAdminNote() + "'," : null;
 
@@ -178,7 +151,7 @@ public class UserController {
                 "новую заметку от самого пользователя: '" + updateUserInfoRequest.getUserNote() + "'," : null;
 
         return "Пользователь '" + username + "' получил" + newUsername +
-                newFullName + newRoles + newAdminNote + newEmail + newUserNote;
+                newFullName + newAdminNote + newEmail + newUserNote;
     }
 
     public ConnectedOrdersResponse getDividedOrders(OrderVersions orderVersion) {

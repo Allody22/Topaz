@@ -65,6 +65,16 @@ const carTypes = [
     'Неизвестно'
 ];
 
+const roles = [
+    'Обычный пользователь',
+    'Администратор',
+    'Модератор',
+    'Директор',
+    'Специалист (мойщик)'
+];
+
+export const rolesArray = createLabelValueArray(roles);
+
 export const orderStatusArray = createLabelValueArray(orderStatuses);
 export const saleDay = createLabelValueArray(saleDayArray);
 export const serviceTypesArray = createLabelValueArray(serviceTypes);

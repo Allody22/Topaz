@@ -25,6 +25,7 @@ import currentOrderStatusMapFromRus from "../model/map/CurrentOrderStatusMapFrom
 import fileNameFromEngMap from "../model/map/FileNamesFromEngMap";
 import {getAllSales} from "../http/userAPI";
 import {carTypesArray, orderStatusArray, serviceTypesArray} from "../model/Constants";
+import MyCustomModal from "../model/MyCustomModal";
 
 const wheelSizeArray = [
     'R13', 'R14', 'R15', 'R16', 'R17', 'R18', 'R19', 'R20', 'R21', 'R22'].map(item => ({label: item, value: item}));
@@ -596,110 +597,89 @@ const UpdateOrderInfo = observer(() => {
                     </Modal.Footer>
                 </Modal>
 
-
-                <Modal show={showModalB}
-                       onHide={handleCloseModal}
-                       dialogClassName="custom-modal-dialog-tire">
-                    <Modal.Header closeButton>
-                        <Modal.Title>Выберите заказы</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        {mainTireOrders.map((item, index) => (
+                <MyCustomModal show={showModalB} handleClose={handleCloseModal} title="Выберите заказы">
+                    <div style={{overflowY: 'auto', maxHeight: '80vh'}}>
+                        {mainOrders.map((item, index) => (
                             <div key={index} style={{
                                 fontSize: '16px',
                                 borderBottom: '1px solid lightgray',
                                 paddingBottom: '10px',
-                                paddingTop: '10px'
+                                paddingTop: '10px',
                             }}>
                                 <div style={{textAlign: 'center'}}>
                                     <span>{item.name}</span>
                                 </div>
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: 'auto 1fr',
                                     gap: '10px',
-                                    alignItems: 'center'
+                                    alignItems: 'center',
+                                    gridTemplateColumns: 'auto 1fr',
+                                    gridTemplateRows: 'repeat(3, auto)', // Добавляем три строки для Размеров, Времени и Цен
                                 }}>
                                     <div style={{color: 'green'}}>Размеры:</div>
-                                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '10px'}}>
-                                        <div>R13</div>
-                                        <div>R14</div>
-                                        <div>R15</div>
-                                        <div>R16</div>
-                                        <div>R17</div>
-                                        <div>R18</div>
-                                        <div>R19</div>
-                                        <div>R20</div>
-                                        <div>R21</div>
-                                        <div>R22</div>
-                                    </div>
-                                </div>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'auto 1fr',
-                                    gap: '10px',
-                                    alignItems: 'center'
-                                }}>
-                                    <div style={{color: 'blue', gridColumn: '1'}}>Время:</div>
                                     <div style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(10, 1fr)',
                                         gap: '10px',
-                                        gridColumn: '2'
+                                        gridTemplateColumns: 'repeat(10, 1fr)',
+                                        overflowX: 'auto'
                                     }}>
-                                        <div
-                                            style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_13}</div>
-                                        <div
-                                            style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_14}</div>
-                                        <div
-                                            style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.time_r_15}</div>
-                                        <div
-                                            style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0'}{item.time_r_16}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_17}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_18}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_19}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.time_r_20}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.time_r_21}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.time_r_22}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R13</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R14</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R15</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R16</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R17</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R18</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R19</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R20</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R21</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>R22</div>
                                     </div>
-                                </div>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'auto 1fr',
-                                    gap: '10px',
-                                    alignItems: 'center'
-                                }}>
-                                    <div style={{color: 'red', gridColumn: '1'}}>Цены:</div>
+                                    <div style={{color: 'blue'}}>Время:</div>
                                     <div style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(10, 1fr)',
                                         gap: '10px',
-                                        gridColumn: '2'
+                                        gridTemplateColumns: 'repeat(10, 1fr)',
+                                        overflowX: 'auto'
                                     }}>
-                                        <div
-                                            style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_13}</div>
-                                        <div
-                                            style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_14}</div>
-                                        <div
-                                            style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_15}</div>
-                                        <div
-                                            style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0\u00A0\u00A0'}{item.price_r_16}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_17}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_18}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_19}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0\u00A0'}{item.price_r_20}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.price_r_21}</div>
-                                        <div style={{whiteSpace: 'pre'}}>{'\u00A0\u00A0'}{item.price_r_22}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_13}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_14}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_15}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_16}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_17}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_18}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_19}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_20}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_21}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.time_r_22}</div>
+                                    </div>
+                                    <div style={{color: 'red'}}>Цены:</div>
+                                    <div style={{
+                                        display: 'grid',
+                                        gap: '10px',
+                                        gridTemplateColumns: 'repeat(10, 1fr)',
+                                        overflowX: 'auto'
+                                    }}>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_13}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_14}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_15}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_16}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_17}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_18}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_19}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_20}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_21}</div>
+                                        <div style={{whiteSpace: 'nowrap'}}>{item.price_r_22}</div>
                                     </div>
                                 </div>
                                 <div style={{
                                     display: 'flex',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    marginTop: '10px',
                                 }}>
                                     <InputNumber
                                         size="sm"
                                         placeholder="sm"
-                                        style={Object.assign({}, stylesForInput, {margin: '0 auto', marginTop: '10px'})}
+                                        style={Object.assign({}, stylesForInput, {margin: '0 auto'})}
                                         min={0}
                                         onChange={value => handleItemChange(item.name, value)}
                                         value={getItemValueByName(item.name) || 0}
@@ -707,13 +687,8 @@ const UpdateOrderInfo = observer(() => {
                                 </div>
                             </div>
                         ))}
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant='secondary' onClick={handleCloseModal}>
-                            Закрыть
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
+                    </div>
+                </MyCustomModal>
 
                 {selectedItems.length > 0 ? (
                     <div className="selected-items-container text-center">

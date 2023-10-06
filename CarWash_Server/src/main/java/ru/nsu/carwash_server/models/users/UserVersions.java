@@ -83,6 +83,8 @@ public class UserVersions {
 
         this.dateOfCreation = new Date();
 
+        this.password = userVersions.getPassword();
+
         this.bonuses = userVersions.getBonuses();
 
         this.phone = (updateUserInfoRequest.getPhone() != null) ?

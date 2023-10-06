@@ -9,13 +9,10 @@ import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
+import rolesFromEnglishMap from "../model/map/RolesFromEnglishMap";
+import rolesFromRussianMap from "../model/map/RolesFromRussianMap";
+import {rolesArray} from "../model/Constants";
 
-
-const rolesArray = [
-    'Обычный пользователь',
-    'Администратор',
-    'Модератор',
-].map(item => ({label: item, value: item}));
 
 const styles = {
     width: 500, display: 'block',
@@ -156,7 +153,8 @@ const ChangeUserInfo = observer(() => {
                     setAdminNote(response.adminNotes || '');
                     setUserNote(response.userNotes || '');
                     setEmail(response.email || '')
-                    const roles = response.roles.map(role => rolesToRussianMap(role.name)) || [];
+                    const roles = response.roles.map(role => rolesToRussianMap(role)) || [];
+
                     setSelectedRoles(roles);
 
                     setGetUsers(true)
@@ -189,34 +187,28 @@ const ChangeUserInfo = observer(() => {
         setEnSelectedRoles(arrayOfRoles);
     };
 
-
     const rolesToEnglishMap = (item) => {
-        if (item === 'Модератор') {
-            return 'ROLE_MODERATOR';
-        } else if (item === 'Админ') {
-            return 'ROLE_ADMIN';
-        } else if (item === 'Администратор') {
-            return 'ROLE_ADMINISTRATOR'
-        } else if (item === 'Обычный пользователь') {
-            return 'ROLE_USER';
+        const translatedRole = rolesFromRussianMap[item];
+
+        if (translatedRole) {
+            return translatedRole;
         } else {
-            return 'ERROR'
+            setErrorResponse("Незивестная роль");
+            setErrorFlag(flag => !flag);
         }
-    };
+    }
+
 
     const rolesToRussianMap = (item) => {
-        if (item === 'ROLE_MODERATOR') {
-            return 'Модератор';
-        } else if (item === 'ROLE_ADMIN') {
-            return 'Админ';
-        } else if (item === 'ROLE_ADMINISTRATOR') {
-            return 'Администратор'
-        } else if (item === 'ROLE_USER') {
-            return 'Обычный пользователь';
+        const translatedRole = rolesFromEnglishMap[item];
+
+        if (translatedRole) {
+            return translatedRole;
         } else {
-            return 'ERROR'
+            setErrorResponse("Незивестная роль");
+            setErrorFlag(flag => !flag);
         }
-    };
+    }
 
     const handleTagRemoved = (item) => {
         setSelectedRoles(prevSelectedRoles =>
@@ -253,11 +245,11 @@ const ChangeUserInfo = observer(() => {
     return (
         <>
             <p className="input-style-modified">Страница изменения информации о человеке в базе данных</p>
-            <p className="input-style-modified">Человек с ролью администратор и выше может пользоваться
+            <p className="input-style-modified">Человек с ролью администратор, модератора, специалиста и директора может
+                пользоваться
                 сайтом</p>
 
             <p className="input-style-modified">Выберите роли пользователя</p>
-            <p className="small-input-style">От этого зависит, смогут ли они пользоваться приложением и сайтом</p>
             <TagPicker
                 data={rolesArray}
                 block

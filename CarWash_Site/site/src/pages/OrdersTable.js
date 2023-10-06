@@ -345,10 +345,10 @@ const OrderTable = observer(() => {
 
     const handleNotMadeOrders = async (event) => {
         event.preventDefault();
-        if (isSubmittingB) {
+        if (isSubmitting) {
             return;
         }
-        setIsSubmittingB(true);
+        setIsSubmitting(true);
 
         try {
             const response = await getNotMadeOrders(includeCancelled);
@@ -370,7 +370,7 @@ const OrderTable = observer(() => {
                 setErrorFlag(flag => !flag)
             }
         } finally {
-            setIsSubmittingB(false)
+            setIsSubmitting(false)
         }
     };
 
@@ -473,9 +473,9 @@ const OrderTable = observer(() => {
                 variant='primary'
                 type='submit'
                 onClick={handleNotMadeOrders}
-                disabled={isSubmittingB}
+                disabled={isSubmitting}
                 style={{marginBottom: '20px', marginTop: '20px'}}>
-                {isSubmittingB ? 'Поиск заказов...' : 'Получить все не сделанные заказы'}
+                {isSubmitting ? 'Поиск заказов...' : 'Получить все не сделанные заказы'}
             </Button>
 
             <p style={inputStyle}>Вы можете нажать на цифру айди, чтобы перейти на страницу изменения этого заказа</p>

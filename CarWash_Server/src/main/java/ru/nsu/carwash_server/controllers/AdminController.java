@@ -35,6 +35,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -76,14 +77,19 @@ public class AdminController {
     @GetMapping("/findUserByTelephone_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> findUserByTelephone(@Valid @RequestParam("phone") String username) {
+    public ResponseEntity<?> findUserByTelephone(@Valid @RequestParam("phone") String phone) {
+        UserVersions latestUserVersion = userService.getActualUserVersionByPhone(phone);
 
-        UserVersions latestUserVersion = userService.getActualUserVersionByPhone(username);
         User user = latestUserVersion.getUser();
 
-        return ResponseEntity.ok(new UserInformationResponse(user.getOrders(), user.getId(),
+        Set<String> userRoles = new HashSet<>();
+        for (Role currentRole : user.getRoles()) {
+            userRoles.add(currentRole.getName().name());
+        }
+
+        return ResponseEntity.ok(new UserInformationResponse(user.getId(),
                 latestUserVersion.getFullName(), latestUserVersion.getPhone(), latestUserVersion.getEmail(),
-                latestUserVersion.getBonuses(), user.getRoles(), latestUserVersion.getComments(), latestUserVersion.getAdminNote()));
+                latestUserVersion.getBonuses(), userRoles, latestUserVersion.getComments(), latestUserVersion.getAdminNote()));
     }
 
     @GetMapping("/getUserOrdersByAdmin_v1")
@@ -168,8 +174,17 @@ public class AdminController {
         String newFullName = (updateUserInfoRequest.getFullName() != null) ?
                 "новое ФИО: '" + updateUserInfoRequest.getFullName() + "'," : null;
 
-        String newRoles = (updateUserInfoRequest.getRoles() != null) ?
-                "новый набор ролей: " + updateUserInfoRequest.getRoles() + "'," : null;
+        List<String> ruRoles = new ArrayList<>();
+        for (String role : updateUserInfoRequest.getRoles()) {
+            switch (role) {
+                case "ROLE_USER" -> ruRoles.add("Обычный пользователь");
+                case "ROLE_MODERATOR" -> ruRoles.add("Модератор");
+                case "ROLE_ADMIN" -> ruRoles.add("Директор");
+                case "ROLE_ADMINISTRATOR" -> ruRoles.add("Администратор");
+                case "ROLE_SPECIALIST" -> ruRoles.add("Специалист (мойщик)");
+            }
+        }
+        String newRoles = "новый набор ролей: " + ruRoles + "',";
 
         String newAdminNote = (updateUserInfoRequest.getAdminNote() != null) ?
                 "новую заметку от администратора: '" + updateUserInfoRequest.getAdminNote() + "'," : null;

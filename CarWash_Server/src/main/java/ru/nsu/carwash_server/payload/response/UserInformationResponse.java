@@ -3,8 +3,6 @@ package ru.nsu.carwash_server.payload.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.nsu.carwash_server.models.orders.Order;
-import ru.nsu.carwash_server.models.users.Role;
 
 import java.util.Set;
 
@@ -12,8 +10,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserInformationResponse {
-
-    private Set<Order> orders;
 
     private Long id;
 
@@ -25,7 +21,7 @@ public class UserInformationResponse {
 
     private int bonuses;
 
-    private Set<Role> roles;
+    private Set<String> roles;
 
     private String userNotes;
 

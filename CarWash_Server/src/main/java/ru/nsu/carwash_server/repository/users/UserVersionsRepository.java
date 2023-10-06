@@ -13,7 +13,7 @@ public interface UserVersionsRepository extends JpaRepository<UserVersions, Long
     List<UserVersions> findLatestVersionByUserId(@Param("userId") Long userId);
 
     @Query(value = "SELECT * FROM user_version where phone = :phone ORDER BY creation_time DESC", nativeQuery = true)
-    List<UserVersions> findLatestVersionByUsername(@Param("phone") String username);
+    List<UserVersions> findLatestVersionByUsername(@Param("phone") String phone);
 
-    boolean existsByPhone(String username);
+    boolean existsByPhone(String phone);
 }
