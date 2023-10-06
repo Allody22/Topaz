@@ -135,7 +135,7 @@ const ChangeServiceInfo = observer(() => {
                     for (let key in error.response.data) {
                         messages.push(error.response.data[key]);
                     }
-                    setErrorResponse(messages.join(', '));
+                    setErrorResponse(messages.join(''));
                     setErrorFlag(flag => !flag);
 
                 } else {
@@ -266,7 +266,7 @@ const ChangeServiceInfo = observer(() => {
                         for (let key in error.response.data) {
                             messages.push(error.response.data[key]);
                         }
-                        setErrorResponse(messages.join(', '));
+                        setErrorResponse(messages.join(''));
                         setErrorFlag(flag => !flag);
 
                     } else {

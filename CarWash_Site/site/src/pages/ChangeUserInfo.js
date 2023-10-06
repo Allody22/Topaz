@@ -134,7 +134,7 @@ const ChangeUserInfo = observer(() => {
                     for (let key in error.response.data) {
                         messages.push(error.response.data[key]);
                     }
-                    setErrorResponse(messages.join(', '));
+                    setErrorResponse(messages.join(''));
                     setErrorFlag(flag => !flag);
                 } else {
                     setErrorResponse("Системная ошибка, проверьте правильность " +

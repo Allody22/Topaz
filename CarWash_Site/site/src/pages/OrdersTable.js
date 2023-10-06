@@ -228,7 +228,7 @@ const OrderTable = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -259,7 +259,7 @@ const OrderTable = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -361,7 +361,7 @@ const OrderTable = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(', '));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
                 setErrorFlag(flag => !flag);
 
             } else {

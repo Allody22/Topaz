@@ -29,7 +29,7 @@ class SaleStore {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                errorMessage = messages.join(', ');
+                errorMessage = messages.join('');
             }
 
             this.setError(errorMessage);

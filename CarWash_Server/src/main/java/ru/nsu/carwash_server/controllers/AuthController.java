@@ -99,9 +99,6 @@ public class AuthController {
     @SendTo(DestinationPrefixes.NOTIFICATIONS)
     @Transactional
     public ResponseEntity<?> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
-        if (userService.existByPhone(number)) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Телефон уже занят!"));
-        }
         String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
 
         Pair<HttpEntity<String>, Integer> resultOfSmsCreating = operationsService.createSmsCode(number);
@@ -279,12 +276,12 @@ public class AuthController {
                 .build();
 
 
-        Long currentUserId = userDetails.getId();
-        UserVersions userAdmin = userService.getActualUserVersionById(currentUserId);
-
-        String operationName = "Admin_log_in";
-        String descriptionMessage = "Админ с логином '" + userAdmin.getPhone() + "' зашёл в аккаунт";
-        operationsService.SaveUserOperation(operationName, userAdmin.getUser(), descriptionMessage, 1);
+//        Long currentUserId = userDetails.getId();
+//        UserVersions userAdmin = userService.getActualUserVersionById(currentUserId);
+//
+//        String operationName = "Admin_log_in";
+//        String descriptionMessage = "Админ с логином '" + userAdmin.getPhone() + "' зашёл в аккаунт";
+//        operationsService.SaveUserOperation(operationName, userAdmin.getUser(), descriptionMessage, 1);
 
 
         return ResponseEntity.ok(jwtResponse);
