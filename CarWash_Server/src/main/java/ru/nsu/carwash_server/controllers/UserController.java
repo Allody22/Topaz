@@ -19,9 +19,8 @@ import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequest;
 import ru.nsu.carwash_server.payload.request.UpdateUserPasswordRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
-import ru.nsu.carwash_server.repository.users.RoleRepository;
-import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
+import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.OrderService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 
@@ -37,30 +36,25 @@ import java.util.Set;
 @RequestMapping("/api/user")
 public class UserController {
 
-    private final OperationsServiceIml operationsService;
+    private final OperationService operationsService;
 
     private final OrderService orderService;
 
     private final UserService userService;
 
-    private final RoleRepository roleRepository;
-
     @Autowired
     public UserController(
-            OperationsServiceIml operationsService,
+            OperationService operationsService,
             OrderService orderService,
-            UserService userService,
-            RoleRepository roleRepository) {
+            UserService userService) {
         this.operationsService = operationsService;
         this.userService = userService;
-        this.roleRepository = roleRepository;
         this.orderService = orderService;
     }
 
     @Transactional
     @PostMapping("/updateUserPassword_v1")
     public ResponseEntity<?> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
-
         if (!updateUserPasswordRequest.getSecretCode().equals(operationsService
                 .getLatestCodeByPhoneNumber(updateUserPasswordRequest.getPhone()) + "")) {
             return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));

@@ -7,6 +7,7 @@ import ru.nsu.carwash_server.models.orders.OrdersPolishing;
 import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.secondary.helpers.AllOrderTypes;
+import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
@@ -24,6 +25,35 @@ public interface OrderService {
      * @return лист строк из услуг мойки
      */
     List<String> getAllWashingOrdersByRole(String role);
+
+    /**
+     * Получаем цену и время определённого списка услуг шиномонтажа.
+     *
+     * @param orderArray - список услуг
+     * @param wheelR     - размер шин
+     * @return цена и время всех переданных услуг
+     */
+    TimeAndPrice getTireOrderTimePrice(List<String> orderArray, String wheelR);
+
+    /**
+     * Получаем цену и время определённого списка услуг полировки.
+     *
+     * @param orderArray - список услуг
+     * @param bodyType   - тип кузова
+     * @return цена и время заказа
+     */
+    TimeAndPrice getPolishingOrderPriceAndTime(List<String> orderArray, int bodyType);
+
+
+    /**
+     * Получаем цену и время определённого списка услуг мойки.
+     *
+     * @param orderArray - список услуг
+     * @param bodyType   - тип кузова
+     * @return цена и время заказа
+     */
+    TimeAndPrice getWashingOrderPriceTime(List<String> orderArray, int bodyType);
+
 
     /**
      * Запрос на получение всех услуг мойки

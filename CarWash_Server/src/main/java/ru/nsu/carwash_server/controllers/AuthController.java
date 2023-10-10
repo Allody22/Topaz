@@ -39,7 +39,6 @@ import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.TokenRefreshResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
 import ru.nsu.carwash_server.security.jwt.JwtUtils;
-import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.RefreshTokenService;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
@@ -79,7 +78,7 @@ public class AuthController {
     public AuthController(
             RestTemplate restTemplate,
             UserService userService,
-            OperationsServiceIml operationsService,
+            OperationService operationsService,
             AuthenticationManager authenticationManager,
             RoleRepository roleRepository,
             PasswordEncoder encoder,

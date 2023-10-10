@@ -25,11 +25,13 @@ import ru.nsu.carwash_server.models.secondary.helpers.TireOrderEntity;
 import ru.nsu.carwash_server.models.secondary.helpers.WashingPolishingOrderEntity;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
+import ru.nsu.carwash_server.payload.request.FreeTimeRequest;
 import ru.nsu.carwash_server.payload.request.OrdersArrayPriceAndGoodTimeRequest;
 import ru.nsu.carwash_server.payload.request.OrdersArrayPriceTimeRequest;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
 import ru.nsu.carwash_server.payload.response.ActualOrdersResponse;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
+import ru.nsu.carwash_server.payload.response.FreeTimeAndBoxResponse;
 import ru.nsu.carwash_server.payload.response.MainAndAdditionalResponse;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.OrdersArrayResponse;
@@ -38,9 +40,9 @@ import ru.nsu.carwash_server.payload.response.TimeAndPriceResponse;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersWashingRepository;
-import ru.nsu.carwash_server.services.OperationsServiceIml;
-import ru.nsu.carwash_server.services.OrderServiceImp;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
+import ru.nsu.carwash_server.services.interfaces.OperationService;
+import ru.nsu.carwash_server.services.interfaces.OrderService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
@@ -65,34 +67,34 @@ public class OrderManagementController {
 
     private final OrdersTireRepository ordersTireRepository;
 
-    private final OrderServiceImp orderServiceImp;
+    private final OrderService orderService;
 
     private final UserService userService;
 
-    private final OperationsServiceIml operationsService;
+    private final OperationService operationsService;
 
     @Autowired
     public OrderManagementController(
-            OperationsServiceIml operationsService,
+            OperationService operationsService,
             OrdersWashingRepository ordersWashingRepository,
             OrdersTireRepository ordersTireRepository,
             UserService userService,
             OrdersPolishingRepository ordersPolishingRepository,
-            OrderServiceImp orderServiceImp) {
+            OrderService orderService) {
         this.ordersWashingRepository = ordersWashingRepository;
         this.ordersPolishingRepository = ordersPolishingRepository;
         this.ordersTireRepository = ordersTireRepository;
         this.userService = userService;
-        this.orderServiceImp = orderServiceImp;
+        this.orderService = orderService;
         this.operationsService = operationsService;
     }
 
     @PostMapping("/deleteOrder_v1")
     @Transactional
     public ResponseEntity<?> deleteOrder(@Valid @RequestParam(name = "orderId") Long id) {
-        var order = orderServiceImp.findById(id);
+        var order = orderService.findById(id);
         if (order != null) {
-            Pair<Boolean, String> result = orderServiceImp.deleteOrder(id);
+            Pair<Boolean, String> result = orderService.deleteOrder(id);
 
             var booleanValue = result.getFirst();
             var resultText = result.getSecond();
@@ -145,7 +147,7 @@ public class OrderManagementController {
     @PostMapping("/updateOrderInfo_v1")
     @Transactional
     public ResponseEntity<?> updateOrderInfo(@Valid @RequestBody UpdateOrderInfoRequest updateOrderInfoRequest) {
-        Pair<Boolean, String> result = orderServiceImp.updateOrderInfo(updateOrderInfoRequest);
+        Pair<Boolean, String> result = orderService.updateOrderInfo(updateOrderInfoRequest);
         var booleanValue = result.getFirst();
         var resultText = result.getSecond();
 
@@ -218,12 +220,12 @@ public class OrderManagementController {
     @GetMapping("/getOrderInfo_v1")
     @Transactional
     public ResponseEntity<?> getOrderInfo(@Valid @RequestParam(name = "orderId", required = false) Long orderId) {
-        var orderById = orderServiceImp.findById(orderId);
+        var orderById = orderService.findById(orderId);
         if (orderId == null) {
             return ResponseEntity.badRequest().body(new MessageResponse("Несуществующий номер заказа"));
         }
 
-        var actualOrder = orderServiceImp.getActualOrderVersion(orderId);
+        var actualOrder = orderService.getActualOrderVersion(orderId);
 
         List<String> ordersNames = new ArrayList<>();
         for (var washOrder : actualOrder.getOrdersWashing()) {
@@ -235,13 +237,14 @@ public class OrderManagementController {
         for (var tireOrders : actualOrder.getOrdersTires()) {
             ordersNames.add(tireOrders.getName());
         }
-        String userPhone = "Нет информации";
+        String userPhone;
         if (actualOrder.getUserContacts() != null) {
             userPhone = actualOrder.getUserContacts();
         } else {
             userPhone = userService.getActualUserVersionById(orderById.getUser().getId()).getPhone();
         }
 
+        System.out.println(ordersNames);
         return ResponseEntity.ok(new SingleOrderResponse(orderId, orderById.getDateOfCreation(), actualOrder.getStartTime(),
                 actualOrder.getEndTime(), actualOrder.getAdministrator(), actualOrder.getSpecialist(),
                 actualOrder.getAutoNumber(), actualOrder.getAutoType(), actualOrder.getBoxNumber(), actualOrder.getBonuses(),
@@ -252,15 +255,15 @@ public class OrderManagementController {
     @GetMapping("/getActualWashingOrders_v1")
     @Transactional
     public ResponseEntity<?> getActualWashingServices(@Valid @RequestParam(name = "orderName", required = true) String orderName) {
-        ConnectedOrdersResponse ordersInfo = orderServiceImp.actualWashingOrders(orderName);
+        ConnectedOrdersResponse ordersInfo = orderService.actualWashingOrders(orderName);
         return ResponseEntity.ok(ordersInfo);
     }
 
     @GetMapping("/getAllWashingOrders_v1")
     @Transactional
     public ResponseEntity<?> getAllWashingServices() {
-        var mainOrders = orderServiceImp.getAllWashingOrdersByRole("main");
-        var additionalOrders = orderServiceImp.getAllWashingOrdersByRole("additional");
+        var mainOrders = orderService.getAllWashingOrdersByRole("main");
+        var additionalOrders = orderService.getAllWashingOrdersByRole("additional");
 
         return ResponseEntity.ok(new MainAndAdditionalResponse(mainOrders, additionalOrders));
     }
@@ -268,7 +271,7 @@ public class OrderManagementController {
     @GetMapping("/getAllWashingServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<?> getAllWashingServicesWithPriceAndTime() {
-        var washingOrdersWithTimeAndPrice = orderServiceImp.findAllWashingService();
+        var washingOrdersWithTimeAndPrice = orderService.findAllWashingService();
         if (washingOrdersWithTimeAndPrice.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Услуг мойки не существует"));
         }
@@ -284,7 +287,7 @@ public class OrderManagementController {
     @GetMapping("/getAllPolishingServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<?> getAllPolishingServicesWithPriceAndTime() {
-        var washingOrdersWithTimeAndPrice = orderServiceImp.findAllPolishingService();
+        var washingOrdersWithTimeAndPrice = orderService.findAllPolishingService();
         if (washingOrdersWithTimeAndPrice.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Услуг полировки не существует"));
         }
@@ -300,7 +303,7 @@ public class OrderManagementController {
     @GetMapping("/getAllTireServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<?> getAllTireServicesWithPriceAndTime() {
-        var tireServicesWithTimeAndPrice = orderServiceImp.findAllTireService();
+        var tireServicesWithTimeAndPrice = orderService.findAllTireService();
         if (tireServicesWithTimeAndPrice.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Услуг шиномонтажа не существует"));
         }
@@ -341,7 +344,7 @@ public class OrderManagementController {
                                                    @Valid @RequestParam(name = "endTime")
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
                                                    @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
-        List<OrderVersions> orders = orderServiceImp.getOrdersInTimeInterval(startTime,
+        List<OrderVersions> orders = orderService.getOrdersInTimeInterval(startTime,
                 endTime, null, includeCancelled);
 
 
@@ -353,7 +356,7 @@ public class OrderManagementController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<?> getNotMadeOrders(@RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
-        List<OrderVersions> orders = orderServiceImp.getNotMadeOrders(includeCancelled);
+        List<OrderVersions> orders = orderService.getNotMadeOrders(includeCancelled);
         List<SingleOrderResponse> ordersForResponse = getTimeAndPriceOfOrders(orders);
         return ResponseEntity.ok(new OrdersArrayResponse(ordersForResponse));
     }
@@ -366,7 +369,7 @@ public class OrderManagementController {
                                                @Valid @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
                                                @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
 
-        List<OrderVersions> orders = orderServiceImp.getOrdersCreatedAt(startTime,
+        List<OrderVersions> orders = orderService.getOrdersCreatedAt(startTime,
                 endTime, includeCancelled);
         List<SingleOrderResponse> ordersForResponse = getTimeAndPriceOfOrders(orders);
 
@@ -376,24 +379,24 @@ public class OrderManagementController {
 
     @PostMapping("/getPriceAndEndTime_v1")
     @Transactional
-    public ResponseEntity<?> getPriceAndTimeForSite(@Valid @RequestBody OrdersArrayPriceAndGoodTimeRequest ordersArrayPriceTimeRequest) {
+    public ResponseEntity<?> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceAndGoodTimeRequest ordersArrayPriceTimeRequest) {
         List<TimeIntervals> timeIntervals = new ArrayList<>();
         int time = 0;
         int price = 0;
         TimeAndPrice timeAndPrice;
         switch (ordersArrayPriceTimeRequest.getOrderType()) {
             case "wash" -> {
-                timeAndPrice = washingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+                timeAndPrice = orderService.getWashingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
                 price = timeAndPrice.getPrice();
                 time = timeAndPrice.getTime();
             }
             case "tire" -> {
-                timeAndPrice = tireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
+                timeAndPrice = orderService.getTireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
                 price = timeAndPrice.getPrice();
                 time = timeAndPrice.getTime();
             }
             case "polishing" -> {
-                timeAndPrice = polishingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+                timeAndPrice = orderService.getPolishingOrderPriceAndTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
                 price = timeAndPrice.getPrice();
                 time = timeAndPrice.getTime();
             }
@@ -445,65 +448,93 @@ public class OrderManagementController {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 14, ordersArrayPriceTimeRequest.getOrderType()));
         }
 
-        List<OrderVersions> orders = orderServiceImp.getOrdersInTimeInterval(ordersArrayPriceTimeRequest.getStartTime(),
+        List<OrderVersions> orders = orderService.getOrdersInTimeInterval(ordersArrayPriceTimeRequest.getStartTime(),
                 ordersArrayPriceTimeRequest.getEndTime(), null, true);
 
         List<SingleOrderResponse> bookedOrders = getTimeAndPriceOfOrders(orders);
 
-        List<TimeIntervals> clearOrders = new ArrayList<>(timeIntervals);
+        List<TimeIntervals> clearOrdersWithoutDuplicates = getClearOrdersWithoutDuplicates(timeIntervals, bookedOrders);
 
-        for (var bookedOrder : bookedOrders) {
-            for (var freeTime : timeIntervals) {
-                Date startTimeBooked = bookedOrder.getStartTime();
-                Date endTimeBooked = bookedOrder.getEndTime();
-                Date startTimeFree = freeTime.getStartTime();
-                Date endTimeFree = freeTime.getEndTime();
-                int freeBox = freeTime.getBox();
-                int bookedBox = bookedOrder.getBoxNumber();
-                if (((startTimeFree.compareTo(startTimeBooked) >= 0
-                        && endTimeFree.compareTo(endTimeBooked) <= 0)
-                        || (startTimeFree.compareTo(startTimeBooked) <= 0
-                        && endTimeFree.compareTo(startTimeBooked) > 0)
-                        || (startTimeFree.compareTo(endTimeBooked) < 0
-                        && endTimeBooked.compareTo(endTimeFree) <= 0))
-                        && freeBox == bookedBox) {
-                    TimeIntervals timeIntervals1 = new TimeIntervals(startTimeFree, endTimeFree, freeBox);
-                    clearOrders.remove(timeIntervals1);
-                }
-            }
-        }
-
-        List<TimeIntervals> noDuplicatesTimeList = new ArrayList<>(clearOrders);
-
-        for (var firstInterval : clearOrders) {
-            for (var secondInterval : clearOrders) {
-                if (noDuplicatesTimeList.contains(secondInterval) && (firstInterval.getStartTime().equals(secondInterval.getStartTime())
-                        && firstInterval.getEndTime().equals(secondInterval.getEndTime())
-                        && !Objects.equals(firstInterval.getBox(), secondInterval.getBox()))
-                        && noDuplicatesTimeList.contains(secondInterval) && noDuplicatesTimeList.contains(firstInterval)) {
-                    noDuplicatesTimeList.remove(secondInterval);
-                }
-            }
-        }
-
-        Date currentDateTime = new Date();
-        return ResponseEntity.ok(new TimeAndPriceAndFreeTimeResponse(price, time, noDuplicatesTimeList, currentDateTime));
+        return ResponseEntity.ok(new TimeAndPriceAndFreeTimeResponse(price, time, clearOrdersWithoutDuplicates, new Date()));
     }
 
-    @PostMapping("/getPriceAndTime_v1")
+    @PostMapping("/getFreeTime_v1")
+    @Transactional
+    public ResponseEntity<?> getFreeTime(@Valid @RequestBody FreeTimeRequest freeTimeRequest) {
+        List<TimeIntervals> timeIntervals = new ArrayList<>();
+        int time = freeTimeRequest.getOrderTime() + 15;
+
+        Date startTimeFromRequest = freeTimeRequest.getStartTime();
+        if (time < 60) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 1, 22, 8, freeTimeRequest.getOrderType()));
+        } else if (time <= 120) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 2, 20, 8, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 2, 19, 9, freeTimeRequest.getOrderType()));
+        } else if (time <= 180) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 20, 8, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 19, 9, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 18, 10, freeTimeRequest.getOrderType()));
+        } else if (time <= 240) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 8, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 9, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 10, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 11, freeTimeRequest.getOrderType()));
+        } else if (time <= 300) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 8, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 9, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 10, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 11, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 12, freeTimeRequest.getOrderType()));
+        } else if (time <= 361) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 16, 8, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 15, 9, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 14, 10, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 13, 11, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 13, 12, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 14, 13, freeTimeRequest.getOrderType()));
+        } else if (time <= 421) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 8, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 9, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 10, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 11, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 12, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 13, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 14, freeTimeRequest.getOrderType()));
+        } else {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 8, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 9, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 10, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 11, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 12, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 13, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 14, freeTimeRequest.getOrderType()));
+        }
+
+        List<OrderVersions> orders = orderService.getOrdersInTimeInterval(freeTimeRequest.getStartTime(),
+                freeTimeRequest.getEndTime(), null, true);
+
+        List<SingleOrderResponse> bookedOrders = getTimeAndPriceOfOrders(orders);
+
+        List<TimeIntervals> clearOrdersWithoutDuplicates = getClearOrdersWithoutDuplicates(timeIntervals, bookedOrders);
+
+        return ResponseEntity.ok(new FreeTimeAndBoxResponse(time, clearOrdersWithoutDuplicates, new Date()));
+    }
+
+    @GetMapping("/getPriceAndTime_v1")
     @Transactional
     public ResponseEntity<?> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
         TimeAndPrice timeAndPrice = new TimeAndPrice(0, 0);
         switch (ordersArrayPriceTimeRequest.getOrderType()) {
             case "wash" ->
-                    timeAndPrice = washingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+                    timeAndPrice = orderService.getWashingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
             case "tire" ->
-                    timeAndPrice = tireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
+                    timeAndPrice = orderService.getTireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
             case "polishing" ->
-                    timeAndPrice = polishingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+                    timeAndPrice = orderService.getPolishingOrderPriceAndTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
         }
         return ResponseEntity.ok(new TimeAndPriceResponse(timeAndPrice.getPrice(), timeAndPrice.getTime()));
     }
+
 
     public List<TimeIntervals> fillTimeIntervals(Date startTimeFromRequest, int timeSkip, int endOfFor, int startOfFor, String orderType) {
         List<TimeIntervals> timeIntervals = new ArrayList<>();
@@ -543,6 +574,46 @@ public class OrderManagementController {
         }
         return timeIntervals;
     }
+
+
+    private List<TimeIntervals> getClearOrdersWithoutDuplicates(List<TimeIntervals> timeIntervals, List<SingleOrderResponse> bookedOrders) {
+        List<TimeIntervals> clearOrders = new ArrayList<>(timeIntervals);
+        for (var bookedOrder : bookedOrders) {
+            for (var freeTime : timeIntervals) {
+                Date startTimeBooked = bookedOrder.getStartTime();
+                Date endTimeBooked = bookedOrder.getEndTime();
+                Date startTimeFree = freeTime.getStartTime();
+                Date endTimeFree = freeTime.getEndTime();
+                int freeBox = freeTime.getBox();
+                int bookedBox = bookedOrder.getBoxNumber();
+                if (((startTimeFree.compareTo(startTimeBooked) >= 0
+                        && endTimeFree.compareTo(endTimeBooked) <= 0)
+                        || (startTimeFree.compareTo(startTimeBooked) <= 0
+                        && endTimeFree.compareTo(startTimeBooked) > 0)
+                        || (startTimeFree.compareTo(endTimeBooked) < 0
+                        && endTimeBooked.compareTo(endTimeFree) <= 0))
+                        && freeBox == bookedBox) {
+                    TimeIntervals timeIntervals1 = new TimeIntervals(startTimeFree, endTimeFree, freeBox);
+                    clearOrders.remove(timeIntervals1);
+                }
+            }
+        }
+
+        List<TimeIntervals> noDuplicatesTimeList = new ArrayList<>(clearOrders);
+
+        for (var firstInterval : clearOrders) {
+            for (var secondInterval : clearOrders) {
+                if (noDuplicatesTimeList.contains(secondInterval) && (firstInterval.getStartTime().equals(secondInterval.getStartTime())
+                        && firstInterval.getEndTime().equals(secondInterval.getEndTime())
+                        && !Objects.equals(firstInterval.getBox(), secondInterval.getBox()))
+                        && noDuplicatesTimeList.contains(secondInterval) && noDuplicatesTimeList.contains(firstInterval)) {
+                    noDuplicatesTimeList.remove(secondInterval);
+                }
+            }
+        }
+        return noDuplicatesTimeList;
+    }
+
 
     public List<SingleOrderResponse> getTimeAndPriceOfOrders(List<OrderVersions> orders) {
         List<SingleOrderResponse> ordersForResponse = new ArrayList<>();
@@ -594,153 +665,5 @@ public class OrderManagementController {
         }
 
         return ordersForResponse;
-    }
-
-
-    public TimeAndPrice polishingOrderPriceTime(List<String> orderArray, int bodyType) {
-        int price = 0;
-        int time = 15;
-        if (bodyType == 1) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceFirstType();
-                time += currentOrder.getTimeFirstType();
-            }
-        } else if (bodyType == 2) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceSecondType();
-                time += currentOrder.getTimeSecondType();
-            }
-
-        } else if (bodyType == 3) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceThirdType();
-                time += currentOrder.getTimeThirdType();
-            }
-        }
-        return new TimeAndPrice(time, price);
-    }
-
-
-    public TimeAndPrice washingOrderPriceTime(List<String> orderArray, int bodyType) {
-        int price = 0;
-        int time = 15;
-        if (bodyType == 1) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceFirstType();
-                time += currentOrder.getTimeFirstType();
-            }
-        } else if (bodyType == 2) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceSecondType();
-                time += currentOrder.getTimeSecondType();
-            }
-
-        } else if (bodyType == 3) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceThirdType();
-                time += currentOrder.getTimeThirdType();
-            }
-        }
-        return new TimeAndPrice(time, price);
-    }
-
-    public TimeAndPrice tireOrderTimePrice(List<String> orderArray, String wheelR) {
-        int price = 0;
-        int time = 15;
-        switch (wheelR) {
-            case "R13":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_13();
-                    time += currentOrder.getTime_r_13();
-                }
-                break;
-            case "R14":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_14();
-                    time += currentOrder.getTime_r_14();
-                }
-                break;
-            case "R15":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_15();
-                    time += currentOrder.getTime_r_15();
-                }
-                break;
-            case "R16":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_16();
-                    time += currentOrder.getTime_r_16();
-                }
-                break;
-            case "R17":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_17();
-                    time += currentOrder.getTime_r_17();
-                }
-                break;
-            case "R18":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_18();
-                    time += currentOrder.getTime_r_18();
-                }
-                break;
-            case "R19":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_19();
-                    time += currentOrder.getTime_r_19();
-                }
-                break;
-            case "R20":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_20();
-                    time += currentOrder.getTime_r_20();
-                }
-                break;
-            case "R21":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_21();
-                    time += currentOrder.getTime_r_21();
-                }
-                break;
-            case "R22":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_22();
-                    time += currentOrder.getTime_r_22();
-                }
-                break;
-        }
-        return new TimeAndPrice(time, price);
     }
 }

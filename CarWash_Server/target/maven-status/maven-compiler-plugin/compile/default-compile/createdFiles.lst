@@ -4,7 +4,9 @@ ru\nsu\carwash_server\models\users\User.class
 ru\nsu\carwash_server\payload\request\BookingTireOrderRequest$BookingTireOrderRequestBuilder.class
 ru\nsu\carwash_server\models\secondary\constants\DestinationPrefixes.class
 ru\nsu\carwash_server\payload\response\TokenRefreshResponse$TokenRefreshResponseBuilder.class
+ru\nsu\carwash_server\payload\request\UpdateUserInfoRequestByAdmin$UpdateUserInfoRequestByAdminBuilder.class
 ru\nsu\carwash_server\models\secondary\constants\StompPaths.class
+ru\nsu\carwash_server\payload\request\FreeTimeRequest.class
 ru\nsu\carwash_server\security\jwt\JwtUtils.class
 ru\nsu\carwash_server\payload\request\UpdateTireServiceRequest.class
 ru\nsu\carwash_server\controllers\OperationController.class
@@ -93,6 +95,7 @@ ru\nsu\carwash_server\models\orders\OrderVersions.class
 ru\nsu\carwash_server\payload\request\GetBookedOrdersInTimeIntervalRequest.class
 ru\nsu\carwash_server\models\secondary\helpers\WashingPolishingOrderEntity.class
 ru\nsu\carwash_server\models\secondary\helpers\OrderPriceTimeDoneTypeInfo.class
+ru\nsu\carwash_server\payload\request\UpdateUserInfoRequestByAdmin.class
 ru\nsu\carwash_server\payload\response\JwtResponse$JwtResponseBuilder.class
 ru\nsu\carwash_server\controllers\OrderCreatingController.class
 ru\nsu\carwash_server\payload\request\Smooth.class
@@ -103,11 +106,13 @@ ru\nsu\carwash_server\controllers\ServiceChangingController.class
 ru\nsu\carwash_server\payload\response\TimeAndPriceAndFreeTimeResponse.class
 ru\nsu\carwash_server\advice\GlobalExceptionHandler.class
 ru\nsu\carwash_server\payload\request\CreatingTireOrderRequest.class
+ru\nsu\carwash_server\payload\response\FreeTimeAndBoxResponse.class
 ru\nsu\carwash_server\payload\request\SignupRequest$SignupRequestBuilder.class
 ru\nsu\carwash_server\payload\response\UpdateOrderInfoResponse.class
 ru\nsu\carwash_server\services\interfaces\FileService.class
 ru\nsu\carwash_server\controllers\AdminController.class
 ru\nsu\carwash_server\repository\operations\OperationsVersionsRepository.class
+ru\nsu\carwash_server\payload\request\FreeTimeRequest$FreeTimeRequestBuilder.class
 ru\nsu\carwash_server\advice\TokenControllerAdvice.class
 ru\nsu\carwash_server\security\jwt\AuthTokenFilter.class
 ru\nsu\carwash_server\sockets\config\WebMvcConfig.class

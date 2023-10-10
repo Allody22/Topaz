@@ -11,6 +11,7 @@ import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.secondary.constants.OrderStatuses;
 import ru.nsu.carwash_server.models.secondary.helpers.AllOrderTypes;
+import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
@@ -53,6 +54,152 @@ public class OrderServiceImp implements OrderService {
     public List<String> getAllWashingOrdersByRole(String role) {
         return ordersWashingRepository.findAllByRole(role)
                 .orElse(null);
+    }
+
+    public TimeAndPrice getTireOrderTimePrice(List<String> orderArray, String wheelR) {
+        int price = 0;
+        int time = 15;
+        switch (wheelR) {
+            case "R13":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_13();
+                    time += currentOrder.getTime_r_13();
+                }
+                break;
+            case "R14":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_14();
+                    time += currentOrder.getTime_r_14();
+                }
+                break;
+            case "R15":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_15();
+                    time += currentOrder.getTime_r_15();
+                }
+                break;
+            case "R16":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_16();
+                    time += currentOrder.getTime_r_16();
+                }
+                break;
+            case "R17":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_17();
+                    time += currentOrder.getTime_r_17();
+                }
+                break;
+            case "R18":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_18();
+                    time += currentOrder.getTime_r_18();
+                }
+                break;
+            case "R19":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_19();
+                    time += currentOrder.getTime_r_19();
+                }
+                break;
+            case "R20":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_20();
+                    time += currentOrder.getTime_r_20();
+                }
+                break;
+            case "R21":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_21();
+                    time += currentOrder.getTime_r_21();
+                }
+                break;
+            case "R22":
+                for (var item : orderArray) {
+                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
+                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
+                    price += currentOrder.getPrice_r_22();
+                    time += currentOrder.getTime_r_22();
+                }
+                break;
+        }
+        return new TimeAndPrice(time, price);
+    }
+
+    public TimeAndPrice getWashingOrderPriceTime(List<String> orderArray, int bodyType) {
+        int price = 0;
+        int time = 15;
+        if (bodyType == 1) {
+            for (var item : orderArray) {
+                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
+                price += currentOrder.getPriceFirstType();
+                time += currentOrder.getTimeFirstType();
+            }
+        } else if (bodyType == 2) {
+            for (var item : orderArray) {
+                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
+                price += currentOrder.getPriceSecondType();
+                time += currentOrder.getTimeSecondType();
+            }
+
+        } else if (bodyType == 3) {
+            for (var item : orderArray) {
+                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
+                price += currentOrder.getPriceThirdType();
+                time += currentOrder.getTimeThirdType();
+            }
+        }
+        return new TimeAndPrice(time, price);
+    }
+
+    public TimeAndPrice getPolishingOrderPriceAndTime(List<String> orderArray, int bodyType) {
+        int price = 0;
+        int time = 15;
+        if (bodyType == 1) {
+            for (var item : orderArray) {
+                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
+                price += currentOrder.getPriceFirstType();
+                time += currentOrder.getTimeFirstType();
+            }
+        } else if (bodyType == 2) {
+            for (var item : orderArray) {
+                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
+                price += currentOrder.getPriceSecondType();
+                time += currentOrder.getTimeSecondType();
+            }
+
+        } else if (bodyType == 3) {
+            for (var item : orderArray) {
+                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
+                price += currentOrder.getPriceThirdType();
+                time += currentOrder.getTimeThirdType();
+            }
+        }
+        return new TimeAndPrice(time, price);
     }
 
     public List<OrdersWashing> findAllWashingService() {

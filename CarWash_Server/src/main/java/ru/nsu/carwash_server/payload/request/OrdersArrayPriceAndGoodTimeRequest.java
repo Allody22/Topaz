@@ -10,11 +10,11 @@ import java.util.Date;
 @Data
 public class OrdersArrayPriceAndGoodTimeRequest {
 
-    String orderType = null;
+    private String orderType = null;
 
-    ArrayList<String> orders = null;
+    private ArrayList<String> orders = null;
 
-    String wheelR = null;
+    private String wheelR = null;
 
     int bodyType;
 

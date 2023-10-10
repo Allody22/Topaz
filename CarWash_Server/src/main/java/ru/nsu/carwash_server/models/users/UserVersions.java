@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequest;
+import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequestByAdmin;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -75,6 +76,34 @@ public class UserVersions {
 
     @Column(name = "version")
     private int version;
+
+
+    public UserVersions(UserVersions userVersions, UpdateUserInfoRequestByAdmin updateUserInfoRequest) {
+        this.user = userVersions.getUser();
+
+        this.version = userVersions.getVersion() + 1;
+
+        this.dateOfCreation = new Date();
+
+        this.password = userVersions.getPassword();
+
+        this.bonuses = userVersions.getBonuses();
+
+        this.phone = (updateUserInfoRequest.getPhone() != null) ?
+                updateUserInfoRequest.getPhone() : userVersions.getPhone();
+
+        this.fullName = (updateUserInfoRequest.getFullName() != null) ?
+                updateUserInfoRequest.getFullName() : userVersions.getFullName();
+
+        this.adminNote = (updateUserInfoRequest.getAdminNote() != null) ?
+                updateUserInfoRequest.getAdminNote() : userVersions.getAdminNote();
+
+        this.comments = (updateUserInfoRequest.getUserNote() != null) ?
+                updateUserInfoRequest.getUserNote() : userVersions.getComments();
+
+        this.email = (updateUserInfoRequest.getEmail() != null) ?
+                updateUserInfoRequest.getEmail() : userVersions.getEmail();
+    }
 
     public UserVersions(UserVersions userVersions, UpdateUserInfoRequest updateUserInfoRequest) {
         this.user = userVersions.getUser();

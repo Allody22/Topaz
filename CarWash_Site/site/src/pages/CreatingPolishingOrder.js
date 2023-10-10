@@ -7,7 +7,7 @@ import addDays from 'date-fns/addDays';
 import 'rsuite/dist/rsuite.css';
 import '../css/CommonStyles.css';
 import InputField from "../model/InputField";
-import {createPolishingOrder, getAllPolishingServicesWithPriceAndTime, getPriceAndFreeTime} from "../http/orderAPI";
+import {createPolishingOrder, getAllPolishingServicesWithPriceAndTime, getFreeTime} from "../http/orderAPI";
 import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
 import {BrowserRouter as Router, useHistory} from "react-router-dom";
@@ -33,12 +33,15 @@ const CreatingPolishingOrder = observer(() => {
     const [submitTime, setSubmitTime] = useState(0);
     const [showModal, setShowModal] = useState(false);
 
-    const [itemsCount, setItemsCount] = useState([{name: '', value: 0}]);
     const [newTime, setNewTime] = useState([{startTime: null, endTime: null, box: 0}]);
 
     const [stringTimeForCurrentDay, setStringTimeForCurrentDay] = useState([]);
 
-    const [selectedItems, setSelectedItems] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([{
+        name: null, priceFirstType: null,
+        priceSecondType: null, priceThirdType: null, timeFirstType: null, timeSecondType: null, timeThirdType: null,
+        number: 0
+    }]);
 
     const [mainOrders, setMainOrders] = useState([{
         name: null, priceFirstType: null,
@@ -84,23 +87,6 @@ const CreatingPolishingOrder = observer(() => {
 
     const [files, setFiles] = useState([]);
 
-    const updateItem = (name, value) => {
-        if (!checkIfItemExists(name)) {
-            const newItemToAdd = {name: name, value: value};
-            setItemsCount(prevItems => [...prevItems, newItemToAdd]);
-        } else {
-            setItemsCount(current =>
-                current.map(item => {
-                    if (item.name === name) {
-                        return {...item, value};
-                    } else {
-                        return item;
-                    }
-                })
-            );
-        }
-    };
-
 
     useEffect(() => {
         if (saleStore?.error) {
@@ -138,37 +124,62 @@ const CreatingPolishingOrder = observer(() => {
     }, [saleStore.discounts]);
 
 
-    const getItemValueByName = (name) => {
-        const item = itemsCount.find(item => item.name === name);
-        return item ? item.value : undefined;
+    const findSelectedItemByName = (name) => {
+        const item = selectedItems.find(item => item.name === name);
+        return item ? item.number : undefined;
     }
 
-    const checkIfItemExists = (name) => {
-        const item = itemsCount.find(item => item.name === name);
-        return !!item;
-    };
 
-    const removeItem = (name) => {
-        setItemsCount(current =>
-            current.filter(item => item.name !== name)
-        );
-    };
+    const updateSelectedItems = (itemName, updatedData) => {
+        setSelectedItems((prevSelectedItems) => {
+            const updatedItems = [...prevSelectedItems];
+            const selectedItem = updatedItems.find((item) => item.name === itemName);
 
-    useEffect(() => {
-        const newSelectedItems = [];
-        for (let item of itemsCount) {
-            for (let i = 0; i < item.value; i++) {
-                newSelectedItems.push(item.name);
+            if (selectedItem) {
+                // Обновляем существующий элемент
+                selectedItem.priceFirstType = updatedData.priceFirstType;
+                selectedItem.priceSecondType = updatedData.priceSecondType;
+                selectedItem.priceThirdType = updatedData.priceThirdType;
+                selectedItem.timeFirstType = updatedData.timeFirstType;
+                selectedItem.timeSecondType = updatedData.timeSecondType;
+                selectedItem.timeThirdType = updatedData.timeThirdType;
+                selectedItem.number = updatedData.number;
+                return updatedItems;
+            } else {
+                // Добавляем новый элемент
+                const newItem = {
+                    name: itemName,
+                    priceFirstType: updatedData.priceFirstType,
+                    priceSecondType: updatedData.priceSecondType,
+                    priceThirdType: updatedData.priceThirdType,
+                    timeFirstType: updatedData.timeFirstType,
+                    timeSecondType: updatedData.timeSecondType,
+                    timeThirdType: updatedData.timeThirdType,
+                    number: updatedData.number
+                };
+                updatedItems.push(newItem);
+                return updatedItems;
             }
-        }
-        setSelectedItems(newSelectedItems);
-    }, [itemsCount]);
+        });
+    };
+
 
     const handleItemChange = (item, value) => {
-        updateItem(item, value);
-
         if (value === '0') {
-            removeItem(item);
+            const updatedSelectedItems = selectedItems.filter(selectedItem => selectedItem.name !== item.name);
+            setSelectedItems(updatedSelectedItems);
+        } else {
+            const updatedData = {
+                priceFirstType: item.priceFirstType,
+                priceSecondType: item.priceSecondType,
+                priceThirdType: item.priceThirdType,
+                timeFirstType: item.timeFirstType,
+                timeSecondType: item.timeSecondType,
+                timeThirdType: item.timeThirdType,
+                number: value
+            };
+
+            updateSelectedItems(item.name, updatedData);
         }
     };
 
@@ -188,17 +199,49 @@ const CreatingPolishingOrder = observer(() => {
     useEffect(() => {
         const carCode = mapCarTypeToCode(carTypeMap);
         setCarType(carCode);
-    }, [carTypeMap]);
+
+        const updatedItems = selectedItems.map((item) => {
+            let price = 0;
+            let time = 0;
+
+            switch (carCode) {
+                case 1:
+                    price = item.priceFirstType * item.number;
+                    time = item.timeFirstType * item.number;
+                    break;
+                case 2:
+                    price = item.priceSecondType * item.number;
+                    time = item.timeSecondType * item.number;
+                    break;
+                case 3:
+                    price = item.priceThirdType * item.number;
+                    time = item.timeThirdType * item.number;
+                    break;
+                default:
+                    price = 0;
+                    time = 0;
+                    break;
+            }
+
+            return {
+                price,
+                time,
+            };
+        });
+
+        const totalPrice = updatedItems.reduce((total, item) => total + item.price, 0);
+        const totalOrderTime = updatedItems.reduce((total, item) => total + item.time, 0);
 
 
-    const handleGetPrice = async (e) => {
+        setPrice(totalPrice);
+        setOrderTime(totalOrderTime);
+    }, [carTypeMap, selectedItems]);
+
+
+    const handleGetFreeTime = async (e) => {
         e.preventDefault();
         try {
-            const response = await getPriceAndFreeTime(selectedItems.map(i => i.replace(/ /g, '_')),
-                carType, "polishing", null, start.toISOString(), end.toISOString());
-
-            setPrice(response.price);
-            setOrderTime(response.time);
+            const response = await getFreeTime(orderTime, "polishing", start.toISOString(), end.toISOString());
 
             const newTimeArray = response.availableTime.map(time => ({
                 startTime: time.startTime,
@@ -207,11 +250,22 @@ const CreatingPolishingOrder = observer(() => {
             }));
 
             setNewTime(newTimeArray);
+
+            const sentence = `Свободное время успешно получено!`;
+            setSuccessResponse(sentence)
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(''));
+                setErrorFlag(flag => !flag);
+
             } else {
-                alert("Системная ошибка, попробуйте позже")
+                setErrorResponse("Системная ошибка, проверьте правильность " +
+                    "введённой информации и попробуйте еще раз")
+                setErrorFlag(flag => !flag)
             }
         }
     }
@@ -246,9 +300,17 @@ const CreatingPolishingOrder = observer(() => {
                 setMainOrders(filteredOrdersMain);
             } catch (error) {
                 if (error.response) {
-                    alert(error.response.data.message)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join(''));
+                    setErrorFlag(flag => !flag);
+
                 } else {
-                    alert("Системная ошибка, попробуйте позже")
+                    setErrorResponse("Системная ошибка, проверьте правильность " +
+                        "введённой информации и попробуйте еще раз")
+                    setErrorFlag(flag => !flag)
                 }
             }
         }
@@ -282,7 +344,9 @@ const CreatingPolishingOrder = observer(() => {
 
         setBoxNumber(boxNumber);
     };
+
     useHistory();
+
     const newOrderMessage = (
         <Router>
             <Notification
@@ -366,8 +430,13 @@ const CreatingPolishingOrder = observer(() => {
         setIsSubmitting(true);
         setSubmitTime(Date.now());
         try {
+            const namesArray = selectedItems.flatMap((item) => {
+                const {name, number} = item;
+                return Array.from({length: number}, () => name);
+            });
 
-            const response = await createPolishingOrder(selectedItems, userContacts,
+
+            const response = await createPolishingOrder(namesArray.map((name) => name.replace(/ /g, '_')), userContacts,
                 requestStartTime.toISOString(), requestEndTime.toISOString(),
                 administrator, specialist, boxNumber, bonuses, comments,
                 carNumber, carType, price, currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription);
@@ -393,7 +462,7 @@ const CreatingPolishingOrder = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join(''));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -489,8 +558,8 @@ const CreatingPolishingOrder = observer(() => {
                                                  marginTop: '10px'
                                              })}
                                              min={0}
-                                             onChange={value => handleItemChange(item.name, value)}
-                                             value={getItemValueByName(item.name) || 0}/>
+                                             onChange={value => handleItemChange(item, value)}
+                                             value={findSelectedItemByName(item.name) || 0}/>
                             </div>
                         </div>
                     ))}
@@ -500,36 +569,41 @@ const CreatingPolishingOrder = observer(() => {
             {selectedItems.length > 0 ? (
                 <div className="selected-items-container text-center">
                     <Form.Label style={{fontWeight: "bold", fontSize: "1.2em"}}>
-                        Доп услуги:
+                        Выбранные услуги:
                     </Form.Label>
                     <div className="selected-items">
-                        {selectedItems
-                            .filter((item, index) => selectedItems.indexOf(item) === index)
-                            .map((item) => {
-                                if (getItemValueByName(item) > 0) {
-                                    return (
-                                        <span key={item} className="item">
-                  {`${item} (${getItemValueByName(item)})`}
-                </span>
-                                    );
+                        {Object.values(
+                            selectedItems.reduce((acc, item) => {
+                                if (item.number > 0) {
+                                    if (!acc[item.name]) {
+                                        acc[item.name] = {
+                                            name: item.name,
+                                            count: 0,
+                                        };
+                                    }
+                                    acc[item.name].count = item.number;
                                 }
-                                return null;
-                            })}
+                                return acc;
+                            }, {})
+                        ).map((groupedItem) => (
+                            <span key={groupedItem.name} className="item">
+                    {`${groupedItem.name} (${groupedItem.count})`}
+                </span>
+                        ))}
                     </div>
                 </div>
             ) : (
                 <div className='selected-items-container text-center'>
                     <Form.Label style={{fontWeight: 'bold', fontSize: '1.2em'}}>
-                        Дополнительные услуги:
+                        Выбранные услуги:
                     </Form.Label>
                     <div className='selected-items-container text-center'>
-                        <span className='empty-list' style={{fontSize: '1.1em'}}>
-                            Нет дополнительных услуг
-                        </span>
+            <span className='empty-list' style={{fontSize: '1.1em'}}>
+                Нет выбранных услуги
+            </span>
                     </div>
-                </div>
-            )
-            }
+                </div>)}
+
             <Divider></Divider>
             <p className="important-input-style">Выберите тип кузова</p>
 
@@ -575,8 +649,8 @@ const CreatingPolishingOrder = observer(() => {
                 }}
             />
 
-            <Button className='full-width' appearance="primary" block onClick={handleGetPrice}>
-                Узнать цену заказа, время и доступное расписание
+            <Button className='full-width' appearance="primary" block onClick={handleGetFreeTime}>
+                Узнать доступное расписание
             </Button>
 
             <div className="label-container">

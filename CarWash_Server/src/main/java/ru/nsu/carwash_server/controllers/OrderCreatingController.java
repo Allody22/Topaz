@@ -35,8 +35,8 @@ import ru.nsu.carwash_server.payload.response.OrderInfoResponse;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersWashingRepository;
-import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
+import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.OrderService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 
@@ -62,7 +62,7 @@ public class OrderCreatingController {
 
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    private final OperationsServiceIml operationsService;
+    private final OperationService operationsService;
 
     private final UserService userService;
 
@@ -73,7 +73,7 @@ public class OrderCreatingController {
             UserService userService,
             OrdersPolishingRepository ordersPolishingRepository,
             OrderService orderService,
-            OperationsServiceIml operationsService,
+            OperationService operationsService,
             SimpMessagingTemplate simpMessagingTemplate) {
         this.userService = userService;
         this.operationsService = operationsService;
@@ -118,7 +118,7 @@ public class OrderCreatingController {
         Integer price = bookingOrderRequest.getPrice();
 
         if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = washingOrderPrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType());
+            price = orderService.getWashingOrderPriceTime(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType()).getPrice();
         }
 
         String orderType = "wash " + bookingOrderRequest.getOrderType();
@@ -179,7 +179,7 @@ public class OrderCreatingController {
         Integer price = bookingOrderRequest.getPrice();
 
         if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = polishingOrderPrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType());
+            price = orderService.getPolishingOrderPriceAndTime(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType()).getPrice();
         }
 
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
@@ -243,7 +243,7 @@ public class OrderCreatingController {
         Integer price = bookingOrderRequest.getPrice();
 
         if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = tireOrderPrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getWheelR());
+            price = orderService.getTireOrderTimePrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getWheelR()).getPrice();
         }
 
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
@@ -304,7 +304,7 @@ public class OrderCreatingController {
         Integer price = bookingOrderRequest.getPrice();
 
         if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = washingOrderPrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType());
+            price = orderService.getWashingOrderPriceTime(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType()).getPrice();
         }
 
         Pair<Order, OrderVersions> result = orderService.saveWashingOrder(ordersWashings, bookingOrderRequest.getStartTime(),
@@ -319,7 +319,7 @@ public class OrderCreatingController {
         OrderVersions orderVersions = result.getSecond();
 
         String operationName = "Create_washing_order";
-        String descriptionMessage = "Админ с логином '" + user.getPhone() + "' создал заказ на автомойку";
+        String descriptionMessage = "Админ с телефоном '" + user.getPhone() + "' создал заказ на автомойку";
 
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
         log.info("createWashingOrder_v1. Admin with login '{}' created a car wash order.", user.getPhone());
@@ -366,7 +366,7 @@ public class OrderCreatingController {
         Integer price = bookingOrderRequest.getPrice();
 
         if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = polishingOrderPrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType());
+            price = orderService.getPolishingOrderPriceAndTime(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType()).getPrice();
         }
 
         Pair<Order, OrderVersions> result = orderService.savePolishingOrder(ordersPolishings, bookingOrderRequest.getStartTime(),
@@ -381,7 +381,7 @@ public class OrderCreatingController {
         OrderVersions newOrderVersion = result.getSecond();
 
         String operationName = "Create_polishing_order";
-        String descriptionMessage = "Админ с логином '" + user.getPhone() + "' создал заказ на полировку";
+        String descriptionMessage = "Админ с телефоном '" + user.getPhone() + "' создал заказ на полировку";
 
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
@@ -427,7 +427,7 @@ public class OrderCreatingController {
         Integer price = bookingOrderRequest.getPrice();
 
         if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = tireOrderPrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getWheelR());
+            price = orderService.getTireOrderTimePrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getWheelR()).getPrice();
         }
 
         var result = orderService.saveTireOrder(ordersTireService,
@@ -443,7 +443,7 @@ public class OrderCreatingController {
         OrderVersions newOrderVersion = result.getSecond();
 
         String operationName = "Create_tire_order";
-        String descriptionMessage = "Админ с логином '" + user.getPhone() + "' создал заказ на шиномонтаж";
+        String descriptionMessage = "Админ с телефоном '" + user.getPhone() + "' создал заказ на шиномонтаж";
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
         log.info("createTireOrder_v1. Admin with login '{}' created a tire order.", user.getPhone());
@@ -456,131 +456,4 @@ public class OrderCreatingController {
                 newOrderVersion.getUserContacts(), newOrderVersion.getCurrentStatus()));
     }
 
-    public int washingOrderPrice(List<String> orderArray, int bodyType) {
-        int price = 0;
-        if (bodyType == 1) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceFirstType();
-            }
-        } else if (bodyType == 2) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceSecondType();
-            }
-
-        } else if (bodyType == 3) {
-            for (var item : orderArray) {
-                var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceThirdType();
-            }
-        }
-        return price;
-    }
-
-
-    public int polishingOrderPrice(List<String> orderArray, int bodyType) {
-        int price = 0;
-        if (bodyType == 1) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceFirstType();
-            }
-        } else if (bodyType == 2) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceSecondType();
-            }
-
-        } else if (bodyType == 3) {
-            for (var item : orderArray) {
-                var currentOrder = ordersPolishingRepository.findByName(item.replace(" ", "_"))
-                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", item.replace("_", " ")));
-                price += currentOrder.getPriceThirdType();
-            }
-        }
-        return price;
-    }
-
-    public int tireOrderPrice(List<String> orderArray, String wheelR) {
-        int price = 0;
-        switch (wheelR) {
-            case "R13":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_13();
-                }
-                break;
-            case "R14":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_14();
-                }
-                break;
-            case "R15":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_15();
-                }
-                break;
-            case "R16":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_16();
-                }
-                break;
-            case "R17":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_17();
-                }
-                break;
-            case "R18":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_18();
-                }
-                break;
-            case "R19":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_19();
-                }
-                break;
-            case "R20":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_20();
-                }
-                break;
-            case "R21":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_21();
-                }
-                break;
-            case "R22":
-                for (var item : orderArray) {
-                    var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
-                    price += currentOrder.getPrice_r_22();
-                }
-                break;
-        }
-        return price;
-    }
 }

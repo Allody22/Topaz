@@ -20,12 +20,11 @@ import ru.nsu.carwash_server.models.secondary.helpers.OrderPriceTimeDoneTypeInfo
 import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
-import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequest;
+import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequestByAdmin;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.UserInformationResponse;
 import ru.nsu.carwash_server.payload.response.UserOrdersResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
-import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.OrderService;
@@ -58,7 +57,7 @@ public class AdminController {
     @Autowired
     public AdminController(
             OrderService orderService,
-            OperationsServiceIml operationsService,
+            OperationService operationsService,
             RoleRepository roleRepository,
             UserService userService) {
         this.operationsService = operationsService;
@@ -122,7 +121,7 @@ public class AdminController {
     @PostMapping("/updateUserInfo_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequest updateUserInfoRequest) {
+    public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequestByAdmin updateUserInfoRequest) {
         var latestUserVersion = userService.getActualUserVersionByPhone(updateUserInfoRequest.getPhone());
 
         User user = latestUserVersion.getUser();
@@ -167,7 +166,7 @@ public class AdminController {
         return ResponseEntity.ok(new MessageResponse(descriptionMessage));
     }
 
-    private static String getString(UpdateUserInfoRequest updateUserInfoRequest, UserVersions newVersion) {
+    private static String getString(UpdateUserInfoRequestByAdmin updateUserInfoRequest, UserVersions newVersion) {
         String newPhone = (updateUserInfoRequest.getPhone() != null) ?
                 "новый username: '" + updateUserInfoRequest.getPhone() + "'," : null;
 

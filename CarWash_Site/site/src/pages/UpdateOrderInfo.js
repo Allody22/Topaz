@@ -41,6 +41,7 @@ const styles = {
 
 const UpdateOrderInfo = observer(() => {
     const [showModal, setShowModal] = useState(false);
+    const [showModalB, setShowModalB] = useState(false);
 
     const handleOpenModal = () => {
         if (orderType) {
@@ -60,8 +61,6 @@ const UpdateOrderInfo = observer(() => {
             }
         }
     }
-
-    const [showModalB, setShowModalB] = useState(false);
 
 
     const [userPhone, setUserPhone] = useState('');
@@ -101,7 +100,6 @@ const UpdateOrderInfo = observer(() => {
     const [boxNumber, setBoxNumber] = useState(0);
     const [bonuses, setBonuses] = useState(0);
     const [comments, setComments] = useState('');
-    const [executedToCode] = useState(false);
 
     const [selectedSaleId, setSelectedSaleId] = useState(null);
 
@@ -114,8 +112,8 @@ const UpdateOrderInfo = observer(() => {
 
     const [successResponse, setSuccessResponse] = useState();
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitTime, setSubmitTime] = useState(0);
+    const [isSubmitting] = useState(false);
+    const [submitTime] = useState(0);
     const [showConfirmation, setShowConfirmation] = useState(false);
 
     const [showConfirmationUpdateOrder, setShowConfirmationUpdateOrder] = useState(false);
@@ -191,6 +189,7 @@ const UpdateOrderInfo = observer(() => {
                     map.set(order, (map.get(order) || 0) + 1);
                     return map;
                 }, new Map());
+
 
                 countMap.forEach((count, item) => {
                     handleItemChange(item, count.toString());
@@ -336,9 +335,17 @@ const UpdateOrderInfo = observer(() => {
             setMainTireOrders(filteredOrdersMain)
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message)
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                setErrorFlag(flag => !flag);
+
             } else {
-                alert("Системная ошибка, попробуйте позже")
+                setErrorResponse("Системная ошибка. " +
+                    "Попробуйте еще раз")
+                setErrorFlag(flag => !flag)
             }
         }
     }
@@ -599,7 +606,7 @@ const UpdateOrderInfo = observer(() => {
 
                 <MyCustomModal show={showModalB} handleClose={handleCloseModal} title="Выберите заказы">
                     <div style={{overflowY: 'auto', maxHeight: '80vh'}}>
-                        {mainOrders.map((item, index) => (
+                        {mainTireOrders.map((item, index) => (
                             <div key={index} style={{
                                 fontSize: '16px',
                                 borderBottom: '1px solid lightgray',

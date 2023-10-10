@@ -288,6 +288,17 @@ export const getPriceAndFreeTime = async (orders, bodyType, orderType, wheelR, s
     return response.data;
 };
 
+export const getFreeTime = async (orderTime, orderType, startTime, endTime) => {
+    const requestBody = {
+        orderTime: orderTime,
+        orderType: orderType,
+        startTime: startTime,
+        endTime: endTime
+    };
+    const response = await $authHost.post('api/orders/management/getFreeTime_v1', requestBody);
+    return response.data;
+};
+
 
 export const getBookedOrdersInTimeInterval = async (startTime, endTime) => {
     const requestBody = {
