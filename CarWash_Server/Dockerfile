@@ -2,7 +2,7 @@ FROM eclipse-temurin:17 as app-build
 ENV RELEASE=17
 
 WORKDIR /opt/build
-COPY ./target/CarWash-1.0.0.jar ./application.jar
+COPY target/*.jar /app.jar
 
 RUN java -Djarmode=layertools -jar application.jar extract
 RUN $JAVA_HOME/bin/jlink \
