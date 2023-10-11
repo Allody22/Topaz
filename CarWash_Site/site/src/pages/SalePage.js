@@ -219,8 +219,8 @@ const SalePage = observer(() => {
                 setDescription("")
                 setStatus("")
                 setUploadedFile(null)
-                handleRefreshDiscounts()
-                await getAllSales();
+                handleRefreshDiscounts();
+                getAllImages();
             } catch (error) {
                 if (error.response) {
                     let messages = [];
@@ -340,8 +340,9 @@ const SalePage = observer(() => {
                             </p>
 
                             {fileExtension === 'png' || fileExtension === 'jpg' || fileExtension === 'jpeg' ? (
-                                <img src={file.url} alt={file.description} style={imageStyle}/>
+                                <img src={file.url} alt={file.description} style={imageStyle} loading="lazy"/>
                             ) : null}
+
                             <div style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                 marginTop: '10px', marginBottom: '20px'

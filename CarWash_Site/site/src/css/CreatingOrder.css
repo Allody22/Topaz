@@ -52,10 +52,12 @@
 }
 
 .selected-items {
-    text-align: center; /* центрируем элементы по горизонтали */
+    text-align: center;
 }
 
 .item {
+    font-weight: bold;
+    border: 1px solid #000;
     display: inline-block;
     background-color: #eee;
     padding: 0.25rem 0.5rem;

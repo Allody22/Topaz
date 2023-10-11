@@ -28,7 +28,7 @@ const columns = [
         accessor: 'description',
     },
     {
-        Header: 'Дата создания заказа',
+        Header: 'Дата и время операции',
         accessor: 'dateOfCreation',
         Cell: ({value}) => (
             value ? (
