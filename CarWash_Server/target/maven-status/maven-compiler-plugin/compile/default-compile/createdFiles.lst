@@ -40,6 +40,7 @@ ru\nsu\carwash_server\payload\response\ActualOrdersResponse.class
 ru\nsu\carwash_server\repository\users\RoleRepository.class
 ru\nsu\carwash_server\payload\request\BookingWashingPolishingOrderRequest$BookingWashingPolishingOrderRequestBuilder.class
 ru\nsu\carwash_server\payload\request\SmsRequest.class
+ru\nsu\carwash_server\payload\response\WashingOrdersPriceTimeAndPart.class
 ru\nsu\carwash_server\repository\users\RefreshTokenRepository.class
 ru\nsu\carwash_server\controllers\FilesController.class
 ru\nsu\carwash_server\services\OrderServiceImp.class
