@@ -540,7 +540,7 @@ const CreatingWashingOrder = observer(() => {
             <p className="input-style-modified">Страница добавления заказов на мойку</p>
             <p className="small-input-style">Здесь вы можете сами создать какой-то заказ мойки на автомойку из всех
                 актуальных услуг, а потом получить всю информацию о нём</p>
-            <p className="small-input-style"><strong>Обязательно </strong> выберите все элементы с красными
+            <p className="small-input-style"><strong>Обязательно</strong>, выберите все элементы с красными
                 под красным текстом</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>

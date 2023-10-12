@@ -577,7 +577,7 @@ const CreatingTireOrder = observer(() => {
             <p className="input-style-modified">Страница добавления заказов на шиномонтаж</p>
             <p className="small-input-style">Здесь вы можете сами создать какой-то заказ
                 на шиномонтаж из всех актуальных услуг, а потом получить всю информацию о нём</p>
-            <p className="small-input-style"><strong>Обязательно </strong> выберите все элементы под красным
+            <p className="small-input-style"><strong>Обязательно</strong>, выберите все элементы под красным
                 текстом</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>

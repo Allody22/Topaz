@@ -25,8 +25,8 @@ import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersWashingRepository;
-import ru.nsu.carwash_server.services.OperationsServiceIml;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
+import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.OrderService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 
@@ -50,12 +50,12 @@ public class ServiceChangingController {
 
     private final UserService userService;
 
-    private final OperationsServiceIml operationsService;
+    private final OperationService operationsService;
 
     @Autowired
     public ServiceChangingController(
             UserService userService,
-            OperationsServiceIml operationsService,
+            OperationService operationsService,
             OrdersWashingRepository ordersWashingRepository,
             OrdersPolishingRepository polishingRepository,
             OrdersTireRepository tireRepository,

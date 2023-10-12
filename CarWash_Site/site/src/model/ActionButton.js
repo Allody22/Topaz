@@ -1,12 +1,12 @@
 import React from 'react';
-import { Button, Image } from 'react-bootstrap';
-import { useHistory } from 'react-router-dom';
+import {Button, Image} from 'react-bootstrap';
+import {useHistory} from 'react-router-dom';
 
 const styles = {
-    buttonContainer: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' },
+    buttonContainer: {display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'},
 };
 
-function ActionButton({ label, route, imageSrc, style }) {
+function ActionButton({label, route, imageSrc, style}) {
     const history = useHistory();
 
     return (
@@ -20,7 +20,7 @@ function ActionButton({ label, route, imageSrc, style }) {
                 {label}
             </Button>
             {/* Добавляем атрибут loading="lazy" к изображению */}
-            <Image src={imageSrc} fluid style={style} loading="lazy" />
+            <Image src={imageSrc} fluid style={style} loading="lazy"/>
         </div>
     );
 }

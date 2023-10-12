@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
+import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.secondary.helpers.SingleOrderResponse;
 import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.secondary.helpers.TimeIntervals;
@@ -37,6 +38,7 @@ import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.OrdersArrayResponse;
 import ru.nsu.carwash_server.payload.response.TimeAndPriceAndFreeTimeResponse;
 import ru.nsu.carwash_server.payload.response.TimeAndPriceResponse;
+import ru.nsu.carwash_server.payload.response.WashingOrdersPriceTimeAndPart;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersWashingRepository;
@@ -271,15 +273,16 @@ public class OrderManagementController {
     @GetMapping("/getAllWashingServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<?> getAllWashingServicesWithPriceAndTime() {
-        var washingOrdersWithTimeAndPrice = orderService.findAllWashingService();
+        List<OrdersWashing> washingOrdersWithTimeAndPrice = orderService.findAllWashingService();
         if (washingOrdersWithTimeAndPrice.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Услуг мойки не существует"));
         }
-        List<WashingPolishingOrderEntity> washingPolishingOrderEntities = new ArrayList<>();
-        for (var services : washingOrdersWithTimeAndPrice) {
-            washingPolishingOrderEntities.add(new WashingPolishingOrderEntity(services.getName(),
+        List<WashingOrdersPriceTimeAndPart> washingPolishingOrderEntities = new ArrayList<>();
+        for (OrdersWashing services : washingOrdersWithTimeAndPrice) {
+            washingPolishingOrderEntities.add(new WashingOrdersPriceTimeAndPart(services.getName(),
                     services.getPriceFirstType(), services.getPriceSecondType(), services.getPriceThirdType(),
-                    services.getTimeFirstType(), services.getTimeSecondType(), services.getTimeThirdType(), services.getRole()));
+                    services.getTimeFirstType(), services.getTimeSecondType(), services.getTimeThirdType(), services.getRole(),
+                    services.getAssociatedOrder()));
         }
         return ResponseEntity.ok(washingPolishingOrderEntities);
     }

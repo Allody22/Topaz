@@ -316,8 +316,6 @@ const SalePage = observer(() => {
     return (
         <>
             <p className="input-style-modified">Страница акций</p>
-            <p className="small-input-style">Если где-то появляется надпись "Неизвестно",
-                то перезайдите на эту страницу.</p>
             <p className="small-input-style">Вы можете добавить акцию на какой-то определённый день недели
                 или обновить текущую.</p>
             <p className="small-input-style"><strong>Пожалуйста</strong>, внимательно выбирайте картинки

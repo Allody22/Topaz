@@ -8,10 +8,9 @@ import 'rsuite/dist/rsuite.css';
 
 import InputField from "../model/InputField";
 import {
-    getActualPolishingOrders,
-    getActualTireOrders,
-    getAllWashingOrders,
-    getServiceInfo,
+    getAllPolishingServicesWithPriceAndTime,
+    getAllTireServicesWithPriceAndTime,
+    getAllWashingServicesWithPriceAndTime,
     updatePolishingService,
     updateTireService,
     updateWashingService,
@@ -21,7 +20,7 @@ import socketStore from "../store/SocketStore";
 import {BrowserRouter as Router, useHistory} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
-import CustomModal from '../model/MyCustomModal';
+import MyCustomModal from '../model/MyCustomModal';
 
 
 const inputStyle = {
@@ -30,238 +29,106 @@ const inputStyle = {
 }
 
 const ChangeServiceInfo = observer(() => {
-    const [isSubmitting] = useState(false);
-    const [submitTime] = useState(0);
-    const [showModal, setShowModal] = useState(false);
+        const [isSubmitting] = useState(false);
+        const [submitTime] = useState(0);
+        const [showModal, setShowModal] = useState(false);
 
-    const [showModalB, setShowModalB] = useState(false);
-    useHistory();
-    const [orderName, setOrderName] = useState(null);
+        const [showModalB, setShowModalB] = useState(false);
+        useHistory();
 
-    const [prices, setPrices] = useState({
-        firstType: 0,
-        secondType: 0,
-        thirdType: 0
-    });
+        const toaster = useToaster();
 
-    const [times, setTimes] = useState({
-        firstType: 0,
-        secondType: 0,
-        thirdType: 0
-    });
+        const [showConfirmation, setShowConfirmation] = useState(false);
 
+        const [response, setResponse] = useState();
+        const [errorResponse, setErrorResponse] = useState();
+        const [errorFlag, setErrorFlag] = useState(false);
 
-    const toaster = useToaster();
+        const [currentService, setCurrentService] = useState([{
+            name: null, priceFirstType: null, priceSecondType: null, priceThirdType: null,
+            timeFirstType: null, timeSecondType: null, timeThirdType: null, price_r_13: null,
+            price_r_14: null, price_r_15: null, price_r_16: null, price_r_17: null, price_r_18: null,
+            price_r_19: null, price_r_20: null, price_r_21: null, price_r_22: null, time_r_13: null,
+            time_r_14: null, time_r_15: null, time_r_16: null, time_r_17: null, time_r_18: null,
+            time_r_19: null, time_r_20: null, time_r_21: null, time_r_22: null, type: null
+        }]);
 
-    const [showConfirmation, setShowConfirmation] = useState(false);
-
-    const [response, setResponse] = useState();
-    const [errorResponse, setErrorResponse] = useState();
-    const [errorFlag, setErrorFlag] = useState(false);
+        const [allOrders, setAllOrders] = useState([]);
 
 
-    const [allOrders, setAllOrders] = useState([]);
-    const [wheelSizeAndPrice, setWheelSizeAndPrice] = useState([{wheelR: null, price: null}]);
-    const [wheelSizeAndTime, setWheelSizeAndTime] = useState([{wheelR: null, time: null}]);
+        const options = allOrders
+            .map((item) => ({
+                label: item.name,
+                value: item.name,
+                type: item.type
+            }))
+            .flat();
 
+        const newOrderMessage = (
+            <Router>
+                <Notification
+                    type="info"
+                    header="Новый заказ!"
+                    closable
+                    timeout={null}
+                    style={{border: '1px solid black'}}
+                >
+                    <div style={{width: 320}}>
+                        {socketStore.message && (
+                            <>
+                                <div style={{textAlign: 'left'}}>
+                                    <p>Тип заказа: {orderTypeMap[JSON.parse(socketStore.message).orderType]}</p>
+                                    <p>Время начала
+                                        заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                    <p>Время конца
+                                        заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </Notification>
+            </Router>
+        );
 
-    const options = allOrders
-        .map((item) => ({
-            label: item.name,
-            value: item.name,
-            type: item.type
-        }))
-        .flat();
-
-    const newOrderMessage = (
-        <Router>
-            <Notification
-                type="info"
-                header="Новый заказ!"
-                closable
-                timeout={null}
-                style={{border: '1px solid black'}}
-            >
-                <div style={{width: 320}}>
-                    {socketStore.message && (
-                        <>
-                            <div style={{textAlign: 'left'}}>
-                                <p>Тип заказа: {orderTypeMap[JSON.parse(socketStore.message).orderType]}</p>
-                                <p>Время начала
-                                    заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                                <p>Время конца
-                                    заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </Notification>
-        </Router>
-    );
-
-    useEffect(() => {
-        if (socketStore.message && !socketStore.isAlreadyShown) {
-            toaster.push(newOrderMessage, {placement: "bottomEnd"});
-            socketStore.isAlreadyShown = true;
-        }
-    }, [socketStore.message]);
-
-
-    useEffect(() => {
-        async function getAllOrders() {
-            try {
-                const responseWashing = await getAllWashingOrders();
-                const ordersOfWashing = [...responseWashing.mainOrders.map(item => item.replace(/_/g, ' ')),
-                    ...responseWashing.additionalOrders.map(item => item.replace(/_/g, ' '))];
-                const ordersWithTypesWashing = ordersOfWashing.map((order) => ({name: order, type: "Мойка"}));
-
-
-                const responsePolishing = await getActualPolishingOrders();
-                const responseTire = await getActualTireOrders();
-
-                const ordersOfTireService = responseTire.orders.map(item => item.replace(/_/g, ' '));
-                const ordersWithTypesTire = ordersOfTireService.map((order) => ({name: order, type: "Шиномонтаж"}));
-
-                const ordersOfPolishing = responsePolishing.orders.map(item => item.replace(/_/g, ' '));
-                const ordersWithTypes = ordersOfPolishing.map((order) => ({name: order, type: "Полировка"}));
-
-                setAllOrders([...ordersWithTypes, ...ordersWithTypesTire, ...ordersWithTypesWashing]);
-
-                setWheelSizeAndPrice([])
-            } catch (error) {
-                if (error.response) {
-
-                    let messages = [];
-                    for (let key in error.response.data) {
-                        messages.push(error.response.data[key]);
-                    }
-                    setErrorResponse(messages.join(''));
-                    setErrorFlag(flag => !flag);
-
-                } else {
-                    alert("Системная ошибка, попробуйте позже")
-                }
+        useEffect(() => {
+            if (socketStore.message && !socketStore.isAlreadyShown) {
+                toaster.push(newOrderMessage, {placement: "bottomEnd"});
+                socketStore.isAlreadyShown = true;
             }
-        }
-
-        getAllOrders();
-    }, []);
-
-    const handleOpenModal = useCallback(() => setShowModal(true), []);
-    const handleCloseModal = useCallback(() => setShowModal(false), []);
-// и так далее для других функций
+        }, [socketStore.message]);
 
 
-    const handleOpenModalB = useCallback(() => setShowModalB(true), []);
-    const handleCloseModalB = useCallback(() => setShowModalB(false), []);
-
-
-    const getItemTypeByName = (name) => {
-        const item = allOrders.find(item => item.name === name);
-        return item ? item.type : undefined;
-    }
-
-    const getPriceByWheelR = (name) => {
-        const item = wheelSizeAndPrice.find(item => item.level === name);
-        return item ? item.price : "Нет информации про цену";
-    }
-
-    const getTimeByWheelR = (name) => {
-        const item = wheelSizeAndTime.find(item => item.level === name);
-        return item ? item.time : "Нет информации про цену";
-    }
-
-
-    const mapOrderTypeToCode = (orderType) => {
-        switch (orderType) {
-            case "Мойка":
-                return "Wash";
-            case "Полировка":
-                return "Polishing";
-            case "Шиномонтаж":
-                return "Tire";
-            default:
-                return -1;
-        }
-    };
-
-    function setPricesValues({firstType, secondType, thirdType}) {
-        setPrices(prevState => ({
-            ...prevState,
-            firstType,
-            secondType,
-            thirdType,
-        }));
-    }
-
-    function setTimesValues({firstType, secondType, thirdType}) {
-        setTimes(prevState => ({
-            ...prevState,
-            firstType,
-            secondType,
-            thirdType,
-        }));
-    }
-
-
-    useEffect(() => {
-        async function getServiceInfoRequest() {
-            const enOrderType = mapOrderTypeToCode(getItemTypeByName(orderName));
-            if (enOrderType !== -1) {
+        useEffect(() => {
+            async function getAllOrders() {
                 try {
-                    const responseOfServiceInfo = await getServiceInfo(orderName.replace(/ /g, '_'), enOrderType);
 
-                    if (getItemTypeByName(orderName) === "Мойка") {
-                        setPricesValues({
-                            firstType: responseOfServiceInfo.priceFirstType,
-                            secondType: responseOfServiceInfo.priceSecondType,
-                            thirdType: responseOfServiceInfo.priceThirdType,
-                        });
-                        setTimesValues({
-                            firstType: responseOfServiceInfo.timeFirstType,
-                            secondType: responseOfServiceInfo.timeSecondType,
-                            thirdType: responseOfServiceInfo.timeThirdType,
-                        });
-                        setWheelSizeAndTime([]);
-                        setWheelSizeAndPrice([]);
+                    //Версия с ценой и временем
+                    const tireOrdersResponse = await getAllTireServicesWithPriceAndTime();
+                    const filteredTireOrders = tireOrdersResponse.map(item => ({
+                        ...item,
+                        name: item.name.replace(/_/g, ' '),
+                        type: "Шиномонтаж"
+                    }));
 
-                    } else if (getItemTypeByName(orderName) === "Шиномонтаж") {
-                        const prices = [];
-                        const time = [];
-                        Object.keys(responseOfServiceInfo).forEach((key) => {
-                            if (key.startsWith('price_r_')) {
-                                prices.push({
-                                    level: key.replace('price_r_', ''),
-                                    price: responseOfServiceInfo[key],
-                                });
-                            } else if (key.startsWith('time_r_')) {
-                                time.push({
-                                    level: key.replace('time_r_', ''),
-                                    time: responseOfServiceInfo[key],
-                                });
-                            }
-                        });
-                        setWheelSizeAndPrice(prices);
-                        setWheelSizeAndTime(time);
-                        setPricesValues({firstType: 0, secondType: 0, thirdType: 0});
-                        setTimesValues({firstType: 0, secondType: 0, thirdType: 0});
+                    const polishingOrdersResponse = await getAllPolishingServicesWithPriceAndTime();
+                    const filteredPolishingOrders = polishingOrdersResponse.map(item => ({
+                        ...item,
+                        name: item.name.replace(/_/g, ' '),
+                        type: "Полировка"
+                    }));
 
-                    } else if (getItemTypeByName(orderName) === "Полировка") {
-                        setPricesValues({
-                            firstType: responseOfServiceInfo.priceFirstType,
-                            secondType: responseOfServiceInfo.priceSecondType,
-                            thirdType: responseOfServiceInfo.priceThirdType,
-                        });
-                        setTimesValues({
-                            firstType: responseOfServiceInfo.timeFirstType,
-                            secondType: responseOfServiceInfo.timeSecondType,
-                            thirdType: responseOfServiceInfo.timeThirdType,
-                        });
-                        setWheelSizeAndPrice([]);
-                        setWheelSizeAndTime([]);
-                    }
+                    const washingOrdersResponse = await getAllWashingServicesWithPriceAndTime();
+                    const filteredWashingOrders = washingOrdersResponse.map(item => ({
+                        ...item,
+                        name: item.name.replace(/_/g, ' '),
+                        type: "Мойка"
+                    }));
+
+                    setAllOrders([...filteredWashingOrders, ...filteredTireOrders, ...filteredPolishingOrders]);
+
                 } catch (error) {
                     if (error.response) {
+
                         let messages = [];
                         for (let key in error.response.data) {
                             messages.push(error.response.data[key]);
@@ -274,269 +141,531 @@ const ChangeServiceInfo = observer(() => {
                     }
                 }
             }
+
+            getAllOrders();
+        }, []);
+
+        const handleOpenModal = useCallback(() => setShowModal(true), []);
+        const handleCloseModal = useCallback(() => setShowModal(false), []);
+
+
+        const handleOpenModalB = useCallback(() => setShowModalB(true), []);
+        const handleCloseModalB = useCallback(() => setShowModalB(false), []);
+
+
+        const getItemTypeByName = (name) => {
+            const item = allOrders.find(item => item.name === name);
+            return item || undefined;
         }
 
-        getServiceInfoRequest();
-    }, [orderName]);
+        const handleOrderChange = (value) => {
+            setCurrentService(null)
+            const service = getItemTypeByName(value);
+            setCurrentService(service)
+        };
 
+        const errorResponseMessage = (
+            <Notification
+                type="error"
+                header="Ошибка!"
+                closable
+                style={{border: '1px solid black'}}
+            >
+                <div style={{width: 320}}>
+                    {errorResponse}
+                </div>
+            </Notification>
+        );
 
-    const setPriceByWheelRForNewInfo = (event, level) => {
-        setWheelSizeAndPrice(prevState => {
-            const index = prevState.findIndex(item => item.level === level);
-            if (index === -1) {
-                return prevState;
-            } else {
-                const newArray = [...prevState];
-                newArray[index].price = Number(event);
-                return newArray;
+        useEffect(() => {
+            if (errorResponse) {
+                toaster.push(errorResponseMessage, {placement: "bottomEnd"});
             }
-        });
-    };
+        }, [errorFlag]);
 
-    const setTimeByWheelRForNewInfo = (event, level) => {
-        setWheelSizeAndTime(prevState => {
-            const index = prevState.findIndex(item => item.level === level);
-            if (index === -1) {
-                return prevState;
-            } else {
-                const newArray = [...prevState];
-                newArray[index].time = Number(event);
-                return newArray;
+        const message = (
+            <Notification
+                type="success"
+                header="Успешно!"
+                closable
+                style={{border: '1px solid black'}}
+            >
+                <div style={{width: 320}}>
+                    <p>{response}</p>
+                    <p>Вы успешно обновили информацию в базе данных.</p>
+                </div>
+            </Notification>
+        );
+
+        useEffect(() => {
+            if (response) {
+                toaster.push(message, {placement: "bottomEnd"});
             }
-        });
-    };
+        }, [response]);
 
-    const handleOrderChange = (value) => {
-        setOrderName(value);
-    };
+        const handleSubmit = async (event) => {
+            event.preventDefault();
 
-    const errorResponseMessage = (
-        <Notification
-            type="error"
-            header="Ошибка!"
-            closable
-            style={{border: '1px solid black'}}
-        >
-            <div style={{width: 320}}>
-                {errorResponse}
-            </div>
-        </Notification>
-    );
+            const serviceName = currentService.name.replace(/ /g, '_');
 
-    useEffect(() => {
-        if (errorResponse) {
-            toaster.push(errorResponseMessage, {placement: "bottomEnd"});
-        }
-    }, [errorFlag]);
+            console.log(currentService)
 
-    const message = (
-        <Notification
-            type="success"
-            header="Успешно!"
-            closable
-            style={{border: '1px solid black'}}
-        >
-            <div style={{width: 320}}>
-                <p>{response}</p>
-                <p>Вы успешно обновили информацию в базе данных.</p>
-            </div>
-        </Notification>
-    );
+            if (showConfirmation) {
+                try {
+                    let response;
+                    switch (currentService.type) {
+                        case "Мойка":
+                            response = await updateWashingService(currentService.priceFirstType, currentService.priceSecondType,
+                                currentService.priceThirdType, currentService.timeFirstType,
+                                currentService.timeSecondType, currentService.timeThirdType, serviceName);
+                            break;
 
-    useEffect(() => {
-        if (response) {
-            toaster.push(message, {placement: "bottomEnd"});
-        }
-    }, [response]);
+                        case "Шиномонтаж":
+                            response = await updateTireService(currentService.price_r_13, currentService.price_r_14, currentService.price_r_15,
+                                currentService.price_r_16, currentService.price_r_17, currentService.price_r_18, currentService.price_r_19,
+                                currentService.price_r_20, currentService.price_r_21, currentService.price_r_22, currentService.time_r_13,
+                                currentService.time_r_14, currentService.time_r_15, currentService.time_r_16, currentService.time_r_17,
+                                currentService.time_r_18, currentService.time_r_19, currentService.time_r_20, currentService.time_r_21, currentService.time_r_22,
+                                serviceName);
+                            break;
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+                        case "Полировка":
+                            response = await updatePolishingService(currentService.priceFirstType, currentService.priceSecondType,
+                                currentService.priceThirdType, currentService.timeFirstType,
+                                currentService.timeSecondType, currentService.timeThirdType, serviceName);
+                            break;
+                    }
 
-        if (showConfirmation) {
-            try {
-                let response;
-                const serviceName = orderName.replace(/ /g, '_');
+                    console.log(response)
+                    setResponse(response.message);
 
-                switch (getItemTypeByName(orderName)) {
-                    case "Мойка":
-                        response = await updateWashingService(prices.firstType, prices.secondType, prices.thirdType, times.firstType,
-                            times.secondType, times.thirdType, serviceName);
-                        break;
-
-                    case "Шиномонтаж":
-                        const pricesByWheelR = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22].map(size => getPriceByWheelR(String(size)));
-                        const timesByWheelR = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22].map(size => getTimeByWheelR(String(size)));
-                        response = await updateTireService(...pricesByWheelR, ...timesByWheelR, serviceName);
-                        break;
-
-                    case "Полировка":
-                        response = await updatePolishingService(prices.firstType, prices.secondType, prices.thirdType, times.firstType,
-                            times.secondType, times.thirdType, serviceName);
-                        break;
-
-                    default:
-                        throw new Error("Unknown service type");
+                } catch (error) {
+                    if (error.response) {
+                        setErrorResponse(error.response.data.message);
+                    } else {
+                        setErrorResponse("Системная ошибка, проверьте правильность введённой информации и попробуйте еще раз");
+                    }
+                    setErrorFlag(flag => !flag);
                 }
-
-                setResponse(response.message);
-
-            } catch (error) {
-                if (error.response) {
-                    setErrorResponse(error.response.data.message);
-                } else {
-                    setErrorResponse("Системная ошибка, проверьте правильность введённой информации и попробуйте еще раз");
-                }
-                setErrorFlag(flag => !flag);
+                setShowConfirmation(false);
+            } else {
+                setShowConfirmation(true);
             }
-            setShowConfirmation(false);
-        } else {
-            setShowConfirmation(true);
-        }
-    };
+        };
 
-    return (
-        <>
-            <p className="input-style-modified">Страница изменения информации об услуге</p>
-            <p className="small-input-style">Цена услуг и время их выполнения на сайте и в приложении берётся из базы
-                данных,
-                если эту информацию необходимо обновить, то вы можете это сделать на этой странице</p>
+        return (
+            <>
+                <p className="input-style-modified">Страница изменения информации об услуге</p>
+                <p className="small-input-style">Цена услуг и время их выполнения на сайте и в приложении берётся из базы
+                    данных,
+                    если эту информацию необходимо обновить, то вы можете это сделать на этой странице</p>
 
-            <p style={inputStyle}>Выберите услугу, информацию о которой хотите поменять</p>
-            <SelectPicker
-                data={options}
-                groupBy="type"
-                style={{
-                    width: '500px', justifyContent: 'center',
-                    margin: '25px auto 0', WebkitTextFillColor: "#000000",
-                    alignItems: 'center', display: 'flex',
-                }}
-                value={orderName}
-                onSelect={handleOrderChange}
-            />
-            <Form onSubmit={handleSubmit}>
-                <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
-                    Посмотреть цену для различных видов шин (доступно только для заказов шиномонтажа)
-                </Button>
+                <p style={inputStyle}>Выберите услугу, информацию о которой хотите поменять</p>
+                <SelectPicker
+                    data={options}
+                    groupBy="type"
+                    style={{
+                        width: '500px', justifyContent: 'center',
+                        margin: '25px auto 0', WebkitTextFillColor: "#000000",
+                        alignItems: 'center', display: 'flex',
+                    }}
+                    value={currentService.name}
+                    onSelect={handleOrderChange}
+                />
+                <Form onSubmit={handleSubmit}>
+                    <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
+                        Посмотреть цену для различных видов шин (доступно только для заказов шиномонтажа)
+                    </Button>
 
-                <CustomModal show={showModal} handleClose={handleCloseModal} title="Цены для различных диаметров колёс">
-                    {wheelSizeAndPrice.map(item => `Размер шин: R${item.level}`).sort().map(item => (
-                        <div key={item}
+                    {/*ИЗМЕНЕНИЕ ЦЕНЫ И ВРЕМЕНИ*/}
+
+                    <MyCustomModal show={showModal} handleClose={handleCloseModal} title="Цены для шин">
+                        <div key={"ЦЕНА R13"}
                              style={{
                                  display: 'flex',
                                  alignItems: 'center',
                                  justifyContent: 'space-between',
                                  fontSize: '16px'
                              }}>
-                            <span className='text' style={{marginRight: '8px'}}>{item}</span>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R13</span>
                             <InputField
-                                id='priceForR'
-                                value={getPriceByWheelR(item.slice(-2))}
-                                onChange={(event) => setPriceByWheelRForNewInfo(event, item.slice(-2))}
+                                id='priceForR13'
+                                value={currentService.price_r_13}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_13: value}))}
                             />
                         </div>
-                    ))}
-                </CustomModal>
-
-                <Button className='full-width' variant='secondary' onClick={handleOpenModalB}>
-                    Посмотреть врем выполнения для различных размеров колёс (доступно только для заказов шиномонтажа)
-                </Button>
-
-                <CustomModal show={showModalB} handleClose={handleCloseModalB}
-                             title="Время для различных диаметров колёс">
-                    {wheelSizeAndPrice.map(item => `Размер шин: R${item.level}`).sort().map(item => (
-                        <div key={item}
+                        <div key={"ЦЕНА R14"}
                              style={{
                                  display: 'flex',
                                  alignItems: 'center',
                                  justifyContent: 'space-between',
                                  fontSize: '16px'
                              }}>
-                            <span className='text' style={{marginRight: '8px'}}>{item}</span>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R14</span>
                             <InputField
-                                id='timeForR'
-                                value={getTimeByWheelR(item.slice(-2))}
-                                onChange={(event) => setTimeByWheelRForNewInfo(event, item.slice(-2))}
+                                id='priceForR14'
+                                value={currentService.price_r_14}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_14: value}))}
                             />
                         </div>
-                    ))}
-                </CustomModal>
 
-                <InputField
-                    label='Цена за 1 тип кузова'
-                    id='priceFirstType'
-                    value={prices.firstType}
-                    inputStyle={inputStyle}
-                    onChange={(value) => setPrices(prev => ({...prev, firstType: value}))}
-                />
-                <InputField
-                    label='Цена за 2 тип кузова'
-                    id='priceSecondType'
-                    value={prices.secondType}
-                    inputStyle={inputStyle}
-                    onChange={(value) => setPrices(prev => ({...prev, secondType: value}))}
-                />
-                <InputField
-                    label='Цена за 3 тип кузова'
-                    id='priceThirdType'
-                    value={prices.thirdType}
-                    inputStyle={inputStyle}
-                    onChange={(value) => setPrices(prev => ({...prev, thirdType: value}))}
-                />
-                <InputField
-                    label='Примерное время выполнения с 1 типом кузова'
-                    id='timeFirstType'
-                    value={times.firstType}
-                    inputStyle={inputStyle}
-                    onChange={(value) => setTimes(prev => ({...prev, firstType: value}))}
-                />
-                <InputField
-                    label='Примерное время выполнения со 2 типом кузова'
-                    id='timeSecondType'
-                    value={times.secondType}
-                    inputStyle={inputStyle}
-                    onChange={(value) => setTimes(prev => ({...prev, secondType: value}))}
-                />
-                <InputField
-                    label='Примерное время выполнения с 3 типом кузова'
-                    id='timeThirdType'
-                    value={times.thirdType}
-                    inputStyle={inputStyle}
-                    onChange={(value) => setTimes(prev => ({...prev, thirdType: value}))}
-                />
+                        <div key={"ЦЕНА R15"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R15</span>
+                            <InputField
+                                id='priceForR15'
+                                value={currentService.price_r_15}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_15: value}))}
+                            />
+                        </div>
 
-                {showConfirmation && (
-                    <div className='confirmation-container'>
-                        <div className='confirmation-message'>
-                            <p style={inputStyle}>Вы уверены, что хотите отправить запрос?</p>
-                            <p>Это изменит информацию об этом заказе ВО ВСЕЙ базе данных для ВСЕХ</p>
-                            <div className='confirmation-buttons'>
-                                <Button onClick={() => setShowConfirmation(false)}
-                                        style={{marginRight: '10px', marginTop: '10px'}}>
-                                    Отменить
-                                </Button>
-                                <Button variant='primary' style={{marginLeft: '10px', marginTop: '10px'}} type='submit'
-                                        onSubmit={handleSubmit}>
-                                    Подтвердить
-                                </Button>
+                        <div key={"ЦЕНА R16"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R16</span>
+                            <InputField
+                                id='priceForR16'
+                                value={currentService.price_r_16}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_16: value}))}
+                            />
+                        </div>
+
+                        <div key={"ЦЕНА R17"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R17</span>
+                            <InputField
+                                id='priceForR17'
+                                value={currentService.price_r_17}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_17: value}))}
+                            />
+                        </div>
+
+
+                        <div key={"ЦЕНА R18"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R18</span>
+                            <InputField
+                                id='priceForR18'
+                                value={currentService.price_r_18}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_18: value}))}
+                            />
+                        </div>
+
+                        <div key={"ЦЕНА R19"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R19</span>
+                            <InputField
+                                id='priceForR19'
+                                value={currentService.price_r_19}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_19: value}))}
+                            />
+                        </div>
+
+                        <div key={"ЦЕНА R20"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R20</span>
+                            <InputField
+                                id='priceForR20'
+                                value={currentService.price_r_20}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_20: value}))}
+                            />
+                        </div>
+
+                        <div key={"ЦЕНА R21"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R21</span>
+                            <InputField
+                                id='priceForR21'
+                                value={currentService.price_r_21}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_21: value}))}
+                            />
+                        </div>
+
+
+                        <div key={"ЦЕНА R22"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>ЦЕНА ЗА R22</span>
+                            <InputField
+                                id='priceForR22'
+                                value={currentService.price_r_22}
+                                onChange={(value) => setCurrentService(prev => ({...prev, price_r_22: value}))}
+                            />
+                        </div>
+                    </MyCustomModal>
+
+                    <Button className='full-width' variant='secondary' onClick={handleOpenModalB}>
+                        Посмотреть врем выполнения для различных размеров колёс (доступно только для заказов шиномонтажа)
+                    </Button>
+
+                    <MyCustomModal show={showModalB} handleClose={handleCloseModalB} title="ВРЕМЯ ЗАКАЗОВ">
+                        <div key={"Время R13"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R13</span>
+                            <InputField
+                                id='timeForR13'
+                                value={currentService.time_r_13}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_13: value}))}
+                            />
+                        </div>
+                        <div key={"Время R14"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R14</span>
+                            <InputField
+                                id='timeForR14'
+                                value={currentService.time_r_14}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_14: value}))}
+                            />
+                        </div>
+
+                        <div key={"Время R15"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R15</span>
+                            <InputField
+                                id='timeForR15'
+                                value={currentService.time_r_15}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_15: value}))}
+                            />
+                        </div>
+
+                        <div key={"Время R16"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R16</span>
+                            <InputField
+                                id='timeForR16'
+                                value={currentService.time_r_16}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_16: value}))}
+                            />
+                        </div>
+
+                        <div key={"Время R17"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R17</span>
+                            <InputField
+                                id='timeForR17'
+                                value={currentService.time_r_17}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_17: value}))}
+                            />
+                        </div>
+
+
+                        <div key={"Время R18"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R18</span>
+                            <InputField
+                                id='timeForR18'
+                                value={currentService.time_r_18}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_18: value}))}
+                            />
+                        </div>
+
+                        <div key={"Время R19"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R19</span>
+                            <InputField
+                                id='timeForR19'
+                                value={currentService.time_r_19}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_19: value}))}
+                            />
+                        </div>
+
+                        <div key={"Время R20"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R20</span>
+                            <InputField
+                                id='timeForR20'
+                                value={currentService.time_r_20}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_20: value}))}
+                            />
+                        </div>
+
+                        <div key={"Время R21"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R21</span>
+                            <InputField
+                                id='timeForR21'
+                                value={currentService.time_r_21}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_21: value}))}
+                            />
+                        </div>
+
+
+                        <div key={"Время R22"}
+                             style={{
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'space-between',
+                                 fontSize: '16px'
+                             }}>
+                            <span className='text' style={{marginRight: '8px'}}>Время ЗА R22</span>
+                            <InputField
+                                id='timeForR22'
+                                value={currentService.time_r_22}
+                                onChange={(value) => setCurrentService(prev => ({...prev, time_r_22: value}))}
+                            />
+                        </div>
+                    </MyCustomModal>
+
+                    <InputField
+                        label='Цена за 1 тип кузова'
+                        id='priceFirstType'
+                        value={currentService.priceFirstType}
+                        inputStyle={inputStyle}
+                        onChange={(value) => setCurrentService(prev => ({...prev, priceFirstType: value}))}
+                    />
+                    <InputField
+                        label='Цена за 2 тип кузова'
+                        id='priceSecondType'
+                        value={currentService.priceSecondType}
+                        inputStyle={inputStyle}
+                        onChange={(value) => setCurrentService(prev => ({...prev, priceSecondType: value}))}
+                    />
+                    <InputField
+                        label='Цена за 3 тип кузова'
+                        id='priceThirdType'
+                        value={currentService.priceThirdType}
+                        inputStyle={inputStyle}
+                        onChange={(value) => setCurrentService(prev => ({...prev, priceThirdType: value}))}
+                    />
+                    <InputField
+                        label='Примерное время выполнения с 1 типом кузова'
+                        id='timeFirstType'
+                        value={currentService.timeFirstType}
+                        inputStyle={inputStyle}
+                        onChange={(value) => setCurrentService(prev => ({...prev, timeFirstType: value}))}
+                    />
+                    <InputField
+                        label='Примерное время выполнения со 2 типом кузова'
+                        id='timeSecondType'
+                        value={currentService.timeSecondType}
+                        inputStyle={inputStyle}
+                        onChange={(value) => setCurrentService(prev => ({...prev, timeSecondType: value}))}
+                    />
+                    <InputField
+                        label='Примерное время выполнения с 3 типом кузова'
+                        id='timeThirdType'
+                        value={currentService.timeThirdType}
+                        inputStyle={inputStyle}
+                        onChange={(value) => setCurrentService(prev => ({...prev, timeThirdType: value}))}
+                    />
+
+                    {showConfirmation && (
+                        <div className='confirmation-container'>
+                            <div className='confirmation-message'>
+                                <p style={inputStyle}>Вы уверены, что хотите отправить запрос?</p>
+                                <p>Это изменит информацию об этом заказе ВО ВСЕЙ базе данных для ВСЕХ</p>
+                                <div className='confirmation-buttons'>
+                                    <Button onClick={() => setShowConfirmation(false)}
+                                            style={{marginRight: '10px', marginTop: '10px'}}>
+                                        Отменить
+                                    </Button>
+                                    <Button variant='primary' style={{marginLeft: '10px', marginTop: '10px'}} type='submit'
+                                            onSubmit={handleSubmit}>
+                                        Подтвердить
+                                    </Button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                <div className='submit-container'>
-                    <Button
-                        className='btn-submit'
-                        variant='primary'
-                        type='submit'
-                        disabled={isSubmitting || Date.now() < submitTime + 4000}
-                        style={{marginBottom: '20px', marginTop: '20px'}}
-                    >
-                        {isSubmitting ? 'Обработка запроса...' : 'Изменить информацию'}
-                    </Button>
-                </div>
-            </Form>
-        </>
-    );
-});
+                    <div className='submit-container'>
+                        <Button
+                            className='btn-submit'
+                            variant='primary'
+                            type='submit'
+                            disabled={isSubmitting || Date.now() < submitTime + 4000}
+                            style={{marginBottom: '20px', marginTop: '20px'}}
+                        >
+                            {isSubmitting ? 'Обработка запроса...' : 'Изменить информацию'}
+                        </Button>
+                    </div>
+                </Form>
+            </>
+        );
+    })
+;
 
 export default ChangeServiceInfo;
