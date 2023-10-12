@@ -1,14 +1,12 @@
 import React from 'react';
-import {Button} from 'react-bootstrap';
-import {useHistory} from 'react-router-dom';
+import { Button, Image } from 'react-bootstrap';
+import { useHistory } from 'react-router-dom';
 
 const styles = {
-    buttonContainer: {display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px'},
-    image: {width: '100px', height: '60px', marginLeft: '15px', marginTop: '20px'},
-    verySmallImage: {width: '85px', height: '60px', marginLeft: '30px', marginTop: '20px'},
+    buttonContainer: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' },
 };
 
-function ActionButton({label, route}) {
+function ActionButton({ label, route, imageSrc, style }) {
     const history = useHistory();
 
     return (
@@ -21,9 +19,10 @@ function ActionButton({label, route}) {
             >
                 {label}
             </Button>
+            {/* Добавляем атрибут loading="lazy" к изображению */}
+            <Image src={imageSrc} fluid style={style} loading="lazy" />
         </div>
     );
 }
-
 
 export default ActionButton;

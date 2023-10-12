@@ -1,10 +1,25 @@
-FROM node:14-alpine
+#FROM node:14-alpine
+#WORKDIR /app
+#COPY site/package*.json ./
+#RUN npm install
+#COPY site/ .
+#EXPOSE 3000
+#CMD ["npm", "start"]
+
+
+# Этап сборки
+FROM node:14-alpine AS build-stage
 WORKDIR /app
 COPY site/package*.json ./
 RUN npm install
-COPY site/ .
-EXPOSE 3000
-CMD ["npm", "start"]
+COPY site/ ./
+RUN npm run build
+
+# Этап production
+FROM nginx:stable-alpine
+COPY --from=build-stage /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 
 
 ## Этап 1: Сборка приложения
