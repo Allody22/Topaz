@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,12 +43,17 @@ public class UserController {
 
     private final UserService userService;
 
+    private final PasswordEncoder encoder;
+
+
     @Autowired
     public UserController(
             OperationService operationsService,
             OrderService orderService,
+            PasswordEncoder encoder,
             UserService userService) {
         this.operationsService = operationsService;
+        this.encoder = encoder;
         this.userService = userService;
         this.orderService = orderService;
     }
@@ -67,7 +73,9 @@ public class UserController {
 
         var latestUserVersion = userService.getActualUserVersionByPhone(updateUserPasswordRequest.getPhone());
 
-        UserVersions newVersion = new UserVersions(latestUserVersion, updateUserPasswordRequest.getPassword(), updateUserPasswordRequest.getPhone());
+        String password = (encoder.encode(updateUserPasswordRequest.getPassword()));
+
+        UserVersions newVersion = new UserVersions(latestUserVersion, password, updateUserPasswordRequest.getPhone());
         user.addUserVersion(newVersion);
 
         String operationName = "Update_user_info_by_user";
