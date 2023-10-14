@@ -3,12 +3,14 @@ package ru.nsu.carwash_server.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ru.nsu.carwash_server.models.File;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.services.interfaces.FileService;
@@ -26,11 +29,19 @@ import ru.nsu.carwash_server.services.interfaces.FileService;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Controller
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -121,6 +132,70 @@ public class FilesController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
                 .body(file);
     }
+
+        @GetMapping("/test/multipart")
+        public ResponseEntity<StreamingResponseBody> getFilesAsMultipart() {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("multipart/mixed"))
+                    .body(os -> {
+                        try {
+                            List<Resource> resources = fileService.loadAllFiles(); // Метод для загрузки всех файлов
+                            for (Resource resource : resources) {
+                                writePart(resource, os);
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException("Error writing multipart response", e);
+                        }
+                    });
+        }
+
+        private void writePart(Resource resource, OutputStream os) throws IOException {
+            String header = "--someBoundary\r\n" +
+                    "Content-Disposition: form-data; name=\"file\"; filename=\"" + resource.getFilename() + "\"\r\n" +
+                    "Content-Type: " + Files.probeContentType(Paths.get(resource.getURI())) + "\r\n\r\n";
+
+            os.write(header.getBytes());
+            StreamUtils.copy(resource.getInputStream(), os);
+            os.write("\r\n".getBytes());
+        }
+
+
+
+    @GetMapping("/test/get_all")
+    public ResponseEntity<Resource> getAllFiles() {
+        try {
+            // 1. Создание временного ZIP-файла
+            Path zipPath = Files.createTempFile("files", ".zip");
+            try (ZipOutputStream zipOut = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+                Stream<Path> paths = fileService.loadAll();
+
+                paths.forEach(path -> {
+                    try {
+                        Resource resource = fileService.load(path.getFileName().toString());
+                        ZipEntry zipEntry = new ZipEntry(Objects.requireNonNull(resource.getFilename()));
+                        zipOut.putNextEntry(zipEntry);
+                        StreamUtils.copy(resource.getInputStream(), zipOut);
+                        zipOut.closeEntry();
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e); // Преобразование в непроверяемое исключение
+                    }
+                });
+            }
+
+            // 2. Возврат ZIP-файла клиенту
+            Resource zipResource = new UrlResource(zipPath.toUri());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + zipResource.getFilename() + "\"")
+                    .body(zipResource);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not create ZIP file.", e);
+        }
+    }
+
+
+
 
 
     @DeleteMapping("/delete/{filename:.+}")

@@ -2,6 +2,7 @@ package ru.nsu.carwash_server.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jdk.jfr.Timespan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
@@ -22,6 +23,7 @@ import ru.nsu.carwash_server.repository.operations.OperationsVersionsRepository;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -62,7 +64,7 @@ public class OperationsServiceIml implements OperationService {
 
     public void checkUserSMS(String number) {
         if (getAllDescriptionOperationsByTime(number, "получил код:", LocalDateTime.now().minusHours(1)).size() >= 2) {
-            throw new BadRequestException("Уже было отправлено больше двух запросов в час");
+            throw new BadRequestException("Превышено количество запросов за час.");
         }
     }
 
@@ -86,10 +88,8 @@ public class OperationsServiceIml implements OperationService {
         return operationsUsersLinkRepository.findAllByDescriptionContainingWithAdvice(phoneNumber, descriptionMessage, time);
     }
 
+    @Transactional
     public Pair<HttpEntity<String>, Integer> createSmsCode(String number) throws JsonProcessingException {
-
-        //Смотрим сколько раз человек с таким phone уже получал код и если больше 2 раз за час, то не даём код
-        checkUserSMS(number);
 
         Random random = new Random();
         int randomNumber = 1000 + random.nextInt(8999);

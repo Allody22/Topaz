@@ -95,9 +95,11 @@ public class AuthController {
     }
 
     @GetMapping("/generate_code_v1")
-    @SendTo(DestinationPrefixes.NOTIFICATIONS)
     @Transactional
     public ResponseEntity<?> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
+
+        //Смотрим сколько раз человек с таким phone уже получал код и если больше 2 раз за час, то не даём код
+        operationsService.checkUserSMS(number);
         String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
 
         Pair<HttpEntity<String>, Integer> resultOfSmsCreating = operationsService.createSmsCode(number);
@@ -130,7 +132,6 @@ public class AuthController {
     }
 
     @PostMapping("/signin_v1")
-    @SendTo(DestinationPrefixes.NOTIFICATIONS)
     @Transactional
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         if (!userService.existByPhone(loginRequest.getPhone())) {
@@ -166,7 +167,6 @@ public class AuthController {
     }
 
     @PostMapping("/signup_v1")
-    @SendTo(DestinationPrefixes.NOTIFICATIONS)
     @Transactional
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userService.existByPhone(signUpRequest.getPhone())) {

@@ -5,10 +5,19 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.nsu.carwash_server.models.File;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface FileService {
+
+
+    /**
+     * Возврат всех файлов в одном запросе
+     *
+     * @return список Resource
+     */
+    List<Resource> loadAllFiles();
 
     /**
      * Находим в репозиторие последнюю версию

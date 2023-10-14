@@ -20,7 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -152,6 +154,23 @@ public class FileServiceIml implements FileService {
             }
 
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public List<Resource> loadAllFiles() {
+        try {
+            return Files.list(root)
+                    .filter(Files::isRegularFile)
+                    .map(path -> {
+                        try {
+                            return new UrlResource(path.toUri());
+                        } catch (MalformedURLException e) {
+                            throw new RuntimeException("Error loading file", e);
+                        }
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Error loading files", e);
         }
     }
 
