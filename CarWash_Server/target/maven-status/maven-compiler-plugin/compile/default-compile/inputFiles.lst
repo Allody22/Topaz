@@ -114,6 +114,7 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\operations\OperationsUserLink.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\OrderInfoResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\OrdersArrayResponse.java
+C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\AllOrdersEntity.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\constants\FileTypes.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\repository\users\UserVersionsRepository.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\GetBookedOrdersInTimeIntervalRequest.java

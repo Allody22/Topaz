@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Button, Container, Image} from "react-bootstrap";
+import {Container} from "react-bootstrap";
 
 import carWashImage from '../assets/carWashImage.png';
 import tireServiceImage from "../assets/tireService.png"
@@ -38,6 +38,7 @@ const styles = {
     image: {width: '100px', height: '60px', marginLeft: '15px', marginTop: '20px'},
     verySmallImage: {width: '85px', height: '60px', marginLeft: '30px', marginTop: '20px'},
 };
+
 
 const Admin = observer(() => {
 
@@ -94,21 +95,8 @@ const Admin = observer(() => {
                           style={styles.verySmallImage}/>
             <ActionButton label="Изменить информацию об услуге" route={CHANGE_SERVICE_INFO} imageSrc={updateServiceInfo}
                           style={styles.verySmallImage}/>
-
-            <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginTop: '10px', marginBottom: '20px'
-            }}>
-                <Button
-                    variant={"outline-dark"}
-                    className="mt-4 p-2 flex-grow-1"
-                    onClick={() => history.push(CREATE_NEW_SERVICE)}
-                    style={{marginTop: '10px'}}
-                >
-                    Добавить новую услугу
-                </Button>
-                <Image src={addNewService} fluid style={styles.verySmallImage}/>
-            </div>
+            <ActionButton label="Добавить новую услугу" route={CREATE_NEW_SERVICE} imageSrc={addNewService}
+                          style={styles.verySmallImage}/>
         </Container>
     );
 });

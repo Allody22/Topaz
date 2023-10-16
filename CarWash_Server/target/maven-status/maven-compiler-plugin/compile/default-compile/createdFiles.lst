@@ -76,6 +76,7 @@ ru\nsu\carwash_server\payload\response\OrderInfoResponse.class
 ru\nsu\carwash_server\repository\operations\OperationsUsersLinkRepository.class
 ru\nsu\carwash_server\models\operations\OperationsUserLink.class
 ru\nsu\carwash_server\models\orders\OrdersTire$OrdersTireBuilder.class
+ru\nsu\carwash_server\payload\response\AllOrdersEntity.class
 ru\nsu\carwash_server\repository\orders\OrdersRepository.class
 ru\nsu\carwash_server\security\jwt\AuthEntryPointJwt.class
 ru\nsu\carwash_server\models\secondary\constants\UserStatuses.class
