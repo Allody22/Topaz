@@ -31,6 +31,7 @@ import ru.nsu.carwash_server.payload.request.OrdersArrayPriceAndGoodTimeRequest;
 import ru.nsu.carwash_server.payload.request.OrdersArrayPriceTimeRequest;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
 import ru.nsu.carwash_server.payload.response.ActualOrdersResponse;
+import ru.nsu.carwash_server.payload.response.AllOrdersEntity;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 import ru.nsu.carwash_server.payload.response.FreeTimeAndBoxResponse;
 import ru.nsu.carwash_server.payload.response.MainAndAdditionalResponse;
@@ -49,6 +50,7 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -93,7 +95,7 @@ public class OrderManagementController {
 
     @PostMapping("/deleteOrder_v1")
     @Transactional
-    public ResponseEntity<?> deleteOrder(@Valid @RequestParam(name = "orderId") Long id) {
+    public ResponseEntity<MessageResponse> deleteOrder(@Valid @RequestParam(name = "orderId") Long id) {
         var order = orderService.findById(id);
         if (order != null) {
             Pair<Boolean, String> result = orderService.deleteOrder(id);
@@ -124,8 +126,8 @@ public class OrderManagementController {
 
     @GetMapping("/getServiceInfo_v1")
     @Transactional
-    public ResponseEntity<?> getServiceInfo(@Valid @RequestParam(name = "orderName", required = true) String orderName,
-                                            @Valid @RequestParam(name = "orderType", required = true) String orderType) {
+    public ResponseEntity<?> getServiceInfo(@Valid @RequestParam(name = "orderName") String orderName,
+                                            @Valid @RequestParam(name = "orderType") String orderType) {
         switch (orderType) {
             case "Wash" -> {
                 var order = ordersWashingRepository.findByName(orderName)
@@ -148,7 +150,7 @@ public class OrderManagementController {
 
     @PostMapping("/updateOrderInfo_v1")
     @Transactional
-    public ResponseEntity<?> updateOrderInfo(@Valid @RequestBody UpdateOrderInfoRequest updateOrderInfoRequest) {
+    public ResponseEntity<MessageResponse> updateOrderInfo(@Valid @RequestBody UpdateOrderInfoRequest updateOrderInfoRequest) {
         Pair<Boolean, String> result = orderService.updateOrderInfo(updateOrderInfoRequest);
         var booleanValue = result.getFirst();
         var resultText = result.getSecond();
@@ -156,8 +158,8 @@ public class OrderManagementController {
         if (!booleanValue) {
             return ResponseEntity.badRequest().body(new MessageResponse(resultText));
         }
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserVersions userLatestVersion = userService.getActualUserVersionById(userDetails.getId());
 
         User user = userLatestVersion.getUser();
@@ -222,10 +224,11 @@ public class OrderManagementController {
     @GetMapping("/getOrderInfo_v1")
     @Transactional
     public ResponseEntity<?> getOrderInfo(@Valid @RequestParam(name = "orderId", required = false) Long orderId) {
-        var orderById = orderService.findById(orderId);
         if (orderId == null) {
             return ResponseEntity.badRequest().body(new MessageResponse("Несуществующий номер заказа"));
         }
+
+        var orderById = orderService.findById(orderId);
 
         var actualOrder = orderService.getActualOrderVersion(orderId);
 
@@ -246,7 +249,6 @@ public class OrderManagementController {
             userPhone = userService.getActualUserVersionById(orderById.getUser().getId()).getPhone();
         }
 
-        System.out.println(ordersNames);
         return ResponseEntity.ok(new SingleOrderResponse(orderId, orderById.getDateOfCreation(), actualOrder.getStartTime(),
                 actualOrder.getEndTime(), actualOrder.getAdministrator(), actualOrder.getSpecialist(),
                 actualOrder.getAutoNumber(), actualOrder.getAutoType(), actualOrder.getBoxNumber(), actualOrder.getBonuses(),
@@ -256,14 +258,14 @@ public class OrderManagementController {
 
     @GetMapping("/getActualWashingOrders_v1")
     @Transactional
-    public ResponseEntity<?> getActualWashingServices(@Valid @RequestParam(name = "orderName", required = true) String orderName) {
+    public ResponseEntity<ConnectedOrdersResponse> getActualWashingServices(@Valid @RequestParam(name = "orderName") String orderName) {
         ConnectedOrdersResponse ordersInfo = orderService.actualWashingOrders(orderName);
         return ResponseEntity.ok(ordersInfo);
     }
 
     @GetMapping("/getAllWashingOrders_v1")
     @Transactional
-    public ResponseEntity<?> getAllWashingServices() {
+    public ResponseEntity<MainAndAdditionalResponse> getAllWashingServices() {
         var mainOrders = orderService.getAllWashingOrdersByRole("main");
         var additionalOrders = orderService.getAllWashingOrdersByRole("additional");
 
@@ -279,7 +281,7 @@ public class OrderManagementController {
         }
         List<WashingOrdersPriceTimeAndPart> washingPolishingOrderEntities = new ArrayList<>();
         for (OrdersWashing services : washingOrdersWithTimeAndPrice) {
-            washingPolishingOrderEntities.add(new WashingOrdersPriceTimeAndPart(services.getName(),
+            washingPolishingOrderEntities.add(new WashingOrdersPriceTimeAndPart(services.getName().replace("_", " "),
                     services.getPriceFirstType(), services.getPriceSecondType(), services.getPriceThirdType(),
                     services.getTimeFirstType(), services.getTimeSecondType(), services.getTimeThirdType(), services.getRole(),
                     services.getAssociatedOrder()));
@@ -290,17 +292,63 @@ public class OrderManagementController {
     @GetMapping("/getAllPolishingServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<?> getAllPolishingServicesWithPriceAndTime() {
-        var washingOrdersWithTimeAndPrice = orderService.findAllPolishingService();
-        if (washingOrdersWithTimeAndPrice.isEmpty()) {
+        var polishingOrdersWithTimeAndPrice = orderService.findAllPolishingService();
+        if (polishingOrdersWithTimeAndPrice.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Услуг полировки не существует"));
         }
         List<WashingPolishingOrderEntity> washingPolishingOrderEntities = new ArrayList<>();
-        for (var services : washingOrdersWithTimeAndPrice) {
-            washingPolishingOrderEntities.add(new WashingPolishingOrderEntity(services.getName(),
+        for (var services : polishingOrdersWithTimeAndPrice) {
+            washingPolishingOrderEntities.add(new WashingPolishingOrderEntity(services.getName().replace("_", " "),
                     services.getPriceFirstType(), services.getPriceSecondType(), services.getPriceThirdType(),
                     services.getTimeFirstType(), services.getTimeSecondType(), services.getTimeThirdType(), null));
         }
         return ResponseEntity.ok(washingPolishingOrderEntities);
+    }
+
+    @GetMapping("/getAllServicesWithPriceAndTime_v1")
+    @Transactional
+    public ResponseEntity<?> getAllServicesWithPriceAndTime() {
+        var washingOrdersWithTimeAndPrice = orderService.findAllWashingService();
+        var polishingOrdersWithTimeAndPrice = orderService.findAllPolishingService();
+        var tireServicesWithTimeAndPrice = orderService.findAllTireService();
+        if (polishingOrdersWithTimeAndPrice.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Услуг полировки не существует"));
+        }
+        if (tireServicesWithTimeAndPrice.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Услуг шиномонтажа не существует"));
+        }
+        if (washingOrdersWithTimeAndPrice.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Услуг мойки не существует"));
+        }
+        List<AllOrdersEntity> allOrdersEntities = new ArrayList<>();
+        for (var services : washingOrdersWithTimeAndPrice) {
+            allOrdersEntities.add(new AllOrdersEntity(services.getName().replace("_", " "),
+                    services.getPriceFirstType(), services.getPriceSecondType(), services.getPriceThirdType(),
+                    services.getTimeFirstType(), services.getTimeSecondType(), services.getTimeThirdType(),null,
+                    null,null,null,null,null,null,null,
+                    null,null,null,null,null,
+                    null,null,null,null,null,null,null,
+                    "Washing"));
+        }
+        for (var services : polishingOrdersWithTimeAndPrice) {
+            allOrdersEntities.add(new AllOrdersEntity(services.getName().replace("_", " "), services.getPriceFirstType(),
+                    services.getPriceSecondType(), services.getPriceThirdType(), services.getTimeFirstType(), services.getTimeSecondType(),
+                    services.getTimeThirdType(),null, null,null,null,
+                    null,null,null,null, null,null,null,null,
+                    null, null, null,null,null,null,null,
+                    null, "Polishing"));
+        }
+        for (var services : tireServicesWithTimeAndPrice) {
+            allOrdersEntities.add(new AllOrdersEntity(services.getName().replace("_", " "),
+                    null, null, null, null
+                    , null, null, services.getPrice_r_13(), services.getPrice_r_14(),
+                    services.getPrice_r_15(), services.getPrice_r_16(), services.getPrice_r_17(), services.getPrice_r_18(),
+                    services.getPrice_r_19(), services.getPrice_r_20(), services.getPrice_r_21(), services.getPrice_r_22(),
+                    services.getTime_r_13(), services.getTime_r_14(), services.getTime_r_15(), services.getTime_r_16(),
+                    services.getTime_r_17(), services.getTime_r_18(), services.getTime_r_19(), services.getTime_r_20(),
+                    services.getTime_r_21(), services.getTime_r_22(),"Tire"));
+        }
+        return ResponseEntity.ok(allOrdersEntities);
     }
 
     @GetMapping("/getAllTireServicesWithPriceAndTime_v1")
@@ -312,7 +360,7 @@ public class OrderManagementController {
         }
         List<TireOrderEntity> tireOrderEntities = new ArrayList<>();
         for (var services : tireServicesWithTimeAndPrice) {
-            tireOrderEntities.add(new TireOrderEntity(services.getName(), services.getPrice_r_13(), services.getPrice_r_14(),
+            tireOrderEntities.add(new TireOrderEntity(services.getName().replace("_", " "), services.getPrice_r_13(), services.getPrice_r_14(),
                     services.getPrice_r_15(), services.getPrice_r_16(), services.getPrice_r_17(), services.getPrice_r_18(),
                     services.getPrice_r_19(), services.getPrice_r_20(), services.getPrice_r_21(), services.getPrice_r_22(),
                     services.getTime_r_13(), services.getTime_r_14(), services.getTime_r_15(), services.getTime_r_16(),
@@ -324,7 +372,7 @@ public class OrderManagementController {
 
     @GetMapping("/getActualPolishingOrders_v1")
     @Transactional
-    public ResponseEntity<?> getActualPolishingOrders() {
+    public ResponseEntity<ActualOrdersResponse> getActualPolishingOrders() {
         var orders = ordersPolishingRepository.getActualOrders()
                 .orElse(null);
         return ResponseEntity.ok(new ActualOrdersResponse(orders));
@@ -332,7 +380,7 @@ public class OrderManagementController {
 
     @GetMapping("/getActualTireOrders_v1")
     @Transactional
-    public ResponseEntity<?> getActualTireOrders() {
+    public ResponseEntity<ActualOrdersResponse> getActualTireOrders() {
         var orders = ordersTireRepository.getActualOrders()
                 .orElse(null);
         return ResponseEntity.ok(new ActualOrdersResponse(orders));
@@ -342,7 +390,7 @@ public class OrderManagementController {
     @GetMapping("/getBookedTimeInOneDay_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> getBookedTimeInOneDay(@Valid @RequestParam(name = "startTime")
+    public ResponseEntity<OrdersArrayResponse> getBookedTimeInOneDay(@Valid @RequestParam(name = "startTime")
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
                                                    @Valid @RequestParam(name = "endTime")
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
@@ -358,7 +406,7 @@ public class OrderManagementController {
     @GetMapping("/getNotMadeOrders_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> getNotMadeOrders(@RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
+    public ResponseEntity<OrdersArrayResponse> getNotMadeOrders(@RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
         List<OrderVersions> orders = orderService.getNotMadeOrders(includeCancelled);
         List<SingleOrderResponse> ordersForResponse = getTimeAndPriceOfOrders(orders);
         return ResponseEntity.ok(new OrdersArrayResponse(ordersForResponse));
@@ -367,7 +415,7 @@ public class OrderManagementController {
     @GetMapping("/getOrderCreatedAt_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> getOrderCreatedAt(@Valid @RequestParam(name = "startTime")
+    public ResponseEntity<OrdersArrayResponse> getOrderCreatedAt(@Valid @RequestParam(name = "startTime")
                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
                                                @Valid @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
                                                @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
@@ -382,7 +430,7 @@ public class OrderManagementController {
 
     @PostMapping("/getPriceAndEndTime_v1")
     @Transactional
-    public ResponseEntity<?> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceAndGoodTimeRequest ordersArrayPriceTimeRequest) {
+    public ResponseEntity<TimeAndPriceAndFreeTimeResponse> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceAndGoodTimeRequest ordersArrayPriceTimeRequest) {
         List<TimeIntervals> timeIntervals = new ArrayList<>();
         int time = 0;
         int price = 0;
@@ -463,7 +511,7 @@ public class OrderManagementController {
 
     @PostMapping("/getFreeTime_v1")
     @Transactional
-    public ResponseEntity<?> getFreeTime(@Valid @RequestBody FreeTimeRequest freeTimeRequest) {
+    public ResponseEntity<FreeTimeAndBoxResponse> getFreeTime(@Valid @RequestBody FreeTimeRequest freeTimeRequest) {
         List<TimeIntervals> timeIntervals = new ArrayList<>();
         int time = freeTimeRequest.getOrderTime() + 15;
 
@@ -525,7 +573,7 @@ public class OrderManagementController {
 
     @GetMapping("/getPriceAndTime_v1")
     @Transactional
-    public ResponseEntity<?> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
+    public ResponseEntity<TimeAndPriceResponse> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
         TimeAndPrice timeAndPrice = new TimeAndPrice(0, 0);
         switch (ordersArrayPriceTimeRequest.getOrderType()) {
             case "wash" ->

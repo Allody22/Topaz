@@ -338,7 +338,7 @@ const SalePage = observer(() => {
                             </p>
 
                             {fileExtension === 'png' || fileExtension === 'jpg' || fileExtension === 'jpeg' ? (
-                                <img src={file.url} alt={file.description} style={imageStyle} loading="lazy"/>
+                                <img src={file.url} alt={file.description} style={imageStyle}/>
                             ) : null}
 
                             <div style={{

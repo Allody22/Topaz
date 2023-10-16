@@ -211,7 +211,7 @@ public class ServiceChangingController {
     @PutMapping("/updateWashingService_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> updateWashingService(@Valid @RequestBody UpdateWashingServiceRequest updateWashingServiceRequest) {
+    public ResponseEntity<MessageResponse> updateWashingService(@Valid @RequestBody UpdateWashingServiceRequest updateWashingServiceRequest) {
         if (ordersWashingRepository.findByName(updateWashingServiceRequest.getName()).isPresent()) {
             UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Long userId = userDetails.getId();
@@ -262,7 +262,7 @@ public class ServiceChangingController {
     @Transactional
     @PutMapping("/updatePolishingService_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
-    public ResponseEntity<?> createPolishingService(@Valid @RequestBody UpdatePolishingServiceRequest updatePolishingServiceRequest) {
+    public ResponseEntity<MessageResponse> createPolishingService(@Valid @RequestBody UpdatePolishingServiceRequest updatePolishingServiceRequest) {
         if (polishingRepository.findByName(updatePolishingServiceRequest.getName()).isPresent()) {
             UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Long userId = userDetails.getId();
@@ -314,7 +314,7 @@ public class ServiceChangingController {
     @PutMapping("/updateTireService_v1")
     @Transactional
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
-    public ResponseEntity<?> updateTireService(@Valid @RequestBody UpdateTireServiceRequest updateTireServiceRequest) {
+    public ResponseEntity<MessageResponse> updateTireService(@Valid @RequestBody UpdateTireServiceRequest updateTireServiceRequest) {
         if (tireRepository.findByName(updateTireServiceRequest.getName()).isPresent()) {
             UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Long userId = userDetails.getId();

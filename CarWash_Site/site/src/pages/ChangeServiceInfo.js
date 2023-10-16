@@ -277,8 +277,6 @@ const ChangeServiceInfo = observer(() => {
                         Посмотреть цену для различных видов шин (доступно только для заказов шиномонтажа)
                     </Button>
 
-                    {/*ИЗМЕНЕНИЕ ЦЕНЫ И ВРЕМЕНИ*/}
-
                     <MyCustomModal show={showModal} handleClose={handleCloseModal} title="Цены для шин">
                         <div key={"ЦЕНА R13"}
                              style={{

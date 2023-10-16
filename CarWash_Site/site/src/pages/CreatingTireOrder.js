@@ -519,7 +519,7 @@ const CreatingTireOrder = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join(''));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -577,7 +577,7 @@ const CreatingTireOrder = observer(() => {
             <p className="input-style-modified">Страница добавления заказов на шиномонтаж</p>
             <p className="small-input-style">Здесь вы можете сами создать какой-то заказ
                 на шиномонтаж из всех актуальных услуг, а потом получить всю информацию о нём</p>
-            <p className="small-input-style"><strong>Обязательно</strong>, выберите все элементы под красным
+            <p className="small-input-style"><strong>Обязательно</strong>: все элементы под красным
                 текстом</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>

@@ -12,6 +12,11 @@ export const getServiceInfo = async (orderName, orderType) => {
     return await response.data;
 };
 
+export const getAllServicesWithPriceAndTime = async () => {
+    const response = await $authHost.get('/api/orders/management/getAllServicesWithPriceAndTime_v1');
+    return await response.data;
+};
+
 export const deleteOrderById = async (orderId) => {
     const response = await $authHost.post('/api/orders/management/deleteOrder_v1?orderId='
         + encodeURIComponent(orderId));

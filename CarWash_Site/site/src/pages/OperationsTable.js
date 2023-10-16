@@ -75,7 +75,7 @@ const OperationsTable = observer(() => {
             setOperations(response)
 
             setSuccessResponse(null)
-            setSuccessResponse("Yes all orders")
+            setSuccessResponse("Все операции успешно получены!")
         } catch (error) {
             if (error.response) {
                 let messages = [];

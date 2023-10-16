@@ -76,7 +76,7 @@ public class AdminController {
     @GetMapping("/findUserByTelephone_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> findUserByTelephone(@Valid @RequestParam("phone") String phone) {
+    public ResponseEntity<UserInformationResponse> findUserByTelephone(@Valid @RequestParam("phone") String phone) {
         UserVersions latestUserVersion = userService.getActualUserVersionByPhone(phone);
 
         User user = latestUserVersion.getUser();
@@ -94,7 +94,7 @@ public class AdminController {
     @GetMapping("/getUserOrdersByAdmin_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> getUserOrdersByAdmin(@Valid @RequestParam("username") String username) {
+    public ResponseEntity<UserOrdersResponse> getUserOrdersByAdmin(@Valid @RequestParam("username") String username) {
 
         User user = userService.getActualUserVersionByPhone(username).getUser();
 
@@ -114,14 +114,14 @@ public class AdminController {
     @GetMapping("/getAllUserTelephones_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> getAllUser() {
+    public ResponseEntity<List<String>> getAllUser() {
         return ResponseEntity.ok(userService.getAllActualPhones());
     }
 
     @PostMapping("/updateUserInfo_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequestByAdmin updateUserInfoRequest) {
+    public ResponseEntity<MessageResponse> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequestByAdmin updateUserInfoRequest) {
         var latestUserVersion = userService.getActualUserVersionByPhone(updateUserInfoRequest.getPhone());
 
         User user = latestUserVersion.getUser();

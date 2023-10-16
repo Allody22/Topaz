@@ -60,7 +60,7 @@ public class UserController {
 
     @Transactional
     @PostMapping("/updateUserPassword_v1")
-    public ResponseEntity<?> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
+    public ResponseEntity<MessageResponse> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
         if (!updateUserPasswordRequest.getSecretCode().equals(operationsService
                 .getLatestCodeByPhoneNumber(updateUserPasswordRequest.getPhone()) + "")) {
             return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
@@ -90,7 +90,7 @@ public class UserController {
 
     @Transactional
     @PostMapping("/updateUserInfo_v1")
-    public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequest updateUserInfoRequest) {
+    public ResponseEntity<MessageResponse> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequest updateUserInfoRequest) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
 
@@ -117,7 +117,7 @@ public class UserController {
 
     @Transactional
     @GetMapping("/getUserOrders_v1")
-    public ResponseEntity<?> getUserOrders() {
+    public ResponseEntity<List<OrderMainInfo>> getUserOrders() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
         List<OrderMainInfo> userOrders = new ArrayList<>();

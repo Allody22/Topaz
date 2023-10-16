@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.carwash_server.models.operations.OperationsUserLink;
 import ru.nsu.carwash_server.models.operations.OperationsVersions;
 import ru.nsu.carwash_server.payload.response.OperationsResponse;
+import ru.nsu.carwash_server.payload.response.UserOperationsResponse;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 
@@ -43,14 +44,14 @@ public class OperationController {
     @GetMapping("/user")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<?> getUserOperations(@Valid @RequestParam("username") String username) {
+    public ResponseEntity<List<UserOperationsResponse>> getUserOperations(@Valid @RequestParam("username") String username) {
         List<OperationsVersions> userOperations = operationsService.getAllUserOperationsByIdOrPhone(null, username);
         return ResponseEntity.ok(operationsService.getRationalOperationForm(userOperations));
     }
 
     @GetMapping("/get_all_day")
     @Transactional
-    public ResponseEntity<?> getAllOperationsInDay(@Valid @RequestParam(name = "startTime")
+    public ResponseEntity<List<OperationsResponse>> getAllOperationsInDay(@Valid @RequestParam(name = "startTime")
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
                                                    @Valid @RequestParam(name = "endTime")
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime) {
@@ -73,7 +74,7 @@ public class OperationController {
 
     @GetMapping("/get_all")
     @Transactional
-    public ResponseEntity<?> getAllOperations() {
+    public ResponseEntity<List<OperationsResponse>> getAllOperations() {
 
         List<OperationsUserLink> allOperationsInATime = operationsService.getAllOperations();
 

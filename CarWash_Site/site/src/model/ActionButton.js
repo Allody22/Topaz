@@ -19,7 +19,6 @@ function ActionButton({label, route, imageSrc, style}) {
             >
                 {label}
             </Button>
-            {/* Добавляем атрибут loading="lazy" к изображению */}
             <Image src={imageSrc} fluid style={style} loading="lazy"/>
         </div>
     );

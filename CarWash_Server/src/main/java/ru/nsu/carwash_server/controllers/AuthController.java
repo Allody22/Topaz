@@ -49,6 +49,7 @@ import javax.validation.Valid;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,7 +97,7 @@ public class AuthController {
 
     @GetMapping("/generate_code_v1")
     @Transactional
-    public ResponseEntity<?> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
+    public ResponseEntity<MessageResponse> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
 
         //Смотрим сколько раз человек с таким phone уже получал код и если больше 2 раз за час, то не даём код
         operationsService.checkUserSMS(number);
@@ -127,7 +128,7 @@ public class AuthController {
     }
 
     @GetMapping("/getRoles")
-    public ResponseEntity<?> getAllRoles() {
+    public ResponseEntity<Optional<List<String>>> getAllRoles() {
         return ResponseEntity.ok(roleRepository.getAllBy());
     }
 
@@ -168,7 +169,7 @@ public class AuthController {
 
     @PostMapping("/signup_v1")
     @Transactional
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userService.existByPhone(signUpRequest.getPhone())) {
             log.warn("SignUp_v1.Registration failed: Phone '{}' is already taken", signUpRequest.getPhone());
             return ResponseEntity.badRequest().body(new MessageResponse("Такой телефон уже занят!"));
@@ -222,7 +223,7 @@ public class AuthController {
 
     @PostMapping("/signout_v1")
     @Transactional
-    public ResponseEntity<?> logoutUser() {
+    public ResponseEntity<MessageResponse> logoutUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.getFullUserById(userDetails.getId());
 

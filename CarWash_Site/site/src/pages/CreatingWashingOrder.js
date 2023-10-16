@@ -507,7 +507,6 @@ const CreatingWashingOrder = observer(() => {
         if (aStartTime > bStartTime) {
             return 1;
         }
-        // Если время начала интервала одинаково, то сортируем по времени окончания
         const aEndTime = timeStringToMinutes(a.split(' - ')[1]);
         const bEndTime = timeStringToMinutes(b.split(' - ')[1]);
         if (aEndTime < bEndTime) {
@@ -516,7 +515,6 @@ const CreatingWashingOrder = observer(() => {
         if (aEndTime > bEndTime) {
             return 1;
         }
-        // Если интервалы одинаковы, то сортируем по боксу
         return a.localeCompare(b);
     };
 
@@ -540,7 +538,7 @@ const CreatingWashingOrder = observer(() => {
             <p className="input-style-modified">Страница добавления заказов на мойку</p>
             <p className="small-input-style">Здесь вы можете сами создать какой-то заказ мойки на автомойку из всех
                 актуальных услуг, а потом получить всю информацию о нём</p>
-            <p className="small-input-style"><strong>Обязательно</strong>, выберите все элементы с красными
+            <p className="small-input-style"><strong>Обязательно</strong>: все элементы с красными
                 под красным текстом</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
