@@ -12,6 +12,10 @@ import java.util.stream.Stream;
 public interface FileService {
 
 
+    Resource loadWithCache(String filename);
+
+    void clearCache();
+
     /**
      * Возврат всех файлов в одном запросе
      *

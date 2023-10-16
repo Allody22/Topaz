@@ -3,14 +3,12 @@ package ru.nsu.carwash_server.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ru.nsu.carwash_server.models.File;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.services.interfaces.FileService;
@@ -29,19 +26,13 @@ import ru.nsu.carwash_server.services.interfaces.FileService;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -50,6 +41,8 @@ import java.util.zip.ZipOutputStream;
 public class FilesController {
 
     private final FileService fileService;
+
+    private Map<String, String> mimeTypeCache = new ConcurrentHashMap<>();
 
     @Autowired
     public FilesController(FileService fileService) {
@@ -132,6 +125,39 @@ public class FilesController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
                 .body(file);
     }
+
+    @GetMapping("/cache/get/{filename:.+}")
+    @Transactional
+    public ResponseEntity<Resource> getFileTest(@PathVariable String filename) {
+        Resource file = fileService.loadWithCache(filename);
+
+        // Проверка, есть ли MIME-тип в кэше
+        String mimeType = mimeTypeCache.get(filename);
+        if (mimeType == null) {
+            try {
+                mimeType = Files.probeContentType(Paths.get(file.getURI()));
+                if (mimeType != null) {
+                    mimeTypeCache.put(filename, mimeType);
+                } else {
+                    mimeType = "application/octet-stream";
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Could not determine file type.", e);
+            }
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mimeType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
+                .body(file);
+    }
+
+    @DeleteMapping("/cache/clear")
+    public ResponseEntity<?> clearCache() {
+        fileService.clearCache();
+        return ResponseEntity.ok(new MessageResponse("Кэш успешно очищен"));
+    }
+
 
     @DeleteMapping("/delete/{filename:.+}")
     @Transactional

@@ -50,7 +50,6 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -324,18 +323,18 @@ public class OrderManagementController {
         for (var services : washingOrdersWithTimeAndPrice) {
             allOrdersEntities.add(new AllOrdersEntity(services.getName().replace("_", " "),
                     services.getPriceFirstType(), services.getPriceSecondType(), services.getPriceThirdType(),
-                    services.getTimeFirstType(), services.getTimeSecondType(), services.getTimeThirdType(),null,
-                    null,null,null,null,null,null,null,
-                    null,null,null,null,null,
-                    null,null,null,null,null,null,null,
+                    services.getTimeFirstType(), services.getTimeSecondType(), services.getTimeThirdType(), null,
+                    null, null, null, null, null, null, null,
+                    null, null, null, null, null,
+                    null, null, null, null, null, null, null,
                     "Washing"));
         }
         for (var services : polishingOrdersWithTimeAndPrice) {
             allOrdersEntities.add(new AllOrdersEntity(services.getName().replace("_", " "), services.getPriceFirstType(),
                     services.getPriceSecondType(), services.getPriceThirdType(), services.getTimeFirstType(), services.getTimeSecondType(),
-                    services.getTimeThirdType(),null, null,null,null,
-                    null,null,null,null, null,null,null,null,
-                    null, null, null,null,null,null,null,
+                    services.getTimeThirdType(), null, null, null, null,
+                    null, null, null, null, null, null, null, null,
+                    null, null, null, null, null, null, null,
                     null, "Polishing"));
         }
         for (var services : tireServicesWithTimeAndPrice) {
@@ -346,7 +345,7 @@ public class OrderManagementController {
                     services.getPrice_r_19(), services.getPrice_r_20(), services.getPrice_r_21(), services.getPrice_r_22(),
                     services.getTime_r_13(), services.getTime_r_14(), services.getTime_r_15(), services.getTime_r_16(),
                     services.getTime_r_17(), services.getTime_r_18(), services.getTime_r_19(), services.getTime_r_20(),
-                    services.getTime_r_21(), services.getTime_r_22(),"Tire"));
+                    services.getTime_r_21(), services.getTime_r_22(), "Tire"));
         }
         return ResponseEntity.ok(allOrdersEntities);
     }
@@ -391,10 +390,10 @@ public class OrderManagementController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<OrdersArrayResponse> getBookedTimeInOneDay(@Valid @RequestParam(name = "startTime")
-                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
-                                                   @Valid @RequestParam(name = "endTime")
-                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
-                                                   @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
+                                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
+                                                                     @Valid @RequestParam(name = "endTime")
+                                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
+                                                                     @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
         List<OrderVersions> orders = orderService.getOrdersInTimeInterval(startTime,
                 endTime, null, includeCancelled);
 
@@ -416,9 +415,9 @@ public class OrderManagementController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<OrdersArrayResponse> getOrderCreatedAt(@Valid @RequestParam(name = "startTime")
-                                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
-                                               @Valid @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
-                                               @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
+                                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
+                                                                 @Valid @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
+                                                                 @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
 
         List<OrderVersions> orders = orderService.getOrdersCreatedAt(startTime,
                 endTime, includeCancelled);

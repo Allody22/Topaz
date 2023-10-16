@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import ru.nsu.carwash_server.controllers.FilesController;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.File;
 import ru.nsu.carwash_server.repository.FileRepository;
 import ru.nsu.carwash_server.services.interfaces.FileService;
@@ -21,7 +22,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,6 +33,10 @@ public class FileServiceIml implements FileService {
     private final Path root = Paths.get("./uploads");
 
     private final FileRepository fileRepository;
+
+    private final Map<String, Resource> fileCache = new ConcurrentHashMap<>();
+
+    private static final int MAX_CACHE_SIZE = 10;  // максимальный размер кэша, например 10 файлов
 
     @Autowired
     public FileServiceIml(FileRepository fileRepository) {
@@ -89,6 +96,9 @@ public class FileServiceIml implements FileService {
 
             Files.copy(file.getInputStream(), targetPath);
 
+            // Добавляем файл в кэш
+            Resource resource = new UrlResource(targetPath.toUri());
+            fileCache.put(newFileName, resource);
 
             String url = MvcUriComponentsBuilder
                     .fromMethodName(FilesController.class, "getFile", newFileName.toString()).build().toString();
@@ -111,6 +121,7 @@ public class FileServiceIml implements FileService {
             throw new RuntimeException(e.getMessage());
         }
     }
+
 
     public void saveByURL(MultipartFile file, String description, String status) {
         try {
@@ -194,6 +205,10 @@ public class FileServiceIml implements FileService {
         }
     }
 
+    public void clearCache() {
+        fileCache.clear();
+    }
+
     @Transactional
     public Resource load(String filename) {
         try {
@@ -203,10 +218,34 @@ public class FileServiceIml implements FileService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new RuntimeException("Could not read the file!");
+                throw new NotInDataBaseException("файлов не найден файл: ", filename);
             }
         } catch (MalformedURLException e) {
             throw new RuntimeException("Error: " + e.getMessage());
         }
     }
+
+    @Transactional
+    public Resource loadWithCache(String filename) {
+        // Проверка кэша
+        Resource cachedFile = fileCache.get(filename);
+
+        if (cachedFile != null) {
+            return cachedFile;
+        }
+        // Если файла нет в кэше (например, при первом запуске приложения после его перезагрузки)
+        try {
+            Path file = root.resolve(filename);
+            Resource resource = new UrlResource(file.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return resource; // Возврат файла, даже если он не в кэше
+            } else {
+                throw new NotInDataBaseException("файлов не найден файл: ", filename);
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
+    }
+
 }
