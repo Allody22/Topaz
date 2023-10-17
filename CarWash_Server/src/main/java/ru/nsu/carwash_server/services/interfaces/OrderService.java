@@ -7,8 +7,8 @@ import ru.nsu.carwash_server.models.orders.OrdersPolishing;
 import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.secondary.helpers.AllOrderTypes;
-import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.users.User;
+import ru.nsu.carwash_server.payload.request.NewServiceRequest;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 
@@ -31,18 +31,18 @@ public interface OrderService {
      *
      * @param orderArray - список услуг
      * @param wheelR     - размер шин
-     * @return цена и время всех переданных услуг
+     * @return время и цена заказа. Время первое
      */
-    TimeAndPrice getTireOrderTimePrice(List<String> orderArray, String wheelR);
+    Pair<Integer, Integer> getTireOrderTimePrice(List<String> orderArray, String wheelR);
 
     /**
      * Получаем цену и время определённого списка услуг полировки.
      *
      * @param orderArray - список услуг
      * @param bodyType   - тип кузова
-     * @return цена и время заказа
+     * @return время и цена заказа. Время первое
      */
-    TimeAndPrice getPolishingOrderPriceAndTime(List<String> orderArray, int bodyType);
+    Pair<Integer, Integer> getPolishingOrderPriceAndTime(List<String> orderArray, int bodyType);
 
 
     /**
@@ -50,9 +50,9 @@ public interface OrderService {
      *
      * @param orderArray - список услуг
      * @param bodyType   - тип кузова
-     * @return цена и время заказа
+     * @return время и цена заказа. Время первое
      */
-    TimeAndPrice getWashingOrderPriceTime(List<String> orderArray, int bodyType);
+    Pair<Integer, Integer> getWashingOrderPriceTime(List<String> orderArray, int bodyType);
 
 
     /**
@@ -89,28 +89,28 @@ public interface OrderService {
      * Создание УСЛУГИ (не заказа) шиномонтажа
      * со всей необходимой информацией
      *
-     * @param ordersTire - новая услуга шиномонтажа
-     * @return информация о том, какой эта услуги сохранилась в бд
+     * @param newServiceRequest - вся информация необходимая для создания услуги шиномонтажа
+     * @return сообщение с результатом изменения и информация об услуге
      */
-    OrdersTire createTireService(OrdersTire ordersTire);
+    Pair<String, OrdersTire> createTireService(NewServiceRequest newServiceRequest);
+
 
     /**
-     * Создание УСЛУГИ (не заказа) полировки
-     * со всей необходимой информацией
+     * Создание услуги полировки со всей необходимой информацией
      *
-     * @param ordersPolishing - новая услуга полировки
-     * @return информация о том, какой эта услуги сохранилась в бд
+     * @param newServiceRequest - вся информация необходимая для создания услуги
+     * @return сообщение с результатом изменения и информация об услуге
      */
-    OrdersPolishing createPolishingService(OrdersPolishing ordersPolishing);
+    Pair<String, OrdersPolishing> createPolishingService(NewServiceRequest newServiceRequest);
 
     /**
      * Создание УСЛУГИ (не заказа) мойки
      * со всей необходимой информацией
      *
-     * @param ordersWashing - новая услуга мойки
-     * @return информация о том, какой услуга сохранилась в бд
+     * @param newServiceRequest - вся информация об услуги необходимая для сохранения
+     * @return сообщение с результатом изменения и информация об услуге
      */
-    OrdersWashing createWashingService(OrdersWashing ordersWashing);
+    Pair<String, OrdersWashing> createWashingService(NewServiceRequest newServiceRequest);
 
     /**
      * Обновление заказа, но в нашем случае
@@ -119,10 +119,8 @@ public interface OrderService {
      * @param updateOrderInfoRequest - запрос со всей информацией о заказе,
      *                               а не представленная информация копируется из
      *                               прошлой версии
-     * @return в первом элементе информация о том, успешно ли обновилась информация,
-     * а во втором почему оно так сохранилась
      */
-    Pair<Boolean, String> updateOrderInfo(UpdateOrderInfoRequest updateOrderInfoRequest);
+    void updateOrderInfo(UpdateOrderInfoRequest updateOrderInfoRequest);
 
     /**
      * Удаление заказа, но в нашем случае
@@ -130,10 +128,8 @@ public interface OrderService {
      * с новым статусом "cancelled"
      *
      * @param orderId - айди заказа для удаления
-     * @return информация об успешности/не успешности операции
-     * и причина этого
      */
-    Pair<Boolean, String> deleteOrder(Long orderId);
+    void deleteOrder(Long orderId);
 
     /**
      * Проверка того, что в данном боксе в данное время
@@ -293,4 +289,21 @@ public interface OrderService {
     OrderVersions getActualOrderVersion(@NotNull Long id);
 
 
+    /**
+     * Выдаём описание изменений при создании или редактировании
+     * услуги мойки или полировки
+     *
+     * @param priceFirstType  - цена за первый тип автомобиля
+     * @param priceSecondType - цена за второй тип автомобиля
+     * @param priceThirdType  - цена за третьи тип автомобиля
+     * @param timeFirstType   - время за первый тип автомобиля
+     * @param timeSecondType  - время за второй тип автомобиля
+     * @param tineThirdType   - время за третий тип автомобиля
+     * @param context         - описание действия: создание или изменении услуги
+     * @param orderName       - имя услуги
+     * @return сообщение, объединяющее все изменения
+     */
+    String getPolishingWashingOrderChangingInfo(Integer priceFirstType, Integer priceSecondType, Integer priceThirdType,
+                                                Integer timeFirstType, Integer timeSecondType, Integer tineThirdType,
+                                                String context, String orderName);
 }

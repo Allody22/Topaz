@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.nsu.carwash_server.exceptions.BadBoxException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.TimeSlotUnavailableException;
 import ru.nsu.carwash_server.models.orders.Order;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.orders.OrdersPolishing;
@@ -30,7 +32,6 @@ import ru.nsu.carwash_server.payload.request.BookingWashingPolishingOrderRequest
 import ru.nsu.carwash_server.payload.request.CreatingPolishingOrder;
 import ru.nsu.carwash_server.payload.request.CreatingTireOrderRequest;
 import ru.nsu.carwash_server.payload.request.CreatingWashingOrder;
-import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.OrderInfoResponse;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
@@ -43,6 +44,7 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -89,108 +91,122 @@ public class OrderCreatingController {
     @PostMapping("/bookWashingOrder_v1")
     @SendTo(DestinationPrefixes.NOTIFICATIONS)
     public ResponseEntity<?> newWashingOrder(@Valid @RequestBody BookingWashingPolishingOrderRequest bookingOrderRequest) {
-        if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
-            log.warn("bookWashingOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
-                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
+        int boxNumber = bookingOrderRequest.getBoxNumber();
+        if (boxNumber < 1 || boxNumber > 3) {
+            throw new BadBoxException(boxNumber, "мойка");
         }
 
-        if (bookingOrderRequest.getBoxNumber() < 1 || bookingOrderRequest.getBoxNumber() > 3) {
-            log.warn("bookWashingOrder_v1. Booking attempt failed: Box number {} cannot be used for washing.", bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Этот бокс не может быть использован для мойки"));
+        Date startTime = bookingOrderRequest.getStartTime();
+        Date endTime = bookingOrderRequest.getEndTime();
+        if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
+            throw new TimeSlotUnavailableException(boxNumber);
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
-
         User user = userService.getFullUserById(userId);
-
-
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
+
+        List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersWashing> ordersWashings = new ArrayList<>();
 
-        for (var order : bookingOrderRequest.getOrders()) {
+        for (var order : ordersList) {
             var currentOrder = ordersWashingRepository.findByName(order.replace(" ", "_"))
                     .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", order));
             ordersWashings.add(currentOrder);
         }
 
+        String bookingOrderRequestOrderType = bookingOrderRequest.getOrderType();
         Integer price = bookingOrderRequest.getPrice();
+        int autoType = bookingOrderRequest.getAutoType();
+        String comments = bookingOrderRequest.getComments();
+        String autoNumber = bookingOrderRequest.getAutoNumber();
+        String sale = bookingOrderRequest.getSale();
+        String administrator = bookingOrderRequest.getAdministrator();
+        String specialist = bookingOrderRequest.getSpecialist();
+        int bonuses = bookingOrderRequest.getBonuses();
+        String currentStatus = bookingOrderRequest.getCurrentStatus();
+        String userPhone = lastUserVersion.getPhone();
 
-        if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = orderService.getWashingOrderPriceTime(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType()).getPrice();
+        if (price == null || price == 0) {
+            price = orderService.getWashingOrderPriceTime(ordersList, autoType).getSecond();
         }
 
-        String orderType = "wash " + bookingOrderRequest.getOrderType();
+        String orderType = "wash " + bookingOrderRequestOrderType;
 
         Pair<Order, OrderVersions> result = orderService.saveWashingOrder(
-                ordersWashings, bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(),
-                bookingOrderRequest.getAdministrator(), bookingOrderRequest.getSpecialist(),
-                bookingOrderRequest.getBoxNumber(), bookingOrderRequest.getBonuses(),
-                bookingOrderRequest.getComments(), bookingOrderRequest.getAutoNumber(),
-                bookingOrderRequest.getAutoType(), lastUserVersion.getPhone(),
-                user, price, orderType, bookingOrderRequest.getCurrentStatus(), 1, bookingOrderRequest.getSale());
+                ordersWashings, startTime, endTime, administrator, specialist,
+                boxNumber, bonuses, comments, autoNumber, autoType,
+                userPhone, user, price, orderType,
+                currentStatus, 1, sale);
         Order newOrder = result.getFirst();
         OrderVersions orderCurrentVersions = result.getSecond();
 
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
         String operationName = "Book_washing_order";
-        String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getPhone() + "' забронировал заказ на автомойку";
+        String descriptionMessage = "Пользователь с логином '" + userPhone + "' забронировал заказ на автомойку";
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-        log.info("bookWashingOrder_v1. User with phone '{}' booked a car wash order.", lastUserVersion.getPhone());
+        log.info("bookWashingOrder_v1. User with phone '{}' booked a car wash order.", userPhone);
 
-        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
-                bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(),
-                bookingOrderRequest.getAdministrator(), bookingOrderRequest.getSpecialist(),
-                bookingOrderRequest.getBoxNumber(), bookingOrderRequest.getAutoNumber(),
-                bookingOrderRequest.getAutoType(), bookingOrderRequest.getBonuses(), bookingOrderRequest.getComments(),
-                newOrder.getUser().getId(), price, orderType, "wash", orderCurrentVersions.getCurrentStatus()));
+        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), ordersList,
+                startTime, endTime, administrator, specialist, boxNumber, autoNumber,
+                autoType, bonuses, comments, newOrder.getUser().getId(), price, orderType, "wash", orderCurrentVersions.getCurrentStatus()));
     }
 
     @Transactional
     @PostMapping("/bookPolishingOrder_v1")
     public ResponseEntity<?> newPolishingOrder(@Valid @RequestBody BookingWashingPolishingOrderRequest bookingOrderRequest) {
-        if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
-            log.warn("bookPolishingOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
-                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
+        int boxNumber = bookingOrderRequest.getBoxNumber();
+        if (boxNumber != 5) {
+            throw new BadBoxException(boxNumber, "полировка");
         }
 
-        if (bookingOrderRequest.getBoxNumber() != 5) {
-            log.warn("bookPolishingOrder_v1. Booking attempt failed: Box number {} cannot be used for polishing.", bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Этот бокс не может быть использован для полировки"));
+        Date startTime = bookingOrderRequest.getStartTime();
+        Date endTime = bookingOrderRequest.getEndTime();
+
+        if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
+            throw new TimeSlotUnavailableException(boxNumber);
         }
+
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
 
         User user = userService.getFullUserById(userId);
+        UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
+        List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersPolishing> ordersPolishings = new ArrayList<>();
 
-        for (var order : bookingOrderRequest.getOrders()) {
+        for (var order : ordersList) {
             var currentOrder = ordersPolishingRepository.findByName(order.replace(" ", "_"))
                     .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", order.replace("_", " ")));
             ordersPolishings.add(currentOrder);
         }
 
         Integer price = bookingOrderRequest.getPrice();
+        int autoType = bookingOrderRequest.getAutoType();
 
-        if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = orderService.getPolishingOrderPriceAndTime(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType()).getPrice();
+        if (price == null || price == 0) {
+            price = orderService.getPolishingOrderPriceAndTime(ordersList, autoType).getSecond();
         }
 
-        UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
+        String bookingOrderRequestOrderType = bookingOrderRequest.getOrderType();
+        String comments = bookingOrderRequest.getComments();
+        String autoNumber = bookingOrderRequest.getAutoNumber();
+        String sale = bookingOrderRequest.getSale();
+        String administrator = bookingOrderRequest.getAdministrator();
+        String specialist = bookingOrderRequest.getSpecialist();
+        int bonuses = bookingOrderRequest.getBonuses();
+        String currentStatus = bookingOrderRequest.getCurrentStatus();
+        String userPhone = lastUserVersion.getPhone();
 
-        Pair<Order, OrderVersions> result = orderService.savePolishingOrder(ordersPolishings, bookingOrderRequest.getStartTime(),
-                bookingOrderRequest.getEndTime(), bookingOrderRequest.getAdministrator(),
-                bookingOrderRequest.getSpecialist(), bookingOrderRequest.getBoxNumber(),
-                bookingOrderRequest.getBonuses(), bookingOrderRequest.getComments(),
-                bookingOrderRequest.getAutoNumber(),
-                bookingOrderRequest.getAutoType(), lastUserVersion.getPhone(), user,
-                price, OrderTypes.polishingApp, bookingOrderRequest.getCurrentStatus(), 1, bookingOrderRequest.getSale());
+        Pair<Order, OrderVersions> result = orderService.savePolishingOrder(ordersPolishings, startTime,
+                endTime, administrator, specialist, boxNumber, bonuses, comments,
+                autoNumber, autoType, userPhone, user, price,
+                OrderTypes.polishingApp, currentStatus, 1, sale);
 
         Order newOrder = result.getFirst();
         OrderVersions orderCurrentVersions = result.getSecond();
@@ -203,37 +219,38 @@ public class OrderCreatingController {
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-        log.info("bookPolishingOrder_v1. User with phone '{}' booked a car wash order.", lastUserVersion.getPhone());
+        log.info("bookPolishingOrder_v1. User with phone '{}' booked a car wash order.", userPhone);
 
-        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
-                bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getAdministrator(),
-                bookingOrderRequest.getSpecialist(), bookingOrderRequest.getBoxNumber(), bookingOrderRequest.getAutoNumber(),
-                bookingOrderRequest.getAutoType(), bookingOrderRequest.getBonuses(), bookingOrderRequest.getComments(),
-                newOrder.getUser().getId(), price, bookingOrderRequest.getOrderType(), "polishing", orderCurrentVersions.getCurrentStatus()));
+        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), ordersList,
+                startTime, endTime, administrator, specialist, boxNumber, autoNumber,
+                autoType, bonuses, comments, newOrder.getUser().getId(), price,
+                bookingOrderRequestOrderType, "polishing", currentStatus));
     }
 
     @Transactional
     @PostMapping("/bookTireOrder_v1")
     public ResponseEntity<?> newTireOrder(@Valid @RequestBody BookingTireOrderRequest bookingOrderRequest) {
-        if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
-            log.warn("bookTireOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
-                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
+        int boxNumber = bookingOrderRequest.getBoxNumber();
+        if (boxNumber != 0) {
+            throw new BadBoxException(boxNumber, "шиномонтаж");
         }
 
-        if (bookingOrderRequest.getBoxNumber() != 0) {
-            log.warn("bookTireOrder_v1. Booking attempt failed: Box number {} cannot be used for tire.", bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Этот бокс не может быть использован для шиномонтажа"));
+        Date startTime = bookingOrderRequest.getStartTime();
+        Date endTime = bookingOrderRequest.getEndTime();
+        if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
+            throw new TimeSlotUnavailableException(boxNumber);
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
 
         User user = userService.getFullUserById(userId);
+        UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
         List<OrdersTire> ordersTireService = new ArrayList<>();
+        List<String> ordersList = bookingOrderRequest.getOrders();
 
-        for (var order : bookingOrderRequest.getOrders()) {
+        for (var order : ordersList) {
             var currentOrder = ordersTireRepository.findByName(order.replace(" ", "_"))
                     .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ",
                             order.replace("_", " ")));
@@ -241,20 +258,26 @@ public class OrderCreatingController {
         }
 
         Integer price = bookingOrderRequest.getPrice();
+        String wheelR = bookingOrderRequest.getWheelR();
 
-        if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = orderService.getTireOrderTimePrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getWheelR()).getPrice();
+        if (price == null || price == 0) {
+            price = orderService.getTireOrderTimePrice(ordersList, wheelR).getSecond();
         }
 
-        UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
+        String comments = bookingOrderRequest.getComments();
+        String autoNumber = bookingOrderRequest.getAutoNumber();
+        String sale = bookingOrderRequest.getSale();
+        String administrator = bookingOrderRequest.getAdministrator();
+        String specialist = bookingOrderRequest.getSpecialist();
+        int bonuses = bookingOrderRequest.getBonuses();
+        String currentStatus = bookingOrderRequest.getCurrentStatus();
+        String userPhone = lastUserVersion.getPhone();
+        int autoType = bookingOrderRequest.getAutoType();
 
-        var result = orderService.saveTireOrder(ordersTireService, bookingOrderRequest.getStartTime(),
-                bookingOrderRequest.getEndTime(), bookingOrderRequest.getAdministrator(),
-                bookingOrderRequest.getSpecialist(), bookingOrderRequest.getBoxNumber(),
-                bookingOrderRequest.getBonuses(), bookingOrderRequest.getComments(),
-                bookingOrderRequest.getAutoNumber(), bookingOrderRequest.getAutoType(),
-                lastUserVersion.getPhone(), user, price, bookingOrderRequest.getWheelR(),
-                OrderTypes.tireApp, bookingOrderRequest.getCurrentStatus(), 1, bookingOrderRequest.getSale());
+        var result = orderService.saveTireOrder(ordersTireService, startTime, endTime,
+                administrator, specialist, boxNumber, bonuses, comments,
+                autoNumber, autoType, userPhone, user, price, wheelR,
+                OrderTypes.tireApp, currentStatus, 1, sale);
 
 
         Order newOrder = result.getFirst();
@@ -263,26 +286,25 @@ public class OrderCreatingController {
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
         String operationName = "Book_tire_order";
-        String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getPhone() + "' забронировал заказ на шиномонтаж";
+        String descriptionMessage = "Пользователь с логином '" + userPhone + "' забронировал заказ на шиномонтаж";
 
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-        log.info("bookTireOrder_v1. User with phone '{}' booked a car wash order.", lastUserVersion.getPhone());
-        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
-                bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getAdministrator(),
-                bookingOrderRequest.getSpecialist(), bookingOrderRequest.getBoxNumber(), bookingOrderRequest.getAutoNumber(),
-                bookingOrderRequest.getAutoType(), bookingOrderRequest.getBonuses(), bookingOrderRequest.getComments(),
-                newOrder.getUser().getId(), price, "tire", bookingOrderRequest.getWheelR(), orderCurrentVersions.getCurrentStatus()));
+        log.info("bookTireOrder_v1. User with phone '{}' booked a car wash order.", userPhone);
+        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), ordersList,
+                startTime, endTime, administrator, specialist, boxNumber, autoNumber,
+                autoType, bonuses, comments, newOrder.getUser().getId(), price, "tire", wheelR, currentStatus));
     }
 
     @PostMapping("/createWashingOrder_v1")
     @Transactional
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<?> creatingWashingOrder(@Valid @RequestBody CreatingWashingOrder bookingOrderRequest) {
-        if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
-            log.warn("createWashingOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
-                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
+        Date startTime = bookingOrderRequest.getStartTime();
+        Date endTime = bookingOrderRequest.getEndTime();
+        int boxNumber = bookingOrderRequest.getBoxNumber();
+        if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
+            throw new TimeSlotUnavailableException(boxNumber);
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -294,7 +316,8 @@ public class OrderCreatingController {
 
         List<OrdersWashing> ordersWashings = new ArrayList<>();
 
-        for (var order : bookingOrderRequest.getOrders()) {
+        List<String> ordersList = bookingOrderRequest.getOrders();
+        for (var order : ordersList) {
             String dataBaseOrderName = order.replace(" ", "_");
             var currentOrder = ordersWashingRepository.findByName(dataBaseOrderName)
                     .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", order.replace("_", " ")));
@@ -302,34 +325,41 @@ public class OrderCreatingController {
         }
 
         Integer price = bookingOrderRequest.getPrice();
+        int autoType = bookingOrderRequest.getAutoType();
 
-        if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = orderService.getWashingOrderPriceTime(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType()).getPrice();
+        if (price == null || price == 0) {
+            price = orderService.getWashingOrderPriceTime(ordersList, autoType).getSecond();
         }
 
-        Pair<Order, OrderVersions> result = orderService.saveWashingOrder(ordersWashings, bookingOrderRequest.getStartTime(),
-                bookingOrderRequest.getEndTime(), administrator,
-                bookingOrderRequest.getSpecialist(), bookingOrderRequest.getBoxNumber(),
-                bookingOrderRequest.getBonuses(), bookingOrderRequest.getComments(),
-                bookingOrderRequest.getAutoNumber(), bookingOrderRequest.getAutoType(),
-                bookingOrderRequest.getUserContacts(), null, price,
-                OrderTypes.washSite, bookingOrderRequest.getCurrentStatus(), 1, bookingOrderRequest.getSale());
+        String comments = bookingOrderRequest.getComments();
+        String autoNumber = bookingOrderRequest.getAutoNumber();
+        String sale = bookingOrderRequest.getSale();
+        String specialist = bookingOrderRequest.getSpecialist();
+        int bonuses = bookingOrderRequest.getBonuses();
+        String currentStatus = bookingOrderRequest.getCurrentStatus();
+        String userContacts = bookingOrderRequest.getUserContacts();
+
+        Pair<Order, OrderVersions> result = orderService.saveWashingOrder(ordersWashings, startTime,
+                endTime, administrator, specialist, boxNumber,
+                bonuses, comments, autoNumber, autoType,
+                userContacts, null, price,
+                OrderTypes.washSite, currentStatus, 1, sale);
 
         Order newOrder = result.getFirst();
         OrderVersions orderVersions = result.getSecond();
+        String adminPhone = user.getPhone();
 
         String operationName = "Create_washing_order";
-        String descriptionMessage = "Админ с телефоном '" + user.getPhone() + "' создал заказ на автомойку";
+        String descriptionMessage = "Админ с телефоном '" + adminPhone + "' создал заказ на автомойку";
 
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
-        log.info("createWashingOrder_v1. Admin with login '{}' created a car wash order.", user.getPhone());
+        log.info("createWashingOrder_v1. Admin with login '{}' created a car wash order.", adminPhone);
 
-        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
-                orderVersions.getStartTime(), orderVersions.getEndTime(), orderVersions.getAdministrator(), bookingOrderRequest.getSpecialist(),
-                orderVersions.getBoxNumber(), orderVersions.getAutoNumber(),
-                orderVersions.getAutoType(), orderVersions.getBonuses(),
-                orderVersions.getComments(), price, "wash", "wash",
-                bookingOrderRequest.getUserContacts(), orderVersions.getCurrentStatus()));
+        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), ordersList,
+                orderVersions.getStartTime(), orderVersions.getEndTime(), orderVersions.getAdministrator(),
+                orderVersions.getSpecialist(), orderVersions.getBoxNumber(), orderVersions.getAutoNumber(),
+                orderVersions.getAutoType(), orderVersions.getBonuses(), orderVersions.getComments(),
+                price, "wash", "wash", orderVersions.getUserContacts(), orderVersions.getCurrentStatus()));
     }
 
 
@@ -337,14 +367,11 @@ public class OrderCreatingController {
     @Transactional
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<?> creatingPolishingOrder(@Valid @RequestBody CreatingPolishingOrder bookingOrderRequest) {
-        if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
-            log.warn("createPolishingOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
-                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
-        }
-
-        if (bookingOrderRequest.getBoxNumber() != 5) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Этот бокс не может быть использован для полировки"));
+        Date startTime = bookingOrderRequest.getStartTime();
+        Date endTime = bookingOrderRequest.getEndTime();
+        int boxNumber = bookingOrderRequest.getBoxNumber();
+        if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
+            throw new TimeSlotUnavailableException(boxNumber);
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -355,39 +382,47 @@ public class OrderCreatingController {
                 ? bookingOrderRequest.getAdministrator() : user.getPhone();
 
 
+        List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersPolishing> ordersPolishings = new ArrayList<>();
 
-        for (String order : bookingOrderRequest.getOrders()) {
+        for (String order : ordersList) {
             OrdersPolishing currentOrder = ordersPolishingRepository.findByName(order.replace(" ", "_"))
                     .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", order.replace("_", " ")));
             ordersPolishings.add(currentOrder);
         }
 
         Integer price = bookingOrderRequest.getPrice();
+        int autoType = bookingOrderRequest.getAutoType();
 
-        if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = orderService.getPolishingOrderPriceAndTime(bookingOrderRequest.getOrders(), bookingOrderRequest.getAutoType()).getPrice();
+        if (price == null || price == 0) {
+            price = orderService.getPolishingOrderPriceAndTime(ordersList, autoType).getSecond();
         }
 
-        Pair<Order, OrderVersions> result = orderService.savePolishingOrder(ordersPolishings, bookingOrderRequest.getStartTime(),
-                bookingOrderRequest.getEndTime(), administrator,
-                bookingOrderRequest.getSpecialist(), bookingOrderRequest.getBoxNumber(),
-                bookingOrderRequest.getBonuses(), bookingOrderRequest.getComments(),
-                bookingOrderRequest.getAutoNumber(), bookingOrderRequest.getAutoType(),
-                bookingOrderRequest.getUserContacts(), null, price,
-                OrderTypes.polishingSite, bookingOrderRequest.getCurrentStatus(), 1, bookingOrderRequest.getSale());
+        String comments = bookingOrderRequest.getComments();
+        String autoNumber = bookingOrderRequest.getAutoNumber();
+        String sale = bookingOrderRequest.getSale();
+        String specialist = bookingOrderRequest.getSpecialist();
+        int bonuses = bookingOrderRequest.getBonuses();
+        String currentStatus = bookingOrderRequest.getCurrentStatus();
+        String userContacts = bookingOrderRequest.getUserContacts();
+
+        Pair<Order, OrderVersions> result = orderService.savePolishingOrder(ordersPolishings, startTime,
+                endTime, administrator, specialist, boxNumber, bonuses, comments,
+                autoNumber, autoType, userContacts, null, price,
+                OrderTypes.polishingSite, currentStatus, 1, sale);
 
         Order newOrder = result.getFirst();
         OrderVersions newOrderVersion = result.getSecond();
+        String adminPhone = user.getPhone();
 
         String operationName = "Create_polishing_order";
-        String descriptionMessage = "Админ с телефоном '" + user.getPhone() + "' создал заказ на полировку";
+        String descriptionMessage = "Админ с телефоном '" + adminPhone + "' создал заказ на полировку";
 
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
-        log.info("createPolishingOrder_v1. Admin with login '{}' created a polishing order.", user.getPhone());
+        log.info("createPolishingOrder_v1. Admin with login '{}' created a polishing order.", adminPhone);
 
-        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
+        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), ordersList,
                 newOrderVersion.getStartTime(), newOrderVersion.getEndTime(),
                 newOrderVersion.getAdministrator(), newOrderVersion.getSpecialist(),
                 newOrderVersion.getBoxNumber(), newOrderVersion.getAutoNumber(),
@@ -400,13 +435,12 @@ public class OrderCreatingController {
     @Transactional
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<?> createTireOrder(@Valid @RequestBody CreatingTireOrderRequest bookingOrderRequest) {
-        if (!orderService.checkIfTimeFree(bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber())) {
-            log.warn("createTireOrder_v1. Booking attempt failed: This time slot from {} to {} in box {} is already taken.",
-                    bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(), bookingOrderRequest.getBoxNumber());
-            return ResponseEntity.badRequest().body(new MessageResponse("Это время в этом боксе уже занято"));
-        }
-        if (bookingOrderRequest.getBoxNumber() != 0) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Этот бокс не может быть использован для шиномонтажа"));
+        Date startTime = bookingOrderRequest.getStartTime();
+        Date endTime = bookingOrderRequest.getEndTime();
+        int boxNumber = bookingOrderRequest.getBoxNumber();
+
+        if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
+            throw new TimeSlotUnavailableException(boxNumber);
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -417,38 +451,44 @@ public class OrderCreatingController {
                 ? bookingOrderRequest.getAdministrator() : user.getPhone();
 
         List<OrdersTire> ordersTireService = new ArrayList<>();
+        List<String> ordersList = bookingOrderRequest.getOrders();
 
-        for (var order : bookingOrderRequest.getOrders()) {
+        for (var order : ordersList) {
             var currentOrder = ordersTireRepository.findByName(order.replace(" ", "_"))
                     .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", order.replace("_", " ")));
             ordersTireService.add(currentOrder);
         }
 
         Integer price = bookingOrderRequest.getPrice();
+        String wheelR = bookingOrderRequest.getWheelR();
 
-        if (bookingOrderRequest.getPrice() == null || bookingOrderRequest.getPrice() == 0) {
-            price = orderService.getTireOrderTimePrice(bookingOrderRequest.getOrders(), bookingOrderRequest.getWheelR()).getPrice();
+        if (price == null || price == 0) {
+            price = orderService.getTireOrderTimePrice(ordersList, wheelR).getSecond();
         }
 
-        var result = orderService.saveTireOrder(ordersTireService,
-                bookingOrderRequest.getStartTime(), bookingOrderRequest.getEndTime(),
-                administrator, bookingOrderRequest.getSpecialist(),
-                bookingOrderRequest.getBoxNumber(), bookingOrderRequest.getBonuses(),
-                bookingOrderRequest.getComments(), bookingOrderRequest.getAutoNumber(),
-                bookingOrderRequest.getAutoType(), bookingOrderRequest.getUserContacts(),
-                null, price, bookingOrderRequest.getWheelR(),
-                OrderTypes.tireSite, bookingOrderRequest.getCurrentStatus(), 1, bookingOrderRequest.getSale());
+        String comments = bookingOrderRequest.getComments();
+        String autoNumber = bookingOrderRequest.getAutoNumber();
+        String sale = bookingOrderRequest.getSale();
+        String specialist = bookingOrderRequest.getSpecialist();
+        int bonuses = bookingOrderRequest.getBonuses();
+        String currentStatus = bookingOrderRequest.getCurrentStatus();
+        String userContacts = bookingOrderRequest.getUserContacts();
+        int autoType = bookingOrderRequest.getAutoType();
+        var result = orderService.saveTireOrder(ordersTireService, startTime, endTime,
+                administrator, specialist, boxNumber, bonuses, comments, autoNumber,
+                autoType, userContacts, null, price, wheelR,
+                OrderTypes.tireSite, currentStatus, 1, sale);
 
         Order newOrder = result.getFirst();
         OrderVersions newOrderVersion = result.getSecond();
-
+        String adminPhone = user.getPhone();
         String operationName = "Create_tire_order";
-        String descriptionMessage = "Админ с телефоном '" + user.getPhone() + "' создал заказ на шиномонтаж";
+        String descriptionMessage = "Админ с телефоном '" + adminPhone + "' создал заказ на шиномонтаж";
         operationsService.SaveUserOperation(operationName, user.getUser(), descriptionMessage, 1);
 
-        log.info("createTireOrder_v1. Admin with login '{}' created a tire order.", user.getPhone());
+        log.info("createTireOrder_v1. Admin with login '{}' created a tire order.", adminPhone);
 
-        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), bookingOrderRequest.getOrders(),
+        return ResponseEntity.ok(new OrderInfoResponse(newOrder.getId(), ordersList,
                 newOrderVersion.getStartTime(), newOrderVersion.getEndTime(), newOrderVersion.getAdministrator(),
                 newOrderVersion.getSpecialist(), newOrderVersion.getBoxNumber(), newOrderVersion.getAutoNumber(),
                 newOrderVersion.getAutoType(), newOrderVersion.getBonuses(), newOrderVersion.getComments(),

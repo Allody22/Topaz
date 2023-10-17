@@ -1,43 +1,60 @@
 package ru.nsu.carwash_server.advice;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
+import ru.nsu.carwash_server.exceptions.ConfirmationCodeMismatchException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.UserAlreadyExistException;
 import ru.nsu.carwash_server.exceptions.UserNotFoundException;
-import ru.nsu.carwash_server.exceptions.model.ErrorMessage;
 
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class UserControllerAdvice {
 
-    private static final Logger log = LoggerFactory.getLogger(UserControllerAdvice.class);
-
     @ExceptionHandler(value = NotInDataBaseException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorMessage handleNotInDataBaseException(NotInDataBaseException ex, WebRequest request) {
-        log.error("NotInDataBaseException encountered: {}", ex.getMessage(), ex);
-        return new ErrorMessage(
-                HttpStatus.NOT_FOUND.value(),
-                new Date(),
-                ex.getMessage(),
-                request.getDescription(false));
+    @ResponseStatus(HttpStatus.GONE)
+    public Map<String, String> handleNotInDataBaseException(NotInDataBaseException ex) {
+        log.error("NotInDataBaseException encountered: {}", ex.getMessage());
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", ex.getMessage());
+        return errorResponse;
     }
 
     @ExceptionHandler(value = UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorMessage handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
-        log.error("UserNotFoundException encountered: {}", ex.getMessage(), ex);
-        return new ErrorMessage(
-                HttpStatus.NOT_FOUND.value(),
-                new Date(),
-                ex.getMessage(),
-                request.getDescription(false));
+    public Map<String, String> handleUserNotFoundException(UserNotFoundException ex) {
+        log.error("UserNotFoundException encountered: {}", ex.getMessage());
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", ex.getMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(value = UserAlreadyExistException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleUserAlreadyExistException(UserAlreadyExistException ex) {
+        log.error("UserAlreadyExist encountered: {}", ex.getMessage());
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", ex.getMessage());
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler(value = ConfirmationCodeMismatchException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public Map<String, String> handleConfirmationCodeMismatchException(ConfirmationCodeMismatchException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", ex.getMessage());
+
+        return errorResponse;
     }
 }

@@ -8,8 +8,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import ru.nsu.carwash_server.exceptions.BadRequestException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.SMSException;
 import ru.nsu.carwash_server.models.operations.OperationsUserLink;
 import ru.nsu.carwash_server.models.operations.OperationsVersions;
 import ru.nsu.carwash_server.models.users.User;
@@ -63,7 +63,7 @@ public class OperationsServiceIml implements OperationService {
 
     public void checkUserSMS(String number) {
         if (getAllDescriptionOperationsByTime(number, "получил код:", LocalDateTime.now().minusHours(1)).size() >= 2) {
-            throw new BadRequestException("Превышено количество запросов за час.");
+            throw new SMSException();
         }
     }
 

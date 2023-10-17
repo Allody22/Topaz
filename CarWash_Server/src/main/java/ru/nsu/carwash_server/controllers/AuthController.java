@@ -22,8 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import ru.nsu.carwash_server.exceptions.ConfirmationCodeMismatchException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.exceptions.TokenRefreshException;
+import ru.nsu.carwash_server.exceptions.UserAlreadyExistException;
+import ru.nsu.carwash_server.exceptions.UserNotFoundException;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
 import ru.nsu.carwash_server.models.users.RefreshToken;
 import ru.nsu.carwash_server.models.users.Role;
@@ -133,13 +136,13 @@ public class AuthController {
     @PostMapping("/signin_v1")
     @Transactional
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        if (!userService.existByPhone(loginRequest.getPhone())) {
-            log.warn("SignIp_v1.LogIn failed: Phone '{}' is not registered", loginRequest.getPhone());
-            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Такого пользователя не существует!"));
+        String userPhone = loginRequest.getPhone();
+        if (!userService.existByPhone(userPhone)) {
+            throw new UserNotFoundException(userPhone);
         }
 
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getPhone(), loginRequest.getPassword()));
+                .authenticate(new UsernamePasswordAuthenticationToken(userPhone, loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -168,14 +171,14 @@ public class AuthController {
     @PostMapping("/signup_v1")
     @Transactional
     public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userService.existByPhone(signUpRequest.getPhone())) {
-            log.warn("SignUp_v1.Registration failed: Phone '{}' is already taken", signUpRequest.getPhone());
-            return ResponseEntity.badRequest().body(new MessageResponse("Такой телефон уже занят!"));
+        String userPhone = signUpRequest.getPhone();
+        if (userService.existByPhone(userPhone)) {
+            log.warn("SignUp_v1.Registration failed: Phone '{}' is already taken", userPhone);
+            throw new UserAlreadyExistException(userPhone);
         }
 
-        if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(signUpRequest.getPhone()) + "")) {
-            log.warn("SignUp_v1.Registration failed: Confirmation code for phone '{}'  does not match", signUpRequest.getPhone());
-            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
+        if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(userPhone) + "")) {
+            throw new ConfirmationCodeMismatchException(userPhone);
         }
 
         Set<Role> roles = new HashSet<>();
@@ -185,7 +188,7 @@ public class AuthController {
         userFirstVersion.setPassword(encoder.encode(signUpRequest.getPassword()));
         userFirstVersion.setPhone(signUpRequest.getPhone());
         userFirstVersion.setDateOfCreation(new Date());
-        userFirstVersion.setPhone(signUpRequest.getPhone());
+        userFirstVersion.setPhone(userPhone);
 
         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                 .orElseThrow(() -> new NotInDataBaseException("ролей не найдена роль: ", ERole.ROLE_USER.name()));
@@ -194,10 +197,10 @@ public class AuthController {
         userService.saveNewUser(user, roles, 1, userFirstVersion);
 
         String operationName = "User_sign_up";
-        String descriptionMessage = "Клиент с логином '" + signUpRequest.getPhone() + "' зарегистрировался";
+        String descriptionMessage = "Клиент с логином '" + userPhone + "' зарегистрировался";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-        log.info("SignUp_v1.User with phone '{}' registered successfully", signUpRequest.getPhone());
+        log.info("SignUp_v1.User with phone '{}' registered successfully", userPhone);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
@@ -272,15 +275,6 @@ public class AuthController {
                 .phone(userDetails.getUsername())
                 .roles(roles)
                 .build();
-
-
-//        Long currentUserId = userDetails.getId();
-//        UserVersions userAdmin = userService.getActualUserVersionById(currentUserId);
-//
-//        String operationName = "Admin_log_in";
-//        String descriptionMessage = "Админ с логином '" + userAdmin.getPhone() + "' зашёл в аккаунт";
-//        operationsService.SaveUserOperation(operationName, userAdmin.getUser(), descriptionMessage, 1);
-
 
         return ResponseEntity.ok(jwtResponse);
     }

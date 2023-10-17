@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.nsu.carwash_server.exceptions.ConfirmationCodeMismatchException;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.secondary.helpers.OrderMainInfo;
 import ru.nsu.carwash_server.models.users.Role;
@@ -61,9 +62,9 @@ public class UserController {
     @Transactional
     @PostMapping("/updateUserPassword_v1")
     public ResponseEntity<MessageResponse> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
-        if (!updateUserPasswordRequest.getSecretCode().equals(operationsService
-                .getLatestCodeByPhoneNumber(updateUserPasswordRequest.getPhone()) + "")) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка: код подтверждения не совпадает!"));
+        String userPhone = updateUserPasswordRequest.getPhone();
+        if (!updateUserPasswordRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(userPhone) + "")) {
+            throw new ConfirmationCodeMismatchException(userPhone);
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -75,7 +76,7 @@ public class UserController {
 
         String password = (encoder.encode(updateUserPasswordRequest.getPassword()));
 
-        UserVersions newVersion = new UserVersions(latestUserVersion, password, updateUserPasswordRequest.getPhone());
+        UserVersions newVersion = new UserVersions(latestUserVersion, password, userPhone);
         user.addUserVersion(newVersion);
 
         String operationName = "Update_user_info_by_user";

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.nsu.carwash_server.exceptions.validation.fields.NotZero;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -20,7 +21,9 @@ public class FreeTimeRequest {
     @NotBlank
     private String orderType = null;
 
-    private int orderTime = 0;
+    @NotNull
+    @NotZero
+    private int orderTime;
 
     @NotNull
     @JsonFormat(timezone = "Asia/Novosibirsk")

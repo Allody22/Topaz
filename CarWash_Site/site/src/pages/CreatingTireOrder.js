@@ -523,8 +523,8 @@ const CreatingTireOrder = observer(() => {
                 setErrorFlag(flag => !flag);
 
             } else {
-                setErrorResponse("Системная ошибка, проверьте правильность " +
-                    "введённой информации и попробуйте еще раз")
+                setErrorResponse("Системная ошибка с созданием заказа. Проверьте правильность введённой информации" +
+                    " и попробуйте еще")
                 setErrorFlag(flag => !flag)
             }
         } finally {

@@ -19,6 +19,7 @@ import socketStore from "../store/SocketStore";
 import {BrowserRouter as Router} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
+import serviceRoleMapFromRus from "../model/map/ServiceRoleMapFromRus";
 
 
 const toLabelValueArray = (items) => items.map(item => ({label: item, value: item}));
@@ -244,7 +245,7 @@ const AddNewService = observer(() => {
                     getTimeByWheelR('15'), getTimeByWheelR('16'), getTimeByWheelR('17'),
                     getTimeByWheelR('18'), getTimeByWheelR('19'), getTimeByWheelR('20'),
                     getTimeByWheelR('21'), getTimeByWheelR('22'),
-                    orderTypeMapFromRussian[role], [...washingTypeIncludedEnglish, ...washingTypeConnectedEnglish])
+                    serviceRoleMapFromRus[role], [...washingTypeIncludedEnglish, ...washingTypeConnectedEnglish])
                 setSuccessResponse(null)
                 setSuccessResponse("В базе данных появилась услуга '" + (response.name).replaceAll('_', ' ') + "'")
             } catch

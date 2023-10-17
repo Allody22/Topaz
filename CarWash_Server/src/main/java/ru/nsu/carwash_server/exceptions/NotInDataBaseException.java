@@ -5,13 +5,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.Serial;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
+@ResponseStatus(HttpStatus.GONE)
 public class NotInDataBaseException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     public NotInDataBaseException(String message, String name) {
-        super(String.format("Ошибка! В базе данных " + message + name, message, name));
+        super(String.format("Ошибка! В базе данных %s %s", message, name));
     }
 }

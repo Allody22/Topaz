@@ -4,6 +4,7 @@ package ru.nsu.carwash_server.controllers;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,8 +14,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.nsu.carwash_server.models.orders.OrdersPolishing;
-import ru.nsu.carwash_server.models.orders.OrdersTire;
+import ru.nsu.carwash_server.exceptions.InvalidOrderTypeException;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.payload.request.NewServiceRequest;
@@ -32,7 +33,6 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.util.StringJoiner;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -79,273 +79,148 @@ public class ServiceChangingController {
         String operationName = "Create_new_service_by_admin";
         User user = userService.getFullUserById(userId);
 
+        String serviceType = newServiceRequest.getServiceType();
         String userPhone = userService.getActualUserVersionById(userId).getPhone();
-        switch (newServiceRequest.getServiceType()) {
+        switch (serviceType) {
             case "wash" -> {
-                StringJoiner joiner = new StringJoiner(";");
-                for (String element : newServiceRequest.getIncludedIn()) {
-                    joiner.add(element);
+                if (newServiceRequest.getRole().isBlank()) {
+                    return ResponseEntity.badRequest().body(new MessageResponse("Пожалуйста, введи роль для услуги мойки"));
                 }
 
-                String serviceRoleInApp = joiner.toString();
-                OrdersWashing ordersWashing = OrdersWashing.builder().
-                        name(newServiceRequest.getName())
-                        .priceFirstType(newServiceRequest.getPriceFirstType())
-                        .priceSecondType(newServiceRequest.getPriceSecondType())
-                        .priceThirdType(newServiceRequest.getPriceThirdType())
-                        .timeFirstType(newServiceRequest.getTimeFirstType())
-                        .timeSecondType(newServiceRequest.getTimeSecondType())
-                        .timeThirdType(newServiceRequest.getTimeThirdType())
-                        .associatedOrder(serviceRoleInApp)
-                        .role(newServiceRequest.getRole())
-                        .build();
-                var response = orderService.createWashingService(ordersWashing);
-                String newPriceFirstType = (newServiceRequest.getPriceFirstType() != null) ?
-                        " цену за 1 тип: '" + newServiceRequest.getPriceThirdType() + "', " : null;
+                Pair<String, OrdersWashing> resultOfSaving = orderService.createWashingService(newServiceRequest);
 
-                String newPriceSecondType = (newServiceRequest.getPriceSecondType() != null) ?
-                        " цену за 2 тип: '" + newServiceRequest.getPriceSecondType() + "', " : null;
-
-                String newPriceThirdType = (newServiceRequest.getPriceThirdType() != null) ?
-                        " цену за 3 тип: '" + newServiceRequest.getTimeThirdType() + "', " : null;
-
-                String newTimeFirstType = (newServiceRequest.getTimeFirstType() != null) ?
-                        " время за 1 тип: '" + newServiceRequest.getTimeFirstType() + "', " : null;
-
-                String newTimeSecondType = (newServiceRequest.getTimeSecondType() != null) ?
-                        " время за 2 тип: '" + newServiceRequest.getTimeSecondType() + "', " : null;
-
-                String newTimeThirdType = (newServiceRequest.getTimeThirdType() != null) ?
-                        " время за 3 тип: '" + newServiceRequest.getTimeThirdType() + "', " : null;
-
-
-                String descriptionMessage = "Создана услуга мойки '" + newServiceRequest.getName().replace("_", " ")
-                        + "', получившая " + newPriceFirstType + newPriceSecondType + newPriceThirdType +
-                        newTimeFirstType + newTimeSecondType + newTimeThirdType;
-
-                operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+                operationsService.SaveUserOperation(operationName, user, resultOfSaving.getFirst(), 1);
                 log.info("createNewService_v1. User with phone '{}' created new washing service.", userPhone);
 
-                return (ResponseEntity.ok(response));
+                return (ResponseEntity.ok(resultOfSaving.getSecond()));
             }
             case "tire" -> {
-                OrdersTire ordersTire = OrdersTire.builder()
-                        .name(newServiceRequest.getName())
-                        .price_r_13(newServiceRequest.getPrice_r_13())
-                        .price_r_14(newServiceRequest.getPrice_r_14())
-                        .price_r_15(newServiceRequest.getPrice_r_15())
-                        .price_r_16(newServiceRequest.getPrice_r_16())
-                        .price_r_17(newServiceRequest.getPrice_r_17())
-                        .price_r_18(newServiceRequest.getPrice_r_18())
-                        .price_r_19(newServiceRequest.getPrice_r_19())
-                        .price_r_20(newServiceRequest.getPrice_r_20())
-                        .price_r_21(newServiceRequest.getPrice_r_21())
-                        .price_r_22(newServiceRequest.getPrice_r_22())
-                        .time_r_13(newServiceRequest.getTime_r_13())
-                        .time_r_14(newServiceRequest.getTime_r_14())
-                        .time_r_15(newServiceRequest.getTime_r_15())
-                        .time_r_16(newServiceRequest.getTime_r_16())
-                        .time_r_17(newServiceRequest.getTime_r_17())
-                        .time_r_18(newServiceRequest.getTime_r_18())
-                        .time_r_19(newServiceRequest.getTime_r_19())
-                        .time_r_20(newServiceRequest.getTime_r_20())
-                        .time_r_21(newServiceRequest.getTime_r_21())
-                        .time_r_22(newServiceRequest.getTime_r_22())
-                        .role(newServiceRequest.getRole())
-                        .build();
-                var response = orderService.createTireService(ordersTire);
-                String descriptionMessage = "Создана услуга шиномонтажа'" + newServiceRequest.getName().replace("_", " ");
 
-                operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+                var resultOfSaving = orderService.createTireService(newServiceRequest);
+
+                operationsService.SaveUserOperation(operationName, user, resultOfSaving.getFirst(), 1);
                 log.info("createNewService_v1. User with phone '{}' created new tire service.", userPhone);
 
-                return (ResponseEntity.ok(response));
+                return (ResponseEntity.ok(resultOfSaving.getSecond()));
 
             }
             case "polishing" -> {
-                OrdersPolishing ordersPolishing = OrdersPolishing.builder().
-                        name(newServiceRequest.getName())
-                        .priceFirstType(newServiceRequest.getPriceFirstType())
-                        .priceSecondType(newServiceRequest.getPriceSecondType())
-                        .priceThirdType(newServiceRequest.getPriceThirdType())
-                        .timeFirstType(newServiceRequest.getTimeFirstType())
-                        .timeSecondType(newServiceRequest.getTimeSecondType())
-                        .timeThirdType(newServiceRequest.getTimeThirdType())
-                        .build();
-                var response = orderService.createPolishingService(ordersPolishing);
 
-                String newPriceFirstType = (newServiceRequest.getPriceFirstType() != null) ?
-                        " цену за 1 тип: '" + newServiceRequest.getPriceThirdType() + "', " : null;
-
-                String newPriceSecondType = (newServiceRequest.getPriceSecondType() != null) ?
-                        " цену за 2 тип: '" + newServiceRequest.getPriceSecondType() + "', " : null;
-
-                String newPriceThirdType = (newServiceRequest.getPriceThirdType() != null) ?
-                        " цену за 3 тип: '" + newServiceRequest.getTimeThirdType() + "', " : null;
-
-                String newTimeFirstType = (newServiceRequest.getTimeFirstType() != null) ?
-                        " время за 1 тип: '" + newServiceRequest.getTimeFirstType() + "', " : null;
-
-                String newTimeSecondType = (newServiceRequest.getTimeSecondType() != null) ?
-                        " время за 2 тип: '" + newServiceRequest.getTimeSecondType() + "', " : null;
-
-                String newTimeThirdType = (newServiceRequest.getTimeThirdType() != null) ?
-                        " время за 3 тип: '" + newServiceRequest.getTimeThirdType() + "', " : null;
-
-
-                String descriptionMessage = "Создана услуга полировка'" + newServiceRequest.getName().replace("_", " ")
-                        + "', получившая " + newPriceFirstType + newPriceSecondType + newPriceThirdType +
-                        newTimeFirstType + newTimeSecondType + newTimeThirdType;
-                operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+                var resultOfSaving = orderService.createPolishingService(newServiceRequest);
+                operationsService.SaveUserOperation(operationName, user, resultOfSaving.getFirst(), 1);
 
                 log.info("createNewService_v1. User with phone '{}' created new polishing service.", userPhone);
 
-                return (ResponseEntity.ok(response));
+                return (ResponseEntity.ok(resultOfSaving.getSecond()));
+            }
+            default -> {
+                throw new InvalidOrderTypeException(serviceType);
             }
         }
-
-        return ResponseEntity.badRequest().body(new MessageResponse("Типа услуг "
-                + newServiceRequest.getServiceType() + " не существует"));
     }
 
     @PutMapping("/updateWashingService_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<MessageResponse> updateWashingService(@Valid @RequestBody UpdateWashingServiceRequest updateWashingServiceRequest) {
-        if (ordersWashingRepository.findByName(updateWashingServiceRequest.getName()).isPresent()) {
-            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Long userId = userDetails.getId();
-            ordersWashingRepository.updateWashingServiceInfo(updateWashingServiceRequest.getName(), updateWashingServiceRequest.getPriceFirstType(),
-                    updateWashingServiceRequest.getPriceSecondType(), updateWashingServiceRequest.getPriceThirdType(),
-                    updateWashingServiceRequest.getTimeFirstType(), updateWashingServiceRequest.getTimeSecondType(),
-                    updateWashingServiceRequest.getTimeThirdType(), updateWashingServiceRequest.getRole());
+        String serviceName = updateWashingServiceRequest.getName();
+        ordersWashingRepository.findByName(updateWashingServiceRequest.getName())
+                .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга ", serviceName.replace("_", " ")));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+        int priceFirstType = updateWashingServiceRequest.getPriceFirstType();
+        int priceSecondType = updateWashingServiceRequest.getPriceSecondType();
+        int priceThirdType = updateWashingServiceRequest.getPriceThirdType();
+        int timeFirstType = updateWashingServiceRequest.getTimeFirstType();
+        int timeSecondType = updateWashingServiceRequest.getTimeSecondType();
+        int timeThirdType = updateWashingServiceRequest.getTimeThirdType();
+        String serviceRole = updateWashingServiceRequest.getRole();
 
+        ordersWashingRepository.updateWashingServiceInfo(serviceName, priceFirstType, priceSecondType, priceThirdType,
+                timeFirstType, timeSecondType, timeThirdType, serviceRole);
 
-            User user = userService.getFullUserById(userId);
-            String userPhone = userService.getActualUserVersionById(userId).getPhone();
-            String operationName = "Update_washing_service_by_admin";
+        User user = userService.getFullUserById(userId);
+        String userPhone = userService.getActualUserVersionById(userId).getPhone();
+        String operationName = "Update_washing_service_by_admin";
 
-            String newPriceFirstType = (updateWashingServiceRequest.getPriceFirstType() != null) ?
-                    "новую цену за 1 тип: '" + updateWashingServiceRequest.getPriceThirdType() + "', " : null;
+        String descriptionMessage = orderService.getPolishingWashingOrderChangingInfo(priceFirstType,
+                priceSecondType, priceThirdType, timeFirstType, timeSecondType, timeThirdType, "Обновлена услуга", serviceName);
 
-            String newPriceSecondType = (updateWashingServiceRequest.getPriceSecondType() != null) ?
-                    "новую цену за 2 тип: '" + updateWashingServiceRequest.getPriceSecondType() + "', " : null;
+        log.info("updateWashingService_v1. User with phone '{}' updated washing service.", userPhone);
 
-            String newPriceThirdType = (updateWashingServiceRequest.getPriceThirdType() != null) ?
-                    "новую цену за 3 тип: '" + updateWashingServiceRequest.getTimeThirdType() + "', " : null;
+        operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-            String newTimeFirstType = (updateWashingServiceRequest.getTimeFirstType() != null) ?
-                    "новое время за 1 тип: '" + updateWashingServiceRequest.getTimeFirstType() + "', " : null;
-
-            String newTimeSecondType = (updateWashingServiceRequest.getTimeSecondType() != null) ?
-                    "новое время за 2 тип: '" + updateWashingServiceRequest.getTimeSecondType() + "', " : null;
-
-            String newTimeThirdType = (updateWashingServiceRequest.getTimeThirdType() != null) ?
-                    "новое время за 3 тип: '" + updateWashingServiceRequest.getTimeThirdType() + "', " : null;
-
-
-            String descriptionMessage = "Услуга '" + updateWashingServiceRequest.getName().replace("_", " ")
-                    + "' получила " + newPriceFirstType + newPriceSecondType + newPriceThirdType +
-                    newTimeFirstType + newTimeSecondType + newTimeThirdType;
-
-            log.info("updateWashingService_v1. User with phone '{}' updated washing service.", userPhone);
-
-            operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
-
-            return ResponseEntity.ok(new MessageResponse(descriptionMessage));
-        } else {
-            return ResponseEntity.badRequest().body(new MessageResponse("Услуги "
-                    + updateWashingServiceRequest.getName().replace("_", " ") + " не существует"));
-        }
+        return ResponseEntity.ok(new MessageResponse(descriptionMessage));
     }
 
     @Transactional
     @PutMapping("/updatePolishingService_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<MessageResponse> createPolishingService(@Valid @RequestBody UpdatePolishingServiceRequest updatePolishingServiceRequest) {
-        if (polishingRepository.findByName(updatePolishingServiceRequest.getName()).isPresent()) {
-            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Long userId = userDetails.getId();
+        String serviceName = updatePolishingServiceRequest.getName();
+        polishingRepository.findByName(serviceName)
+                .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга ", serviceName.replace("_", " ")));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
 
-            polishingRepository.updatePolishingOrder(updatePolishingServiceRequest.getName(), updatePolishingServiceRequest.getPriceFirstType(),
-                    updatePolishingServiceRequest.getPriceSecondType(), updatePolishingServiceRequest.getPriceThirdType(),
-                    updatePolishingServiceRequest.getTimeFirstType(), updatePolishingServiceRequest.getTimeSecondType(),
-                    updatePolishingServiceRequest.getTimeThirdType());
+        int priceFirstType = updatePolishingServiceRequest.getPriceFirstType();
+        int priceSecondType = updatePolishingServiceRequest.getPriceSecondType();
+        int priceThirdType = updatePolishingServiceRequest.getPriceThirdType();
+        int timeFirstType = updatePolishingServiceRequest.getTimeFirstType();
+        int timeSecondType = updatePolishingServiceRequest.getTimeSecondType();
+        int timeThirdType = updatePolishingServiceRequest.getTimeThirdType();
 
-            User user = userService.getFullUserById(userId);
+        polishingRepository.updatePolishingOrder(serviceName, priceFirstType, priceSecondType, priceThirdType,
+                timeFirstType, timeSecondType, timeThirdType);
 
-            String userPhone = userService.getActualUserVersionById(userId).getPhone();
+        User user = userService.getFullUserById(userId);
 
-            String operationName = "Update_polishing_service_by_admin";
+        String userPhone = userService.getActualUserVersionById(userId).getPhone();
 
-            String newPriceFirstType = (updatePolishingServiceRequest.getPriceFirstType() != null) ?
-                    "новую цену за 1 тип: '" + updatePolishingServiceRequest.getPriceThirdType() + "', " : null;
+        String operationName = "Update_polishing_service_by_admin";
 
-            String newPriceSecondType = (updatePolishingServiceRequest.getPriceSecondType() != null) ?
-                    "новую цену за 2 тип: '" + updatePolishingServiceRequest.getPriceSecondType() + "', " : null;
+        String descriptionMessage = orderService.getPolishingWashingOrderChangingInfo(timeFirstType,
+                priceSecondType, priceThirdType, timeFirstType, timeSecondType, timeThirdType, "Обновлена услуга", serviceName);
+        operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+        log.info("updatePolishingService_v1. User with phone '{}' updated polishing service.", userPhone);
 
-            String newPriceThirdType = (updatePolishingServiceRequest.getPriceThirdType() != null) ?
-                    "новую цену за 3 тип: '" + updatePolishingServiceRequest.getTimeThirdType() + "', " : null;
-
-            String newTimeFirstType = (updatePolishingServiceRequest.getTimeFirstType() != null) ?
-                    "новое время за 1 тип: '" + updatePolishingServiceRequest.getTimeFirstType() + "', " : null;
-
-            String newTimeSecondType = (updatePolishingServiceRequest.getTimeSecondType() != null) ?
-                    "новое время за 2 тип: '" + updatePolishingServiceRequest.getTimeSecondType() + "', " : null;
-
-            String newTimeThirdType = (updatePolishingServiceRequest.getTimeThirdType() != null) ?
-                    "новое время за 3 тип: '" + updatePolishingServiceRequest.getTimeThirdType() + "', " : null;
-
-
-            String descriptionMessage = "Услуга '" + updatePolishingServiceRequest.getName().replace("_", " ")
-                    + "' получила " + newPriceFirstType + newPriceSecondType + newPriceThirdType +
-                    newTimeFirstType + newTimeSecondType + newTimeThirdType;
-
-            operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
-            log.info("updatePolishingService_v1. User with phone '{}' updated polishing service.", userPhone);
-
-            return ResponseEntity.ok(new MessageResponse("Услуга " + updatePolishingServiceRequest.getName().replace("_", " ") + " изменена"));
-        } else {
-            return ResponseEntity.badRequest().body(new MessageResponse("Услуги "
-                    + updatePolishingServiceRequest.getName().replace("_", " ") + " не существует"));
-        }
+        return ResponseEntity.ok(new MessageResponse("Услуга " + updatePolishingServiceRequest.getName().replace("_", " ") + " изменена"));
     }
 
     @PutMapping("/updateTireService_v1")
     @Transactional
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<MessageResponse> updateTireService(@Valid @RequestBody UpdateTireServiceRequest updateTireServiceRequest) {
-        if (tireRepository.findByName(updateTireServiceRequest.getName()).isPresent()) {
-            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Long userId = userDetails.getId();
+        String serviceName = updateTireServiceRequest.getName();
 
-            tireRepository.updateTireOrderInfo(updateTireServiceRequest.getName(), updateTireServiceRequest.getPrice_r_13(),
-                    updateTireServiceRequest.getPrice_r_14(), updateTireServiceRequest.getPrice_r_15(),
-                    updateTireServiceRequest.getPrice_r_16(), updateTireServiceRequest.getPrice_r_17(),
-                    updateTireServiceRequest.getPrice_r_18(), updateTireServiceRequest.getPrice_r_19(), updateTireServiceRequest.getPrice_r_20(),
-                    updateTireServiceRequest.getPrice_r_21(), updateTireServiceRequest.getPrice_r_22(),
-                    updateTireServiceRequest.getTime_r_13(), updateTireServiceRequest.getTime_r_14(),
-                    updateTireServiceRequest.getTime_r_15(), updateTireServiceRequest.getTime_r_16(),
-                    updateTireServiceRequest.getTime_r_17(), updateTireServiceRequest.getTime_r_18(),
-                    updateTireServiceRequest.getTime_r_19(), updateTireServiceRequest.getTime_r_20(),
-                    updateTireServiceRequest.getTime_r_21(), updateTireServiceRequest.getTime_r_22(),
-                    updateTireServiceRequest.getRole());
+        tireRepository.findByName(serviceName)
+                .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга ", serviceName.replace("_", " ")));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
 
-            String operationName = "Update_tire_service_by_admin";
+        tireRepository.updateTireOrderInfo(updateTireServiceRequest.getName(), updateTireServiceRequest.getPrice_r_13(),
+                updateTireServiceRequest.getPrice_r_14(), updateTireServiceRequest.getPrice_r_15(),
+                updateTireServiceRequest.getPrice_r_16(), updateTireServiceRequest.getPrice_r_17(),
+                updateTireServiceRequest.getPrice_r_18(), updateTireServiceRequest.getPrice_r_19(), updateTireServiceRequest.getPrice_r_20(),
+                updateTireServiceRequest.getPrice_r_21(), updateTireServiceRequest.getPrice_r_22(),
+                updateTireServiceRequest.getTime_r_13(), updateTireServiceRequest.getTime_r_14(),
+                updateTireServiceRequest.getTime_r_15(), updateTireServiceRequest.getTime_r_16(),
+                updateTireServiceRequest.getTime_r_17(), updateTireServiceRequest.getTime_r_18(),
+                updateTireServiceRequest.getTime_r_19(), updateTireServiceRequest.getTime_r_20(),
+                updateTireServiceRequest.getTime_r_21(), updateTireServiceRequest.getTime_r_22(),
+                updateTireServiceRequest.getRole());
 
-            User user = userService.getFullUserById(userId);
-            String userPhone = userService.getActualUserVersionById(userId).getPhone();
+        String operationName = "Update_tire_service_by_admin";
 
-            String descriptionMessage = "Услуга '" + updateTireServiceRequest.getName().replace("_", " ")
-                    + "' изменена";
+        User user = userService.getFullUserById(userId);
+        String userPhone = userService.getActualUserVersionById(userId).getPhone();
 
-            operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
-            log.info("updatePolishingService_v1. User with phone '{}' updated tire service.", userPhone);
+        String descriptionMessage = "Услуга '" + updateTireServiceRequest.getName().replace("_", " ")
+                + "' изменена";
 
-            return ResponseEntity.ok(new MessageResponse("Услуга " + updateTireServiceRequest.getName().replace("_", " ") + " изменена"));
-        } else {
-            return ResponseEntity.badRequest().body(new MessageResponse("Услуги "
-                    + updateTireServiceRequest.getName().replace("_", " ") + " не существует"));
-        }
+        operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
+        log.info("updatePolishingService_v1. User with phone '{}' updated tire service.", userPhone);
+
+        return ResponseEntity.ok(new MessageResponse("Услуга " + updateTireServiceRequest.getName().replace("_", " ") + " изменена"));
     }
 }

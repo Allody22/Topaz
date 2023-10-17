@@ -1,19 +1,27 @@
 package ru.nsu.carwash_server.advice;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.nsu.carwash_server.exceptions.BadRequestException;
-import ru.nsu.carwash_server.payload.response.MessageResponse;
+import ru.nsu.carwash_server.exceptions.SMSException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class SmsControllerAdvice {
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequestException(BadRequestException ex) {
-        log.error("Sms controller exception: ", ex);
-        return ResponseEntity.badRequest().body(new MessageResponse(ex.getMessage()));
+    @ExceptionHandler(SMSException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public Map<String, String> handleTooManySMSException(SMSException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", ex.getMessage());
+        return errorResponse;
     }
 }

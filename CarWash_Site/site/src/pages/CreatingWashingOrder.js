@@ -337,9 +337,8 @@ const CreatingWashingOrder = observer(() => {
                     ...item,
                     name: item.name.replace(/_/g, ' ')
                 }));
-                setMainOrders(filteredOrdersMain);
 
-                const filteredOrdersAdditional = response.filter(item => item.role === "additional").map(item => ({
+                const filteredOrdersAdditional = response.filter(item => item.role !== "main").map(item => ({
                     ...item,
                     name: item.name.replace(/_/g, ' ')
                 }));
@@ -484,8 +483,8 @@ const CreatingWashingOrder = observer(() => {
                 setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
                 setErrorFlag(flag => !flag);
             } else {
-                setErrorResponse("Системная ошибка с получением услуг," +
-                    "введённой информации и попробуйте еще ")
+                setErrorResponse("Системная ошибка с созданием заказа. Проверьте правильность введённой информации" +
+                    " и попробуйте еще ")
                 setErrorFlag(flag => !flag)
             }
         } finally {

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
@@ -25,5 +26,6 @@ public class UpdateUserInfoRequestByAdmin {
 
     private String userNote = null;
 
+    @Email
     private String email = null;
 }

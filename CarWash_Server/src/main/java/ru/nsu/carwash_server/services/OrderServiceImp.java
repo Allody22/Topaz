@@ -3,6 +3,7 @@ package ru.nsu.carwash_server.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import ru.nsu.carwash_server.exceptions.InvalidOrderTypeException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.orders.Order;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
@@ -11,8 +12,8 @@ import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.secondary.constants.OrderStatuses;
 import ru.nsu.carwash_server.models.secondary.helpers.AllOrderTypes;
-import ru.nsu.carwash_server.models.secondary.helpers.TimeAndPrice;
 import ru.nsu.carwash_server.models.users.User;
+import ru.nsu.carwash_server.payload.request.NewServiceRequest;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 import ru.nsu.carwash_server.repository.orders.OrderVersionsRepository;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 @Service
 public class OrderServiceImp implements OrderService {
@@ -56,95 +58,95 @@ public class OrderServiceImp implements OrderService {
                 .orElse(null);
     }
 
-    public TimeAndPrice getTireOrderTimePrice(List<String> orderArray, String wheelR) {
+    public Pair<Integer, Integer> getTireOrderTimePrice(List<String> orderArray, String wheelR) {
         int price = 0;
         int time = 15;
         switch (wheelR) {
-            case "R13":
+            case "R13" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_13();
                     time += currentOrder.getTime_r_13();
                 }
-                break;
-            case "R14":
+            }
+            case "R14" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_14();
                     time += currentOrder.getTime_r_14();
                 }
-                break;
-            case "R15":
+            }
+            case "R15" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_15();
                     time += currentOrder.getTime_r_15();
                 }
-                break;
-            case "R16":
+            }
+            case "R16" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_16();
                     time += currentOrder.getTime_r_16();
                 }
-                break;
-            case "R17":
+            }
+            case "R17" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_17();
                     time += currentOrder.getTime_r_17();
                 }
-                break;
-            case "R18":
+            }
+            case "R18" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_18();
                     time += currentOrder.getTime_r_18();
                 }
-                break;
-            case "R19":
+            }
+            case "R19" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_19();
                     time += currentOrder.getTime_r_19();
                 }
-                break;
-            case "R20":
+            }
+            case "R20" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_20();
                     time += currentOrder.getTime_r_20();
                 }
-                break;
-            case "R21":
+            }
+            case "R21" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_21();
                     time += currentOrder.getTime_r_21();
                 }
-                break;
-            case "R22":
+            }
+            case "R22" -> {
                 for (var item : orderArray) {
                     var currentOrder = ordersTireRepository.findByName(item.replace(" ", "_"))
                             .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", item.replace("_", " ")));
                     price += currentOrder.getPrice_r_22();
                     time += currentOrder.getTime_r_22();
                 }
-                break;
+            }
         }
-        return new TimeAndPrice(time, price);
+        return Pair.of(time, price);
     }
 
-    public TimeAndPrice getWashingOrderPriceTime(List<String> orderArray, int bodyType) {
+    public Pair<Integer, Integer> getWashingOrderPriceTime(List<String> orderArray, int bodyType) {
         int price = 0;
         int time = 15;
         if (bodyType == 1) {
@@ -161,7 +163,6 @@ public class OrderServiceImp implements OrderService {
                 price += currentOrder.getPriceSecondType();
                 time += currentOrder.getTimeSecondType();
             }
-
         } else if (bodyType == 3) {
             for (var item : orderArray) {
                 var currentOrder = ordersWashingRepository.findByName(item.replace(" ", "_"))
@@ -170,10 +171,10 @@ public class OrderServiceImp implements OrderService {
                 time += currentOrder.getTimeThirdType();
             }
         }
-        return new TimeAndPrice(time, price);
+        return Pair.of(time, price);
     }
 
-    public TimeAndPrice getPolishingOrderPriceAndTime(List<String> orderArray, int bodyType) {
+    public Pair<Integer, Integer> getPolishingOrderPriceAndTime(List<String> orderArray, int bodyType) {
         int price = 0;
         int time = 15;
         if (bodyType == 1) {
@@ -199,7 +200,7 @@ public class OrderServiceImp implements OrderService {
                 time += currentOrder.getTimeThirdType();
             }
         }
-        return new TimeAndPrice(time, price);
+        return Pair.of(time, price);
     }
 
     public List<OrdersWashing> findAllWashingService() {
@@ -222,130 +223,200 @@ public class OrderServiceImp implements OrderService {
         return new ConnectedOrdersResponse(mainOrders, connectedOrders);
     }
 
-    public OrdersTire createTireService(OrdersTire ordersTire) {
-        return ordersTireRepository.save(ordersTire);
+    public Pair<String, OrdersTire> createTireService(NewServiceRequest newServiceRequest) {
+        OrdersTire ordersTire = OrdersTire.builder()
+                .name(newServiceRequest.getName())
+                .price_r_13(newServiceRequest.getPrice_r_13())
+                .price_r_14(newServiceRequest.getPrice_r_14())
+                .price_r_15(newServiceRequest.getPrice_r_15())
+                .price_r_16(newServiceRequest.getPrice_r_16())
+                .price_r_17(newServiceRequest.getPrice_r_17())
+                .price_r_18(newServiceRequest.getPrice_r_18())
+                .price_r_19(newServiceRequest.getPrice_r_19())
+                .price_r_20(newServiceRequest.getPrice_r_20())
+                .price_r_21(newServiceRequest.getPrice_r_21())
+                .price_r_22(newServiceRequest.getPrice_r_22())
+                .time_r_13(newServiceRequest.getTime_r_13())
+                .time_r_14(newServiceRequest.getTime_r_14())
+                .time_r_15(newServiceRequest.getTime_r_15())
+                .time_r_16(newServiceRequest.getTime_r_16())
+                .time_r_17(newServiceRequest.getTime_r_17())
+                .time_r_18(newServiceRequest.getTime_r_18())
+                .time_r_19(newServiceRequest.getTime_r_19())
+                .time_r_20(newServiceRequest.getTime_r_20())
+                .time_r_21(newServiceRequest.getTime_r_21())
+                .time_r_22(newServiceRequest.getTime_r_22())
+                .role(newServiceRequest.getRole())
+                .build();
+
+        String descriptionMessage = "Создана услуга шиномонтажа'" + newServiceRequest.getName().replace("_", " ");
+
+        OrdersTire savedService = ordersTireRepository.save(ordersTire);
+        return Pair.of(descriptionMessage, savedService);
     }
 
-    public OrdersPolishing createPolishingService(OrdersPolishing ordersPolishing) {
-        return ordersPolishingRepository.save(ordersPolishing);
+    public Pair<String, OrdersPolishing> createPolishingService(NewServiceRequest newServiceRequest) {
+        OrdersPolishing ordersPolishing = OrdersPolishing.builder().
+                name(newServiceRequest.getName())
+                .priceFirstType(newServiceRequest.getPriceFirstType())
+                .priceSecondType(newServiceRequest.getPriceSecondType())
+                .priceThirdType(newServiceRequest.getPriceThirdType())
+                .timeFirstType(newServiceRequest.getTimeFirstType())
+                .timeSecondType(newServiceRequest.getTimeSecondType())
+                .timeThirdType(newServiceRequest.getTimeThirdType())
+                .build();
+
+        String descriptionMessage = getPolishingWashingOrderChangingInfo(ordersPolishing.getPriceFirstType(), ordersPolishing.getPriceSecondType(),
+                ordersPolishing.getPriceThirdType(), ordersPolishing.getTimeFirstType(), ordersPolishing.getTimeSecondType(),
+                ordersPolishing.getTimeThirdType(), "Создана услуга полировки '", ordersPolishing.getName().replace("_", " "));
+
+        OrdersPolishing savedService = ordersPolishingRepository.save(ordersPolishing);
+        return Pair.of(descriptionMessage, savedService);
     }
 
-    public OrdersWashing createWashingService(OrdersWashing ordersWashing) {
-        return ordersWashingRepository.save(ordersWashing);
+    public Pair<String, OrdersWashing> createWashingService(NewServiceRequest newServiceRequest) {
+        StringJoiner joiner = new StringJoiner(";");
+        for (String element : newServiceRequest.getIncludedIn()) {
+            joiner.add(element);
+        }
+
+        String serviceRoleInApp = joiner.toString();
+        OrdersWashing ordersWashing = OrdersWashing.builder().
+                name(newServiceRequest.getName())
+                .priceFirstType(newServiceRequest.getPriceFirstType())
+                .priceSecondType(newServiceRequest.getPriceSecondType())
+                .priceThirdType(newServiceRequest.getPriceThirdType())
+                .timeFirstType(newServiceRequest.getTimeFirstType())
+                .timeSecondType(newServiceRequest.getTimeSecondType())
+                .timeThirdType(newServiceRequest.getTimeThirdType())
+                .associatedOrder(serviceRoleInApp)
+                .role(newServiceRequest.getRole())
+                .build();
+
+        String descriptionMessage = getPolishingWashingOrderChangingInfo(ordersWashing.getPriceFirstType(), ordersWashing.getPriceSecondType(),
+                ordersWashing.getPriceThirdType(), ordersWashing.getTimeFirstType(), ordersWashing.getTimeSecondType(),
+                ordersWashing.getTimeThirdType(), "Создана услуга мойки '", ordersWashing.getName().replace("_", " "));
+
+        OrdersWashing savedService = ordersWashingRepository.save(ordersWashing);
+        return Pair.of(descriptionMessage, savedService);
+    }
+
+
+    public String getPolishingWashingOrderChangingInfo(Integer priceFirstType, Integer priceSecondType, Integer priceThirdType,
+                                                       Integer timeFirstType, Integer timeSecondType, Integer tineThirdType,
+                                                       String context, String orderName) {
+        String newPriceFirstType = (priceFirstType != null) ?
+                " цену за 1 тип: '" + priceFirstType + "', " : null;
+
+        String newPriceSecondType = (priceSecondType != null) ?
+                " цену за 2 тип: '" + priceSecondType + "', " : null;
+
+        String newPriceThirdType = (priceThirdType != null) ?
+                " цену за 3 тип: '" + priceThirdType + "', " : null;
+
+        String newTimeFirstType = (timeFirstType != null) ?
+                " время за 1 тип: '" + timeSecondType + "', " : null;
+
+        String newTimeSecondType = (timeSecondType != null) ?
+                " время за 2 тип: '" + timeSecondType + "', " : null;
+
+        String newTimeThirdType = (tineThirdType != null) ?
+                " время за 3 тип: '" + tineThirdType + "', " : null;
+
+        return context + " '" + orderName.replace("_", " ")
+                + "', получившая " + newPriceFirstType + newPriceSecondType + newPriceThirdType +
+                newTimeFirstType + newTimeSecondType + newTimeThirdType;
     }
 
     @Transactional
-    public Pair<Boolean, String> updateOrderInfo(UpdateOrderInfoRequest updateOrderInfoRequest) {
-        Pair<Boolean, String> result = Pair.of(false, "");
-        var orderId = updateOrderInfoRequest.getOrderId();
+    public void updateOrderInfo(UpdateOrderInfoRequest updateOrderInfoRequest) {
+        Long orderId = updateOrderInfoRequest.getOrderId();
 
+        String orderType = updateOrderInfoRequest.getOrderType();
+        Order order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new NotInDataBaseException("заказов не найден заказ с айди: ", orderId.toString()));
 
-        Optional<Order> optionalOrder = ordersRepository.findById(orderId);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
+        var actualOrderVersion = getActualOrderVersion(orderId);
 
-            var actualOrderVersion = getActualOrderVersion(orderId);
+        List<String> ordersList = updateOrderInfoRequest.getOrders();
 
-            List<String> ordersList = updateOrderInfoRequest.getOrders();
-
-            List<OrdersWashing> ordersWashings = new ArrayList<>();
-            List<OrdersPolishing> ordersPolishings = new ArrayList<>();
-            List<OrdersTire> ordersTires = new ArrayList<>();
-            if (updateOrderInfoRequest.getOrderType().contains("tire")) {
-                for (var tireOrder : ordersList) {
-                    var service = ordersTireRepository.findByName(tireOrder.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", tireOrder.replace("_", " ")));
-                    ordersTires.add(service);
-                }
-            } else if (updateOrderInfoRequest.getOrderType().contains("polish")) {
-                for (var polishOrder : ordersList) {
-                    var service = ordersPolishingRepository.findByName(polishOrder.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", polishOrder.replace("_", " ")));
-                    ordersPolishings.add(service);
-                }
-            } else if (updateOrderInfoRequest.getOrderType().contains("wash")) {
-                for (var washingOrders : ordersList) {
-                    var service = ordersWashingRepository.findByName(washingOrders.replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", washingOrders.replace("_", " ")));
-                    ordersWashings.add(service);
-                }
-            } else {
-                String resultText = ("Типа заказа:'" +
-                        updateOrderInfoRequest.getOrderType() + "' не существует");
-                result = Pair.of(false, resultText);
-                return result;
+        List<OrdersWashing> ordersWashings = new ArrayList<>();
+        List<OrdersPolishing> ordersPolishings = new ArrayList<>();
+        List<OrdersTire> ordersTires = new ArrayList<>();
+        if (orderType.contains("tire")) {
+            for (var tireOrder : ordersList) {
+                var service = ordersTireRepository.findByName(tireOrder.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", tireOrder.replace("_", " ")));
+                ordersTires.add(service);
             }
-
-            AllOrderTypes allOrdersByTypes = copyOrdersByName(actualOrderVersion.getOrdersPolishings(),
-                    actualOrderVersion.getOrdersWashing(), actualOrderVersion.getOrdersTires());
-
-            OrderVersions newOrderVersion = new OrderVersions(actualOrderVersion, updateOrderInfoRequest,
-                    ordersTires, ordersPolishings, ordersWashings, allOrdersByTypes.getOrdersTire(),
-                    allOrdersByTypes.getOrdersPolishing(), allOrdersByTypes.getOrdersWashing());
-            result = Pair.of(true, "Информация о заказе успешно обновлена");
-
-            order.addOrderVersion(newOrderVersion);
-
-            return result;
+        } else if (orderType.contains("polish")) {
+            for (var polishOrder : ordersList) {
+                var service = ordersPolishingRepository.findByName(polishOrder.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", polishOrder.replace("_", " ")));
+                ordersPolishings.add(service);
+            }
+        } else if (orderType.contains("wash")) {
+            for (var washingOrders : ordersList) {
+                var service = ordersWashingRepository.findByName(washingOrders.replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", washingOrders.replace("_", " ")));
+                ordersWashings.add(service);
+            }
         } else {
-            return Pair.of(false, "Такого заказа не существует");
+            throw new InvalidOrderTypeException(orderType);
         }
+
+        AllOrderTypes allOrdersByTypes = copyOrdersByName(actualOrderVersion.getOrdersPolishings(),
+                actualOrderVersion.getOrdersWashing(), actualOrderVersion.getOrdersTires());
+
+        OrderVersions newOrderVersion = new OrderVersions(actualOrderVersion, updateOrderInfoRequest,
+                ordersTires, ordersPolishings, ordersWashings, allOrdersByTypes.getOrdersTire(),
+                allOrdersByTypes.getOrdersPolishing(), allOrdersByTypes.getOrdersWashing());
+
+        order.addOrderVersion(newOrderVersion);
     }
 
     @Transactional
-    public Pair<Boolean, String> deleteOrder(Long orderId) {
-        Pair<Boolean, String> result = Pair.of(false, "");
+    public void deleteOrder(Long orderId) {
+        Order order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new NotInDataBaseException("заказов не найден заказ с айди: ", orderId.toString()));
+        var actualOrderVersion = getActualOrderVersion(orderId);
+        String orderType = actualOrderVersion.getOrderType();
 
-        Optional<Order> optionalOrder = ordersRepository.findById(orderId);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-
-            var actualOrderVersion = getActualOrderVersion(orderId);
-
-            List<OrdersWashing> ordersWashings = new ArrayList<>();
-            List<OrdersPolishing> ordersPolishings = new ArrayList<>();
-            List<OrdersTire> ordersTires = new ArrayList<>();
-            if (actualOrderVersion.getOrderType().contains("tire")) {
-                for (var tireOrder : actualOrderVersion.getOrdersTires()) {
-                    var service = ordersTireRepository.findByName(tireOrder.getName())
-                            .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", tireOrder.getName().replace("_", " ")));
-                    ordersTires.add(service);
-                }
-            } else if (actualOrderVersion.getOrderType().contains("polish")) {
-                for (var polishOrder : actualOrderVersion.getOrdersPolishings()) {
-                    var service = ordersPolishingRepository.findByName(polishOrder.getName().replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", polishOrder.getName().replace("_", " ")));
-                    ordersPolishings.add(service);
-                }
-            } else if (actualOrderVersion.getOrderType().contains("wash")) {
-                for (var washingOrders : actualOrderVersion.getOrdersWashing()) {
-                    var service = ordersWashingRepository.findByName(washingOrders.getName().replace(" ", "_"))
-                            .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", washingOrders.getName().replace("_", " ")));
-                    ordersWashings.add(service);
-                }
-            } else {
-                String resultText = ("Типа заказа:'" +
-                        actualOrderVersion.getOrderType() + "' не существует");
-                result = Pair.of(false, resultText);
-                return result;
+        List<OrdersWashing> ordersWashings = new ArrayList<>();
+        List<OrdersPolishing> ordersPolishings = new ArrayList<>();
+        List<OrdersTire> ordersTires = new ArrayList<>();
+        if (orderType.contains("tire")) {
+            for (var tireOrder : actualOrderVersion.getOrdersTires()) {
+                var service = ordersTireRepository.findByName(tireOrder.getName())
+                        .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ", tireOrder.getName().replace("_", " ")));
+                ordersTires.add(service);
             }
-
-            AllOrderTypes allOrdersByTypes = copyOrdersByName(actualOrderVersion.getOrdersPolishings(),
-                    actualOrderVersion.getOrdersWashing(), actualOrderVersion.getOrdersTires());
-
-            UpdateOrderInfoRequest updateOrderInfoRequest = new UpdateOrderInfoRequest();
-            updateOrderInfoRequest.setCurrentStatus(OrderStatuses.cancelled);
-            OrderVersions newOrderVersion = new OrderVersions(actualOrderVersion, updateOrderInfoRequest,
-                    ordersTires, ordersPolishings, ordersWashings, allOrdersByTypes.getOrdersTire(),
-                    allOrdersByTypes.getOrdersPolishing(), allOrdersByTypes.getOrdersWashing());
-            result = Pair.of(true, "Информация о заказе успешно обновлена");
-
-            order.addOrderVersion(newOrderVersion);
-
-            return result;
+        } else if (orderType.contains("polish")) {
+            for (var polishOrder : actualOrderVersion.getOrdersPolishings()) {
+                var service = ordersPolishingRepository.findByName(polishOrder.getName().replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", polishOrder.getName().replace("_", " ")));
+                ordersPolishings.add(service);
+            }
+        } else if (orderType.contains("wash")) {
+            for (var washingOrders : actualOrderVersion.getOrdersWashing()) {
+                var service = ordersWashingRepository.findByName(washingOrders.getName().replace(" ", "_"))
+                        .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", washingOrders.getName().replace("_", " ")));
+                ordersWashings.add(service);
+            }
         } else {
-            return Pair.of(false, "Такого заказа не существует");
+            throw new InvalidOrderTypeException(orderType);
         }
+
+        AllOrderTypes allOrdersByTypes = copyOrdersByName(actualOrderVersion.getOrdersPolishings(),
+                actualOrderVersion.getOrdersWashing(), actualOrderVersion.getOrdersTires());
+
+        UpdateOrderInfoRequest updateOrderInfoRequest = new UpdateOrderInfoRequest();
+        updateOrderInfoRequest.setCurrentStatus(OrderStatuses.cancelled);
+        OrderVersions newOrderVersion = new OrderVersions(actualOrderVersion, updateOrderInfoRequest,
+                ordersTires, ordersPolishings, ordersWashings, allOrdersByTypes.getOrdersTire(),
+                allOrdersByTypes.getOrdersPolishing(), allOrdersByTypes.getOrdersWashing());
+        order.addOrderVersion(newOrderVersion);
+
     }
 
     @Transactional
