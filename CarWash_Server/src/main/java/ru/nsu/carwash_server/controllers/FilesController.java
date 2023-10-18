@@ -1,6 +1,7 @@
 package ru.nsu.carwash_server.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -19,20 +20,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
-import ru.nsu.carwash_server.models.File;
+import ru.nsu.carwash_server.models.FileEntity;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
-import ru.nsu.carwash_server.services.interfaces.FileService;
+import ru.nsu.carwash_server.services.FileServiceIml;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -40,12 +37,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/api/files")
 public class FilesController {
 
-    private final FileService fileService;
-
-    private Map<String, String> mimeTypeCache = new ConcurrentHashMap<>();
+    private final FileServiceIml fileService;
 
     @Autowired
-    public FilesController(FileService fileService) {
+    public FilesController(FileServiceIml fileService) {
         this.fileService = fileService;
     }
 
@@ -62,8 +57,22 @@ public class FilesController {
         String decodedStatus = new String(status.getBytes(StandardCharsets.ISO_8859_1),
                 StandardCharsets.UTF_8);
 
-        fileService.saveByStatus(file, decodedDescription, decodedStatus);
+        Optional<FileEntity> previousVersion = fileService.findLatestVersionByStatus(decodedStatus);
+        String originalName = file.getOriginalFilename();
+        String extension = FilenameUtils.getExtension(originalName);
 
+        if (previousVersion.isPresent()) {
+            String url = previousVersion.get().getUrl();
+            String actualURL = url.substring(url.lastIndexOf("/") + 1);
+            fileService.deleteAndEvict(actualURL);
+
+            int newVersion = previousVersion.get().getVersion() + 1;
+            String newFileName = status + "_v" + newVersion + "." + extension;
+            fileService.overwriteByStatus(file, decodedDescription, decodedStatus, previousVersion.get(), newFileName);
+        } else {
+            String newFileName = status + "_v" + 0 + "." + extension;
+            fileService.saveByStatus(file, decodedDescription, decodedStatus, newFileName);
+        }
         log.info("upload_file_v1.Image with description: '{}' and status: '{}' successfully uploaded", decodedDescription, decodedStatus);
 
         return ResponseEntity.ok(new MessageResponse("Изображение успешно добавлено"));
@@ -71,25 +80,25 @@ public class FilesController {
 
     @GetMapping("/get_all")
     @Transactional
-    public ResponseEntity<Set<File>> getListFiles() {
+    public ResponseEntity<Set<FileEntity>> getListFiles() {
 
-        Set<File> fileInfos = new HashSet<>();
+        Set<FileEntity> fileEntityInfos = new HashSet<>();
         fileService.loadAll().forEach(path -> {
             String url = MvcUriComponentsBuilder
                     .fromMethodName(FilesController.class, "getFile", path.getFileName().toString()).build().toString();
             String fileName = url.substring(url.lastIndexOf("/") + 1);
             String nameWithoutExtensionAndVersion = fileName.substring(0, fileName.lastIndexOf('_'));
 
-            fileService.checkByName(nameWithoutExtensionAndVersion).ifPresent(fileInfos::add);
+            fileService.checkByName(nameWithoutExtensionAndVersion).ifPresent(fileEntityInfos::add);
         });
 
-        return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
+        return ResponseEntity.status(HttpStatus.OK).body(fileEntityInfos);
     }
 
     @GetMapping("/sales/get_all")
     @Transactional
     public ResponseEntity<?> getSales() {
-        Set<File> fileInfos = new HashSet<>();
+        Set<FileEntity> fileEntityInfos = new HashSet<>();
         fileService.loadAll().forEach(path -> {
 
             String url = MvcUriComponentsBuilder
@@ -98,63 +107,28 @@ public class FilesController {
 
             String nameWithoutExtensionAndVersion = fileName.substring(0, fileName.lastIndexOf('_'));
 
-            fileService.checkByUrlAndStatus(nameWithoutExtensionAndVersion, "sale").ifPresent(fileInfos::add);
+            fileService.checkByUrlAndStatus(nameWithoutExtensionAndVersion, "sale").ifPresent(fileEntityInfos::add);
         });
 
-        return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
+        return ResponseEntity.status(HttpStatus.OK).body(fileEntityInfos);
     }
 
     @GetMapping("/get/{filename:.+}")
     @Transactional
     public ResponseEntity<Resource> getFile(@PathVariable String filename) {
+        System.out.println("controller load filename : " + filename);
+
         Resource file = fileService.load(filename);
 
-        String mimeType;
-        try {
-            mimeType = Files.probeContentType(Paths.get(file.getURI()));
-        } catch (IOException e) {
-            throw new RuntimeException("Could not determine file type.", e);
-        }
-
-        if (mimeType == null) {
-            mimeType = "application/octet-stream";
-        }
-
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(mimeType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
-                .body(file);
-    }
-
-    @GetMapping("/cache/get/{filename:.+}")
-    @Transactional
-    public ResponseEntity<Resource> getFileTest(@PathVariable String filename) {
-        Resource file = fileService.loadWithCache(filename);
-
-        // Проверка, есть ли MIME-тип в кэше
-        String mimeType = mimeTypeCache.get(filename);
-        if (mimeType == null) {
-            try {
-                mimeType = Files.probeContentType(Paths.get(file.getURI()));
-                if (mimeType != null) {
-                    mimeTypeCache.put(filename, mimeType);
-                } else {
-                    mimeType = "application/octet-stream";
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Could not determine file type.", e);
-            }
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(mimeType))
+                .contentType(MediaType.parseMediaType("application/octet-stream")) // Устанавливаем MIME-тип по умолчанию
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
                 .body(file);
     }
 
     @DeleteMapping("/cache/clear")
     public ResponseEntity<?> clearCache() {
-        fileService.clearCache();
+        fileService.evictAllCacheValues();
         return ResponseEntity.ok(new MessageResponse("Кэш успешно очищен"));
     }
 

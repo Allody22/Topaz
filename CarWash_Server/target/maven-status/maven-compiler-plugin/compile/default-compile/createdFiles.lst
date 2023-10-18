@@ -23,7 +23,6 @@ ru\nsu\carwash_server\services\RefreshTokenService.class
 ru\nsu\carwash_server\models\orders\Order.class
 ru\nsu\carwash_server\models\users\Role.class
 ru\nsu\carwash_server\payload\response\UserOperationsResponse.class
-ru\nsu\carwash_server\models\File.class
 ru\nsu\carwash_server\advice\FileUploadExceptionAdvice.class
 ru\nsu\carwash_server\payload\request\OrdersArrayPriceTimeRequest.class
 ru\nsu\carwash_server\advice\FieldValidationAdvice.class
@@ -107,6 +106,7 @@ ru\nsu\carwash_server\models\orders\OrdersWashing.class
 ru\nsu\carwash_server\models\secondary\constants\OrderTypes.class
 ru\nsu\carwash_server\payload\request\TokenRefreshRequest.class
 ru\nsu\carwash_server\controllers\ServiceChangingController.class
+ru\nsu\carwash_server\models\FileEntity.class
 ru\nsu\carwash_server\payload\response\TimeAndPriceAndFreeTimeResponse.class
 ru\nsu\carwash_server\payload\request\CreatingTireOrderRequest.class
 ru\nsu\carwash_server\payload\response\FreeTimeAndBoxResponse.class
@@ -143,6 +143,7 @@ ru\nsu\carwash_server\payload\response\MessageResponse.class
 ru\nsu\carwash_server\services\UserServiceImp.class
 ru\nsu\carwash_server\advice\OrderControllerAdvice.class
 ru\nsu\carwash_server\security\RestTemplateConfig.class
+ru\nsu\carwash_server\configuration\AppConfiguration.class
 ru\nsu\carwash_server\models\orders\OrdersTire.class
 ru\nsu\carwash_server\payload\request\BookingWashingPolishingOrderRequest.class
 ru\nsu\carwash_server\payload\request\BookingTireOrderRequest.class

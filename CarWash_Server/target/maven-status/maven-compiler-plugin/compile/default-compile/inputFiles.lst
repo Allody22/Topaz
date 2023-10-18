@@ -37,7 +37,6 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\exceptions\UserNotFoundException.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\BookingTireOrderRequest.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\security\RestTemplateConfig.java
-C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\File.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\UpdatePolishingServiceRequest.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\constants\DestinationPrefixes.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\advice\SmsControllerAdvice.java
@@ -97,6 +96,7 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\MessagesSms.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\MainAndAdditionalResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\UpdateWashingServiceRequest.java
+C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\FileEntity.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\TokenRefreshResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\UserOrdersResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\exceptions\NotInDataBaseException.java
@@ -115,6 +115,7 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\UpdateUserPasswordRequest.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\operations\OperationsUserLink.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\OrderInfoResponse.java
+C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\configuration\AppConfiguration.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\OrdersArrayResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\AllOrdersEntity.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\constants\FileTypes.java

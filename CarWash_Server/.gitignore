@@ -15,10 +15,10 @@
 # AWS User-specific
 .idea/**/aws.xml
 
-# Generated file
+# Generated fileEntity
 .idea/**/contentModel.xml
 
-# Sensitive or high-churn file
+# Sensitive or high-churn fileEntity
 .idea/**/dataSources/
 .idea/**/dataSources.ids
 .idea/**/dataSources.local.xml
@@ -32,7 +32,7 @@
 .idea/**/libraries
 
 # Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module file,
+# When using Gradle or Maven with auto-import, you should exclude module fileEntity,
 # since they will be recreated, and may cause churn.  Uncomment if using
 # auto-import.
 # .idea/artifacts
@@ -77,7 +77,7 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 
-# Android studio 3.1+ serialized cache file
+# Android studio 3.1+ serialized cache fileEntity
 .idea/caches/build_file_checksums.ser
 
 ### Intellij+all Patch ###
@@ -90,13 +90,13 @@ fabric.properties
 !.idea/runConfigurations
 
 ### Java ###
-# Compiled class file
+# Compiled class fileEntity
 *.class
 
-# Log file
+# Log fileEntity
 *.log
 
-# BlueJ file
+# BlueJ fileEntity
 *.ctxt
 
 # Mobile Tools for Java (J2ME)
@@ -129,7 +129,7 @@ buildNumber.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 
-# Eclipse m2e generated file
+# Eclipse m2e generated fileEntity
 # Eclipse Core
 .project
 # JDT-specific (Eclipse Java Development Tools)

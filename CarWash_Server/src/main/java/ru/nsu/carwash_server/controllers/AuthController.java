@@ -99,7 +99,6 @@ public class AuthController {
     @GetMapping("/generate_code_v1")
     @Transactional
     public ResponseEntity<MessageResponse> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
-
         //Смотрим сколько раз человек с таким phone уже получал код и если больше 2 раз за час, то не даём код
         operationsService.checkUserSMS(number);
         String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";

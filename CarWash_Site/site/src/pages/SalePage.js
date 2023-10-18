@@ -278,10 +278,10 @@ const SalePage = observer(() => {
         }
     }, [successResponse]);
 
-    const handleOpenModal = (file) => {
-        if (file) {
-            setDescription(file.description);
-            setStatus(StatusFileMap[file.status])
+    const handleOpenModal = (fileEntity) => {
+        if (fileEntity) {
+            setDescription(fileEntity.description);
+            setStatus(StatusFileMap[fileEntity.status])
         } else {
             setDescription("");
             setStatus("");
@@ -298,9 +298,9 @@ const SalePage = observer(() => {
 
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setUploadedFile(file);
+        const fileEntity = e.target.files[0];
+        if (fileEntity) {
+            setUploadedFile(fileEntity);
         }
     };
 
@@ -321,24 +321,24 @@ const SalePage = observer(() => {
             <p className="small-input-style"><strong>Пожалуйста</strong>, внимательно выбирайте картинки
                 для отправки: очень большие картинки пользователям будет тяжело смотреть с телефона</p>
             <div style={containerStyle}>
-                {files.map(file => {
-                    const fileExtension = file.name.split('.').pop().toLowerCase();
+                {files.map(fileEntity => {
+                    const fileExtension = fileEntity.name.split('.').pop().toLowerCase();
                     return (
-                        <div key={file.id} style={fileBoxStyle}>
-                            <p style={statusStyle}>{StatusFileMap[file.status] || file.status}</p>
-                            <p style={statusStyle}>Описание: {file.description || "Неизвестно"}.
-                                Версия {(file.version + 1) || "Неизвестно"}</p>
+                        <div key={fileEntity.id} style={fileBoxStyle}>
+                            <p style={statusStyle}>{StatusFileMap[fileEntity.status] || fileEntity.status}</p>
+                            <p style={statusStyle}>Описание: {fileEntity.description || "Неизвестно"}.
+                                Версия {(fileEntity.version + 1) || "Неизвестно"}</p>
                             <p style={statusStyle}>Дата
-                                создания: {file.dateOfCreation ? new Date(file.dateOfCreation).toLocaleString() : "Неизвестно"}</p>
+                                создания: {fileEntity.dateOfCreation ? new Date(fileEntity.dateOfCreation).toLocaleString() : "Неизвестно"}</p>
 
                             <p style={statusStyle}>
-                                {file.url
-                                    ? <a href={file.url} target="_blank" download>Ссылка для скачивания</a>
+                                {fileEntity.url
+                                    ? <a href={fileEntity.url} target="_blank" download>Ссылка для скачивания</a>
                                     : "Неизвестно"}
                             </p>
 
                             {fileExtension === 'png' || fileExtension === 'jpg' || fileExtension === 'jpeg' ? (
-                                <img src={file.url} alt={file.description} style={imageStyle}/>
+                                <img src={fileEntity.url} alt={fileEntity.description} style={imageStyle}/>
                             ) : null}
 
                             <div style={{
@@ -348,7 +348,7 @@ const SalePage = observer(() => {
                                 <Button
                                     variant={"outline-dark"}
                                     className="mt-4 p-2 flex-grow-1"
-                                    onClick={() => handleOpenModal(file)}
+                                    onClick={() => handleOpenModal(fileEntity)}
                                     style={{marginTop: '10px'}}
                                 >
                                     Обновить данную услугу
@@ -394,7 +394,7 @@ const SalePage = observer(() => {
                             onChange={setDescription}
                         />
 
-                        <input type="file" onChange={handleFileChange} style={inputFileStyle}/>
+                        <input type="fileEntity" onChange={handleFileChange} style={inputFileStyle}/>
                         {uploadedFile ? <img src={URL.createObjectURL(uploadedFile)} alt="Uploaded"
                                              style={{width: '100%', margin: '20px 0'}}/> : null}
 
