@@ -116,7 +116,6 @@ public class FilesController {
     @GetMapping("/get/{filename:.+}")
     @Transactional
     public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        System.out.println("controller load filename : " + filename);
 
         Resource file = fileService.load(filename);
 
