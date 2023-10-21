@@ -194,16 +194,18 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
-            ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-            ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
-
-            Date startOfTheDay = Date.from(startOfDay.toInstant());
-            Date endOfTheDay = Date.from(endOfDay.toInstant());
-
-            List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
-            if (userTodayOrders.size() >= 2) {
-                throw new TooManyOrdersException();
-            }
+        log.info("MISHA HERE");
+        log.info(lastUserVersion.toString());
+//        ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+//        ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+//
+//        Date startOfTheDay = Date.from(startOfDay.toInstant());
+//        Date endOfTheDay = Date.from(endOfDay.toInstant());
+//
+//        List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
+//        if (userTodayOrders.size() >= 2) {
+//            throw new TooManyOrdersException();
+//        }
 
         List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersPolishing> ordersPolishings = new ArrayList<>();
@@ -275,16 +277,16 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
-            ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-            ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+        ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
-            Date startOfTheDay = Date.from(startOfDay.toInstant());
-            Date endOfTheDay = Date.from(endOfDay.toInstant());
+        Date startOfTheDay = Date.from(startOfDay.toInstant());
+        Date endOfTheDay = Date.from(endOfDay.toInstant());
 
-            List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
-            if (userTodayOrders.size() >= 2) {
-                throw new TooManyOrdersException();
-            }
+        List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
+        if (userTodayOrders.size() >= 2) {
+            throw new TooManyOrdersException();
+        }
         List<OrdersTire> ordersTireService = new ArrayList<>();
         List<String> ordersList = bookingOrderRequest.getOrders();
 
