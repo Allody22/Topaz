@@ -194,7 +194,6 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
-        if (!(lastUserVersion.getPhone().equals("79635186660"))) {
             ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
             ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
@@ -205,7 +204,6 @@ public class OrderCreatingController {
             if (userTodayOrders.size() >= 2) {
                 throw new TooManyOrdersException();
             }
-        }
 
         List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersPolishing> ordersPolishings = new ArrayList<>();
@@ -277,7 +275,6 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
-        if (!(lastUserVersion.getPhone().equals("79635186660"))) {
             ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
             ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
@@ -288,7 +285,6 @@ public class OrderCreatingController {
             if (userTodayOrders.size() >= 2) {
                 throw new TooManyOrdersException();
             }
-        }
         List<OrdersTire> ordersTireService = new ArrayList<>();
         List<String> ordersList = bookingOrderRequest.getOrders();
 
