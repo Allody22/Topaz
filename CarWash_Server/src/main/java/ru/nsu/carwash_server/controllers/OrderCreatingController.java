@@ -111,7 +111,7 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
-        if (!(lastUserVersion.getPhone().equals("79635186660") || lastUserVersion.getComments().equals("Комментарии самого чела"))) {
+        if (!(lastUserVersion.getPhone().equals("79635186660"))) {
             ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
             ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
@@ -123,6 +123,7 @@ public class OrderCreatingController {
                 throw new TooManyOrdersException();
             }
         }
+
         List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersWashing> ordersWashings = new ArrayList<>();
 
@@ -193,7 +194,7 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
-        if (!(lastUserVersion.getPhone().equals("79635186660") || lastUserVersion.getComments().equals("Комментарии самого чела"))) {
+        if (!(lastUserVersion.getPhone().equals("79635186660"))) {
             ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
             ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
@@ -276,7 +277,7 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
-        if (!(lastUserVersion.getPhone().equals("79635186660") || lastUserVersion.getComments().equals("Комментарии самого чела"))) {
+        if (!(lastUserVersion.getPhone().equals("79635186660"))) {
             ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
             ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
