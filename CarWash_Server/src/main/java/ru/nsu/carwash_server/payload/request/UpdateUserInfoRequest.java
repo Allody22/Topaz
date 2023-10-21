@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 @Data
@@ -13,6 +15,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class UpdateUserInfoRequest {
 
+    @NotBlank
+    @Size(max = 30)
     private String phone = null;
 
     private String fullName = null;

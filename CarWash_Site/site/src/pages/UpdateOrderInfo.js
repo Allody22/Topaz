@@ -19,6 +19,7 @@ import {carTypesArray, orderStatusArray, serviceTypesArray} from "../model/Const
 import MyCustomModal from "../model/MyCustomModal";
 import saleStore from "../store/SaleStore";
 import ModalContent from "../model/ModalContent"
+import InputFieldPriceTimeNumber from "../model/InputFieldPriceTimeNumber";
 
 const wheelSizeArray = [
     'R13', 'R14', 'R15', 'R16', 'R17', 'R18', 'R19', 'R20', 'R21', 'R22'].map(item => ({label: item, value: item}));
@@ -73,7 +74,7 @@ const UpdateOrderInfo = observer(() => {
     const [files, setFiles] = useState([]);
     const [allServices, setAllServices] = useState([]);
 
-    const [errorResponse, setErrorResponse] = useState();
+    const [errorResponse, setErrorResponse] = useState("");
     const [errorFlag, setErrorFlag] = useState(false);
 
     const [successResponse, setSuccessResponse] = useState();
@@ -88,7 +89,6 @@ const UpdateOrderInfo = observer(() => {
     const {id} = useParams();
     const [orderId, setOrderId] = useState('')
 
-    //Работа с акциями
     useEffect(() => {
         if (saleStore?.error) {
             const errorResponseMessage = (
@@ -105,7 +105,7 @@ const UpdateOrderInfo = observer(() => {
             );
 
             toaster.push(errorResponseMessage, {placement: "bottomEnd"});
-            saleStore.error = null; // Очищаем ошибку после показа
+            saleStore.error = null;
         }
     }, [saleStore?.error]);
 
@@ -123,7 +123,6 @@ const UpdateOrderInfo = observer(() => {
             setFiles(saleStore.discounts);
         }
     }, [saleStore.discounts]);
-    //Работа с акциями
 
     const updateSelectedItems = (itemName, updatedData) => {
         setSelectedItems((prevSelectedItems) => {
@@ -296,7 +295,7 @@ const UpdateOrderInfo = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));
+                setErrorResponse(messages.join('\n'));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -416,7 +415,7 @@ const UpdateOrderInfo = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 {errorResponse}
             </div>
         </Notification>
@@ -436,7 +435,7 @@ const UpdateOrderInfo = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 <p>{successResponse}</p>
             </div>
         </Notification>
@@ -460,27 +459,26 @@ const UpdateOrderInfo = observer(() => {
                             return acc.concat(names);
                         }, []);
                 };
-
-
                 const filteredAndFormattedItems = prepareSelectedItems(selectedItems);
 
-                const data = await updateOrderInfo(
-                    orderId, userPhone, russianToEnglishMap[orderType], price, wheelR,
-                    startTime.toISOString(), administrator, autoNumber, carType, specialist,
+                const data = await updateOrderInfo(orderId, userPhone, russianToEnglishMap[orderType],
+                    price, wheelR, startTime.toISOString(), administrator, autoNumber, carType, specialist,
                     boxNumber, bonuses, comments, endTime.toISOString(), filteredAndFormattedItems,
-                    currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription
-                );
+                    currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription);
 
                 setSuccessResponse(data.message);
-
-            } catch
-                (error) {
+            } catch (error) {
                 if (error.response) {
-                    setErrorResponse(error.response.data.message)
-                    setErrorFlag(flag => !flag)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join('\n'));
+                    setErrorFlag(flag => !flag);
+
                 } else {
-                    setErrorResponse("Системная ошибка, проверьте правильность " +
-                        "введённой информации и попробуйте еще раз")
+                    setErrorResponse("Системная ошибка с загрузкой файлов. " +
+                        "Перезагрузите страницу и попробуйте еще раз")
                     setErrorFlag(flag => !flag)
                 }
             }
@@ -507,14 +505,18 @@ const UpdateOrderInfo = observer(() => {
             try {
                 const data = await deleteOrderById(orderId);
                 setSuccessResponse(data.message)
-            } catch
-                (error) {
+            } catch (error) {
                 if (error.response) {
-                    setErrorResponse(error.response.data.message)
-                    setErrorFlag(flag => !flag)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join('\n'));
+                    setErrorFlag(flag => !flag);
+
                 } else {
-                    setErrorResponse("Системная ошибка с удалением заказа. " +
-                        "Проверьте правильность введённой информации и попробуйте еще раз")
+                    setErrorResponse("Системная ошибка с загрузкой файлов. " +
+                        "Перезагрузите страницу и попробуйте еще раз")
                     setErrorFlag(flag => !flag)
                 }
             }
@@ -559,7 +561,7 @@ const UpdateOrderInfo = observer(() => {
             <p className="small-input-style">Вы можете открыть таблицу с заказами за какой-то день,
                 выбрать там заказ, информацию о котором хотите обновить, а он сам окажется здесь</p>
             <Form onSubmit={sendUpdateRequest}>
-                <InputField
+                <InputFieldPriceTimeNumber
                     className="input-style"
                     label='Айди заказа'
                     id='orderId'
@@ -731,6 +733,7 @@ const UpdateOrderInfo = observer(() => {
                     id='userPhone'
                     value={userPhone}
                     onChange={setUserPhone}
+                    maxLength={50}
                 />
 
                 <p style={{
@@ -744,9 +747,10 @@ const UpdateOrderInfo = observer(() => {
                     onChange={setOrderType}
                     style={{...styles, WebkitTextFillColor: "#000000"}}
                     menuStyle={{fontSize: "17px"}}
+                    maxLength={30}
                 />
 
-                <InputField
+                <InputFieldPriceTimeNumber
                     className="input-style"
                     label='Цена за заказ (целое число)'
                     id='price'
@@ -759,12 +763,14 @@ const UpdateOrderInfo = observer(() => {
                     id='administrator'
                     value={administrator}
                     onChange={setAdministrator}
+                    maxLength={50}
                 />
                 <InputField
                     className="input-style"
                     label='Специалист'
                     id='specialist'
                     value={specialist}
+                    maxLength={50}
                     onChange={setSpecialist}
                 />
                 <p className="input-style">Выберите тип кузова</p>
@@ -799,9 +805,10 @@ const UpdateOrderInfo = observer(() => {
                     label='Номер автомобиля'
                     id='autoNumber'
                     value={autoNumber}
+                    maxLength={50}
                     onChange={setAutoNumber}
                 />
-                <InputField
+                <InputFieldPriceTimeNumber
                     className="input-style"
                     label='Номер бокса'
                     id='boxNumber'
@@ -882,6 +889,7 @@ const UpdateOrderInfo = observer(() => {
                     id='comments'
                     value={comments}
                     onChange={setComments}
+                    maxLength={200}
                 />
                 <p style={{
                     fontWeight: 'bold', display: 'flex',
@@ -910,7 +918,7 @@ const UpdateOrderInfo = observer(() => {
                     }}
                 />
 
-                <InputField
+                <InputFieldPriceTimeNumber
                     className="input-style"
                     label='Использованные клиентом бонусы'
                     id='bonuses'

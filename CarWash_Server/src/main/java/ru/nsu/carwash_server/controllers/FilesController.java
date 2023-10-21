@@ -26,6 +26,7 @@ import ru.nsu.carwash_server.services.FileServiceIml;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class FilesController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
     public ResponseEntity<?> uploadImage(@Valid @RequestParam("file") MultipartFile file,
-                                         @Valid @RequestPart("description") String description,
+                                         @Valid @Size(max = 255) @RequestPart("description") String description,
                                          @Valid @RequestPart("status") String status) {
 
         String decodedDescription = new String(description.getBytes(StandardCharsets.ISO_8859_1),
@@ -120,7 +121,7 @@ public class FilesController {
         Resource file = fileService.load(filename);
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/octet-stream")) // Устанавливаем MIME-тип по умолчанию
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
                 .body(file);
     }

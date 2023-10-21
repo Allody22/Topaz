@@ -83,7 +83,7 @@ public class ServiceChangingController {
         String userPhone = userService.getActualUserVersionById(userId).getPhone();
         switch (serviceType) {
             case "wash" -> {
-                if (newServiceRequest.getRole().isBlank()) {
+                if (newServiceRequest.getRole() == null || newServiceRequest.getRole().isBlank()) {
                     return ResponseEntity.badRequest().body(new MessageResponse("Пожалуйста, введи роль для услуги мойки"));
                 }
 
@@ -113,9 +113,7 @@ public class ServiceChangingController {
 
                 return (ResponseEntity.ok(resultOfSaving.getSecond()));
             }
-            default -> {
-                throw new InvalidOrderTypeException(serviceType);
-            }
+            default -> throw new InvalidOrderTypeException(serviceType);
         }
     }
 

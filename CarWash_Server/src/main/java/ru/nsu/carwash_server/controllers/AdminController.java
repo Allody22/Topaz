@@ -32,6 +32,7 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -76,7 +77,7 @@ public class AdminController {
     @GetMapping("/findUserByTelephone_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<UserInformationResponse> findUserByTelephone(@Valid @RequestParam("phone") String phone) {
+    public ResponseEntity<UserInformationResponse> findUserByTelephone(@Valid @NotBlank @RequestParam("phone") String phone) {
         UserVersions latestUserVersion = userService.getActualUserVersionByPhone(phone);
 
         User user = latestUserVersion.getUser();
@@ -94,7 +95,7 @@ public class AdminController {
     @GetMapping("/getUserOrdersByAdmin_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<UserOrdersResponse> getUserOrdersByAdmin(@Valid @RequestParam("username") String username) {
+    public ResponseEntity<UserOrdersResponse> getUserOrdersByAdmin(@Valid @NotBlank @RequestParam("username") String username) {
 
         User user = userService.getActualUserVersionByPhone(username).getUser();
 

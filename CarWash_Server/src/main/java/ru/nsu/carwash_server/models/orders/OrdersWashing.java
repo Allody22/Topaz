@@ -16,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Min;
 import java.util.Date;
 
 
@@ -45,21 +46,27 @@ public class OrdersWashing {
     @Column(nullable = false, unique = true, name = "name")
     private String name;
 
+    @Min(0)
     @Column(name = "price_first_type")
     private int priceFirstType;
 
+    @Min(0)
     @Column(name = "price_second_type")
     private int priceSecondType;
 
+    @Min(0)
     @Column(name = "price_third_type")
     private int priceThirdType;
 
+    @Min(0)
     @Column(name = "time_first_type")
     private int timeFirstType;
 
+    @Min(0)
     @Column(name = "time_second_type")
     private int timeSecondType;
 
+    @Min(0)
     @Column(name = "time_third_type")
     private int timeThirdType;
 

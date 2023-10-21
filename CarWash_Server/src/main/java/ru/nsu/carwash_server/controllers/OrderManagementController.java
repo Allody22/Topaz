@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.nsu.carwash_server.exceptions.EmptyOrdersArrayException;
 import ru.nsu.carwash_server.exceptions.InvalidOrderTypeException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
@@ -50,6 +51,8 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -94,25 +97,25 @@ public class OrderManagementController {
 
     @PostMapping("/deleteOrder_v1")
     @Transactional
-    public ResponseEntity<MessageResponse> deleteOrder(@Valid @RequestParam(name = "orderId") Long id) {
-        orderService.deleteOrder(id);
+    public ResponseEntity<MessageResponse> deleteOrder(@Valid @NotNull @RequestParam(name = "orderId") Long orderId) {
+        orderService.deleteOrder(orderId);
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
         UserVersions userLatestVersion = userService.getActualUserVersionById(userId);
 
         String operationName = "Delete_order";
-        String descriptionMessage = "Заказ с айди'" + id + "' отменён";
+        String descriptionMessage = "Заказ с айди'" + orderId + "' отменён";
         operationsService.SaveUserOperation(operationName, userLatestVersion.getUser(), descriptionMessage, 1);
 
-        log.info("deleteOrder_v1. User with phone '{}' cancelled order with id '{}'.", userLatestVersion.getPhone(), id);
+        log.info("deleteOrder_v1. User with phone '{}' cancelled order with id '{}'.", userLatestVersion.getPhone(), orderId);
 
-        return ResponseEntity.ok(new MessageResponse("Заказ с айди " + id.toString() + " успешно удалён"));
+        return ResponseEntity.ok(new MessageResponse("Заказ с айди " + orderId.toString() + " успешно удалён"));
     }
 
     @GetMapping("/getServiceInfo_v1")
     @Transactional
-    public ResponseEntity<?> getServiceInfo(@Valid @RequestParam(name = "orderName") String orderName,
-                                            @Valid @RequestParam(name = "orderType") String orderType) {
+    public ResponseEntity<?> getServiceInfo(@Valid @NotBlank @RequestParam(name = "orderName") String orderName,
+                                            @Valid @NotBlank @RequestParam(name = "orderType") String orderType) {
         switch (orderType) {
             case "Wash" -> {
                 var order = ordersWashingRepository.findByName(orderName)
@@ -202,7 +205,7 @@ public class OrderManagementController {
 
     @GetMapping("/getOrderInfo_v1")
     @Transactional
-    public ResponseEntity<?> getOrderInfo(@Valid @RequestParam(name = "orderId", required = true) Long orderId) {
+    public ResponseEntity<?> getOrderInfo(@Valid @NotNull @RequestParam(name = "orderId", required = true) Long orderId) {
 
         var orderById = orderService.findById(orderId);
 
@@ -367,10 +370,8 @@ public class OrderManagementController {
     @GetMapping("/getBookedTimeInOneDay_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<OrdersArrayResponse> getBookedTimeInOneDay(@Valid @RequestParam(name = "startTime")
-                                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
-                                                                     @Valid @RequestParam(name = "endTime")
-                                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
+    public ResponseEntity<OrdersArrayResponse> getBookedTimeInOneDay(@Valid @NotNull @RequestParam(name = "startTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
+                                                                     @Valid @NotNull @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
                                                                      @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
         List<OrderVersions> orders = orderService.getOrdersInTimeInterval(startTime,
                 endTime, null, includeCancelled);
@@ -391,9 +392,8 @@ public class OrderManagementController {
     @GetMapping("/getOrderCreatedAt_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<OrdersArrayResponse> getOrderCreatedAt(@Valid @RequestParam(name = "startTime")
-                                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
-                                                                 @Valid @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
+    public ResponseEntity<OrdersArrayResponse> getOrderCreatedAt(@Valid @NotNull @RequestParam(name = "startTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
+                                                                 @Valid @NotNull @RequestParam(name = "endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime,
                                                                  @Valid @RequestParam(name = "includeCancelled", defaultValue = "false") Boolean includeCancelled) {
 
         List<OrderVersions> orders = orderService.getOrdersCreatedAt(startTime,
@@ -419,36 +419,41 @@ public class OrderManagementController {
             default -> throw new InvalidOrderTypeException(ordersArrayPriceTimeRequest.getOrderType());
         }
 
+        int orderTime = timeAndPrice.getFirst();
+
+        if (orderTime == 0) {
+            throw new EmptyOrdersArrayException();
+        }
         Date startTimeFromRequest = ordersArrayPriceTimeRequest.getStartTime();
 
-        if (timeAndPrice.getFirst() < 60) {
+        if (orderTime < 60) {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 1, 22, 8, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (timeAndPrice.getFirst() <= 120) {
+        } else if (orderTime <= 120) {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 2, 20, 8, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 2, 19, 9, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (timeAndPrice.getFirst() <= 180) {
+        } else if (orderTime <= 180) {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 20, 8, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 19, 9, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 18, 10, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (timeAndPrice.getFirst() <= 240) {
+        } else if (orderTime <= 240) {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 8, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 9, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 10, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 11, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (timeAndPrice.getFirst() <= 300) {
+        } else if (orderTime <= 300) {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 8, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 9, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 10, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 11, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 12, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (timeAndPrice.getFirst() <= 361) {
+        } else if (orderTime <= 361) {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 16, 8, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 15, 9, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 14, 10, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 13, 11, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 13, 12, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 14, 13, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (timeAndPrice.getFirst() <= 421) {
+        } else if (orderTime <= 421) {
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 8, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 9, ordersArrayPriceTimeRequest.getOrderType()));
             timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 10, ordersArrayPriceTimeRequest.getOrderType()));
@@ -479,6 +484,10 @@ public class OrderManagementController {
     @Transactional
     public ResponseEntity<FreeTimeAndBoxResponse> getFreeTime(@Valid @RequestBody FreeTimeRequest freeTimeRequest) {
         int time = freeTimeRequest.getOrderTime();
+        if (time == 0) {
+            throw new EmptyOrdersArrayException();
+        }
+
         List<TimeIntervals> timeIntervals = new ArrayList<>();
         time += 15;
 
@@ -538,6 +547,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(new FreeTimeAndBoxResponse(time, clearOrdersWithoutDuplicates, new Date()));
     }
 
+
     @GetMapping("/getPriceAndTime_v1")
     @Transactional
     public ResponseEntity<TimeAndPriceResponse> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
@@ -550,6 +560,9 @@ public class OrderManagementController {
             case "polishing" ->
                     timeAndPrice = orderService.getPolishingOrderPriceAndTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
             default -> throw new InvalidOrderTypeException(ordersArrayPriceTimeRequest.getOrderType());
+        }
+        if (timeAndPrice.getFirst() == 0 || timeAndPrice.getSecond() == 0) {
+            throw new EmptyOrdersArrayException();
         }
         return ResponseEntity.ok(new TimeAndPriceResponse(timeAndPrice.getSecond(), timeAndPrice.getFirst()));
     }
@@ -589,9 +602,7 @@ public class OrderManagementController {
                     TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 5);
                     timeIntervals.add(singleTimeIntervalFirstBox);
                 }
-                default -> {
-                    throw new InvalidOrderTypeException(orderType);
-                }
+                default -> throw new InvalidOrderTypeException(orderType);
             }
         }
         return timeIntervals;

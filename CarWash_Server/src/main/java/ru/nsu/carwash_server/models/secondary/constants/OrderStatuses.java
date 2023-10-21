@@ -5,7 +5,12 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class OrderStatuses {
+
     public final String cancelled = "cancelled";
+
+    private final String technicalBoxCheck = "technicalBoxCheck";
+
+    public final String createdPaid100PercentAndDone = "createdPaid100PercentAndDone";
 
     public final String createdPaid0PercentNotDone = "createdPaid0PercentNotDone";
 
@@ -52,6 +57,4 @@ public class OrderStatuses {
     public final String createdPaid80PercentAndDone = "createdPaid80PercentAndDone";
 
     public final String createdPaid90PercentAndDone = "createdPaid90PercentAndDone";
-
-    public final String createdPaid100PercentAndDone = "createdPaid100PercentAndDone";
 }

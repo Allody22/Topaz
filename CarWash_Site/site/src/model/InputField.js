@@ -1,10 +1,12 @@
 import React, {useState} from 'react';
 
-const InputField = ({label, id, value, onChange, className, style}) => {
+const InputField = ({label, id, value, onChange, className, style, maxLength = 200}) => {
     const [hasValue, setHasValue] = useState(value !== "");
+    const [isExceeded, setIsExceeded] = useState(false);
 
     const handleChange = (e) => {
         setHasValue(e.target.value !== "");
+        setIsExceeded(e.target.value.length >= maxLength);  // Проверьте здесь
         onChange(e.target.value);
     };
 
@@ -16,12 +18,14 @@ const InputField = ({label, id, value, onChange, className, style}) => {
         setHasValue(value !== "");
     };
 
+
     const inputStyle = {
         fontSize: '17px',
-        border: '1px solid #000',
+        border: isExceeded ? '1px solid red' : '1px solid #000',  // Измените цвет границы здесь
         padding: '5px 10px',
         ...style,
     };
+
 
     return (
         <div className={`input-container ${className}`} style={style}>
@@ -37,7 +41,8 @@ const InputField = ({label, id, value, onChange, className, style}) => {
                 onChange={handleChange}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                style={inputStyle} // Применяем стили к <input>
+                style={inputStyle}
+                maxLength={maxLength}
             />
         </div>
     );

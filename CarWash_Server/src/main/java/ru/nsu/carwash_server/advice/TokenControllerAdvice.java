@@ -22,8 +22,7 @@ public class TokenControllerAdvice {
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
-        String errorMessage = "В базе данных уже существует такой элемент.\n" +
-                "Это нарушает уникальность этого значения.";
+        String errorMessage = "Ошибка! Внимательно проверьте правильность введённой информации еще раз.";
 
         log.error("Data integrity violation: {} | Request: {}", ex.getMessage(), request.getDescription(true), ex);
 

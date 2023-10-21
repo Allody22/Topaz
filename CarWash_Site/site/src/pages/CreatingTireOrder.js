@@ -21,6 +21,7 @@ import InputFieldNear from "../model/InputFieldNear";
 import saleStore from "../store/SaleStore";
 import {orderStatusArray} from "../model/Constants";
 import MyCustomModal from "../model/MyCustomModal";
+import InputFieldPriceTimeNumber from "../model/InputFieldPriceTimeNumber";
 
 const stylesForInput = {
     width: 190, marginBottom: 10, marginTop: 5
@@ -216,7 +217,7 @@ const CreatingTireOrder = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));
+                setErrorResponse(messages.join('\n'));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -447,7 +448,7 @@ const CreatingTireOrder = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 <p>{successResponse}</p>
             </div>
         </Notification>
@@ -460,7 +461,7 @@ const CreatingTireOrder = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 {errorResponse}
             </div>
         </Notification>
@@ -481,6 +482,12 @@ const CreatingTireOrder = observer(() => {
 
     const handleCreateOrder = async (e) => {
         e.preventDefault();
+        if (!requestStartTime || !requestEndTime) {
+            setErrorResponse("Обязательно укажите время начала и время конца заказа")
+            setErrorFlag(flag => !flag)
+            return;
+        }
+
         if (isSubmitting) {
             return;
         }
@@ -519,7 +526,7 @@ const CreatingTireOrder = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));
+                setErrorResponse(messages.join('\n'));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -809,12 +816,14 @@ const CreatingTireOrder = observer(() => {
                     className="input-style"
                     value={userContacts}
                     onChange={setUserContacts}
+                    maxLength={50}
                 />
                 <InputField
                     label='Номер автомобиля:'
                     id='carNumber'
                     className="input-style"
                     value={carNumber}
+                    maxLength={50}
                     onChange={setCarNumber}
                 />
 
@@ -847,16 +856,18 @@ const CreatingTireOrder = observer(() => {
                     className="input-style"
                     id='specialist'
                     value={specialist}
+                    maxLength={50}
                     onChange={setSpecialist}
                 />
                 <InputField
+                    maxLength={50}
                     label='Администратор:'
                     id='administrator'
                     className="input-style"
                     value={administrator}
                     onChange={setAdministrator}
                 />
-                <InputField
+                <InputFieldPriceTimeNumber
                     label='Количество использованных бонусов:'
                     id='bonuses'
                     className="input-style"
@@ -864,6 +875,7 @@ const CreatingTireOrder = observer(() => {
                     onChange={setBonuses}
                 />
                 <InputField
+                    maxLength={200}
                     label='Комментарии:'
                     id='comments'
                     className="input-style"

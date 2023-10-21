@@ -20,6 +20,7 @@ import {BrowserRouter as Router} from "react-router-dom";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {format, parseISO} from "date-fns";
 import serviceRoleMapFromRus from "../model/map/ServiceRoleMapFromRus";
+import InputFieldPriceTimeNumber from "../model/InputFieldPriceTimeNumber";
 
 
 const toLabelValueArray = (items) => items.map(item => ({label: item, value: item}));
@@ -132,9 +133,17 @@ const AddNewService = observer(() => {
                 setTimeThirdType(0)
             } catch (error) {
                 if (error.response) {
-                    alert(error.response.data.message)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join('\n'));
+                    setErrorFlag(flag => !flag);
+
                 } else {
-                    alert("Системная ошибка, попробуйте позже")
+                    setErrorResponse("Системная ошибка, проверьте правильность " +
+                        "введённой информации и попробуйте еще раз")
+                    setErrorFlag(flag => !flag)
                 }
             }
         }
@@ -151,36 +160,50 @@ const AddNewService = observer(() => {
 
     const getPriceByWheelR = (name) => {
         const item = wheelSizeAndPrice.find(item => item.level === name);
-        return item ? item.price : "Нет информации про цену";
+        return item ? item.price : 0;
     }
 
     const getTimeByWheelR = (name) => {
         const item = wheelSizeAndTime.find(item => item.level === name);
-        return item ? item.time : "Нет информации про цену";
+        return item ? item.time : 0;
     }
 
-
     const setPriceByWheelRForNewInfo = (event, level) => {
+        const value = event;
+
+        // Если значение не является числом или пустой строкой, просто вернем текущий state
+        if (isNaN(value) || value === '') {
+            return;
+        }
+
         setWheelSizeAndPrice(prevState => {
             const index = prevState.findIndex(item => item.level === level);
             if (index === -1) {
                 return prevState;
             } else {
                 const newArray = [...prevState];
-                newArray[index].price = Number(event);
+                newArray[index].price = Number(value);
                 return newArray;
             }
         });
     };
 
+
     const setTimeByWheelRForNewInfo = (event, level) => {
+        const value = event;
+
+        // Если значение не является числом или пустой строкой, просто вернем текущий state
+        if (isNaN(value) || value === '') {
+            return;
+        }
+
         setWheelSizeAndTime(prevState => {
             const index = prevState.findIndex(item => item.level === level);
             if (index === -1) {
                 return prevState;
             } else {
                 const newArray = [...prevState];
-                newArray[index].time = Number(event);
+                newArray[index].time = Number(value);
                 return newArray;
             }
         });
@@ -206,7 +229,7 @@ const AddNewService = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: 'pre-line'}}> {/* Добавлено свойство whiteSpace */}
                 {errorResponse}
             </div>
         </Notification>
@@ -231,9 +254,18 @@ const AddNewService = observer(() => {
     useEffect(() => {
         setWashingTypeConnectedEnglish(washingTypeIncluded.map(item => connectedServiceMap[item]))
     }, [washingTypeConnected]);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
-        if (showConfirmation) {
+        if (!orderName || orderName === "") {
+            setErrorResponse("Обязательно укажите название новой услуги.")
+            setErrorFlag(flag => !flag)
+            return;
+        } else if (serviceType === "Мойка" && (!role || role === "")) {
+            setErrorResponse("Обязательно укажите роль новой услуги для мойки.")
+            setErrorFlag(flag => !flag)
+            return;
+        } else if (showConfirmation) {
             try {
                 let response;
                 response = await createNewService(orderTypeMapFromRussian[serviceType], orderName.replaceAll(' ', '_'), priceFirstType,
@@ -251,8 +283,13 @@ const AddNewService = observer(() => {
             } catch
                 (error) {
                 if (error.response) {
-                    setErrorResponse(error.response.data.message)
-                    setErrorFlag(flag => !flag)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join('\n'));
+                    setErrorFlag(flag => !flag);
+
                 } else {
                     setErrorResponse("Системная ошибка, проверьте правильность " +
                         "введённой информации и попробуйте еще раз")
@@ -296,6 +333,7 @@ const AddNewService = observer(() => {
             />
 
             <InputField
+                maxLength={120}
                 label='Название услуги'
                 id='orderName'
                 value={orderName}
@@ -370,42 +408,42 @@ const AddNewService = observer(() => {
                         </Button>
                     </Modal.Footer>
                 </Modal>
-                <InputField
+                <InputFieldPriceTimeNumber
                     label='Цена за 1 тип кузова'
                     id='priceFirstType'
                     value={priceFirstType}
                     className="input-style"
                     onChange={setPriceFirstType}
                 />
-                <InputField
+                <InputFieldPriceTimeNumber
                     label='Цена за 2 тип кузова'
                     id='priceSecondType'
                     value={priceSecondType}
                     className="input-style"
                     onChange={setPriceSecondType}
                 />
-                <InputField
+                <InputFieldPriceTimeNumber
                     label='Цена за 3 тип кузова'
                     id='priceFirstType'
                     value={priceThirdType}
                     className="input-style"
                     onChange={setPriceThirdType}
                 />
-                <InputField
+                <InputFieldPriceTimeNumber
                     label='Примерное время выполнения с 1 типом кузова'
                     id='timeFirstType'
                     value={timeFirstType}
                     className="input-style"
                     onChange={setTimeFirstType}
                 />
-                <InputField
+                <InputFieldPriceTimeNumber
                     label='Примерное время выполнения со 2 типом кузова'
                     id='timeSecondType'
                     value={timeSecondType}
                     className="input-style"
                     onChange={setTimeSecondType}
                 />
-                <InputField
+                <InputFieldPriceTimeNumber
                     label='Примерное время выполнения с 3 типом кузова'
                     id='timeThirdType'
                     value={timeThirdType}

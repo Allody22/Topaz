@@ -28,7 +28,7 @@ const Auth = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 {errorResponse}
             </div>
         </Notification>
@@ -55,7 +55,7 @@ const Auth = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));
+                setErrorResponse(messages.join('\n'));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -108,8 +108,8 @@ const Auth = observer(() => {
                 position: "absolute",
                 bottom: "10px",
                 width: "90%",
-                height: "auto", // Автоматическая высота, чтобы контейнер мог расширяться
-                minHeight: "70px", // Минимальная высота, которую мы хотели бы сохранить
+                height: "auto",
+                minHeight: "70px",
                 backgroundColor: "white",
                 color: "black",
                 border: "1px solid black",

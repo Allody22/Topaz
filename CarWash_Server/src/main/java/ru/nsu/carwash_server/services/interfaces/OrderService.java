@@ -280,6 +280,17 @@ public interface OrderService {
      */
     List<OrderVersions> getNotMadeOrders(boolean flag);
 
+
+    /**
+     * Получение всех заказов определённого пользователя за определённое время.
+     *
+     * @param firstDate  - время начала
+     * @param secondDate - время конца
+     * @param userId     - айди пользователя
+     * @return - список всех заказов
+     */
+    List<Order> getUserOrdersInTimeInterval(Date firstDate, Date secondDate, Long userId);
+
     /**
      * Получение последний версии данного заказа
      *

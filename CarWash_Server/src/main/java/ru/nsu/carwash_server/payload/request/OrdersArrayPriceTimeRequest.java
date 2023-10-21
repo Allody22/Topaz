@@ -2,16 +2,22 @@ package ru.nsu.carwash_server.payload.request;
 
 import lombok.Data;
 
-import java.util.ArrayList;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
 public class OrdersArrayPriceTimeRequest {
 
-    String orderType = null;
+    @Size(max = 30)
+    private String orderType = null;
 
-    ArrayList<String> orders = null;
+    @Size(min = 1)
+    @NotNull
+    private List<String> orders = null;
 
-    String wheelR = null;
+    @Size(max = 50)
+    private String wheelR = null;
 
     int bodyType;
 }

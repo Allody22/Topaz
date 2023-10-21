@@ -197,13 +197,12 @@ const OrderTable = observer(() => {
 
     const [orders, setOrders] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSubmittingB, setIsSubmittingB] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const start = new Date(selectedDate);
     const end = new Date(selectedDate);
     const [includeCancelled, setIncludeCancelled] = useState(false);
 
-    const [errorResponse, setErrorResponse] = useState();
+    const [errorResponse, setErrorResponse] = useState("");
     const [errorFlag, setErrorFlag] = useState(false);
     const [successResponse, setSuccessResponse] = useState();
     const toaster = useToaster();
@@ -228,7 +227,7 @@ const OrderTable = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join('\n'));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -259,7 +258,7 @@ const OrderTable = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join('\n'));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -279,7 +278,7 @@ const OrderTable = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 <p>Информация успешно получена из базы данных</p>
             </div>
         </Notification>
@@ -325,7 +324,7 @@ const OrderTable = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 {errorResponse}
             </div>
         </Notification>
@@ -361,7 +360,7 @@ const OrderTable = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join('\n'));  // Объединяем все сообщения об ошибках через запятую
                 setErrorFlag(flag => !flag);
 
             } else {

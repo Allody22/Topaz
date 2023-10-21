@@ -559,6 +559,11 @@ public class OrderServiceImp implements OrderService {
         }
     }
 
+    public List<Order> getUserOrdersInTimeInterval(Date firstDate, Date secondDate, Long userId) {
+        return ordersRepository.findAllByDateOfCreationAndUser(firstDate, secondDate, userId);
+    }
+
+
     public List<OrderVersions> getNotMadeOrders(boolean flag) {
         if (flag) {
             return orderVersionsRepository.getLatestOrderVersionsWithStatusNotDoneWithCancelled();

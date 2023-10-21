@@ -10,6 +10,7 @@ import ru.nsu.carwash_server.exceptions.validation.fields.NotZero;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 @Data
@@ -19,6 +20,7 @@ import java.util.Date;
 public class FreeTimeRequest {
 
     @NotBlank
+    @Size(max = 30)
     private String orderType = null;
 
     @NotNull

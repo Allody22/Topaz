@@ -19,6 +19,7 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,11 +52,10 @@ public class OperationController {
 
     @GetMapping("/get_all_day")
     @Transactional
-    public ResponseEntity<List<OperationsResponse>> getAllOperationsInDay(@Valid @RequestParam(name = "startTime")
+    public ResponseEntity<List<OperationsResponse>> getAllOperationsInDay(@Valid @NotNull @RequestParam(name = "startTime")
                                                                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startTime,
-                                                                          @Valid @RequestParam(name = "endTime")
+                                                                          @Valid @NotNull @RequestParam(name = "endTime")
                                                                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endTime) {
-
         List<OperationsUserLink> allOperationsInATime = operationsService.getAllOperationsInATime(startTime, endTime);
 
         List<OperationsResponse> allOperationsInThisTime = new ArrayList<>();

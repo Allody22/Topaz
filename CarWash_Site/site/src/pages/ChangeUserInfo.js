@@ -36,7 +36,7 @@ const ChangeUserInfo = observer(() => {
     const {username: paramsUsername} = useParams();
     const [username, setUsername] = useState(paramsUsername);
 
-    const [errorResponse, setErrorResponse] = useState();
+    const [errorResponse, setErrorResponse] = useState('');
     const [errorFlag, setErrorFlag] = useState(false);
     const [successResponse, setSuccessResponse] = useState();
     const toaster = useToaster();
@@ -82,7 +82,7 @@ const ChangeUserInfo = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 <p>{successResponse}</p>
             </div>
         </Notification>
@@ -95,7 +95,7 @@ const ChangeUserInfo = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: "pre-line"}}>
                 {errorResponse}
             </div>
         </Notification>
@@ -131,7 +131,7 @@ const ChangeUserInfo = observer(() => {
                     for (let key in error.response.data) {
                         messages.push(error.response.data[key]);
                     }
-                    setErrorResponse(messages.join(''));
+                    setErrorResponse(messages.join('\n'));
                     setErrorFlag(flag => !flag);
                 } else {
                     setErrorResponse("Системная ошибка, проверьте правильность " +
@@ -163,8 +163,12 @@ const ChangeUserInfo = observer(() => {
                     setSuccessResponse(sentence)
                 } catch (error) {
                     if (error.response) {
-                        setErrorResponse(error.response.data.message)
-                        setErrorFlag(flag => !flag)
+                        let messages = [];
+                        for (let key in error.response.data) {
+                            messages.push(error.response.data[key]);
+                        }
+                        setErrorResponse(messages.join('\n'));
+                        setErrorFlag(flag => !flag);
                     } else {
                         setErrorResponse("Системная ошибка, проверьте правильность " +
                             "введённой информации и попробуйте еще раз")
@@ -218,6 +222,11 @@ const ChangeUserInfo = observer(() => {
 
     const handleSubmit = async (event) => {
         event.preventDefault()
+        if (!username || username === "") {
+            setErrorResponse("Обязательно укажите телефон пользователя")
+            setErrorFlag(flag => !flag)
+            return;
+        }
         if (showConfirmation) {
             try {
                 const data = (await updateUserInfo(username, fullName, enSelectedRoles,
@@ -227,8 +236,13 @@ const ChangeUserInfo = observer(() => {
                 setSuccessResponse(data)
             } catch (error) {
                 if (error.response) {
-                    setErrorResponse(error.response.data.message)
-                    setErrorFlag(flag => !flag)
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join('\n'));
+                    setErrorFlag(flag => !flag);
+
                 } else {
                     setErrorResponse("Системная ошибка, проверьте правильность " +
                         "введённой информации и попробуйте еще раз")
@@ -272,6 +286,7 @@ const ChangeUserInfo = observer(() => {
                 />
 
                 <InputField
+                    maxLength={80}
                     className="input-style"
                     label='Имя и фамилия'
                     id='fullName'
@@ -287,6 +302,7 @@ const ChangeUserInfo = observer(() => {
                 />
 
                 <InputField
+                    maxLength={120}
                     className="input-style"
                     label='Ваша заметка о человеке '
                     id='adminNote'
@@ -294,6 +310,7 @@ const ChangeUserInfo = observer(() => {
                     onChange={setAdminNote}
                 />
                 <InputField
+                    maxLength={120}
                     className="input-style"
                     label='Комментарии самого пользователя (возможно, более точная информация о машине и тп)'
                     id='userNote'

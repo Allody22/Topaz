@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.carwash_server.exceptions.BadBoxException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.exceptions.TimeSlotUnavailableException;
+import ru.nsu.carwash_server.exceptions.TooManyOrdersException;
 import ru.nsu.carwash_server.models.orders.Order;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.orders.OrdersPolishing;
@@ -43,6 +44,9 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -107,6 +111,18 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
+        if (!(lastUserVersion.getPhone().equals("79635186660") || lastUserVersion.getComments().equals("Комментарии самого чела"))) {
+            ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+            ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
+            Date startOfTheDay = Date.from(startOfDay.toInstant());
+            Date endOfTheDay = Date.from(endOfDay.toInstant());
+
+            List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
+            if (userTodayOrders.size() >= 2) {
+                throw new TooManyOrdersException();
+            }
+        }
         List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersWashing> ordersWashings = new ArrayList<>();
 
@@ -176,6 +192,19 @@ public class OrderCreatingController {
 
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
+
+        if (!(lastUserVersion.getPhone().equals("79635186660") || lastUserVersion.getComments().equals("Комментарии самого чела"))) {
+            ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+            ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
+            Date startOfTheDay = Date.from(startOfDay.toInstant());
+            Date endOfTheDay = Date.from(endOfDay.toInstant());
+
+            List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
+            if (userTodayOrders.size() >= 2) {
+                throw new TooManyOrdersException();
+            }
+        }
 
         List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersPolishing> ordersPolishings = new ArrayList<>();
@@ -247,6 +276,18 @@ public class OrderCreatingController {
         User user = userService.getFullUserById(userId);
         UserVersions lastUserVersion = userService.getActualUserVersionById(userId);
 
+        if (!(lastUserVersion.getPhone().equals("79635186660") || lastUserVersion.getComments().equals("Комментарии самого чела"))) {
+            ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+            ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
+            Date startOfTheDay = Date.from(startOfDay.toInstant());
+            Date endOfTheDay = Date.from(endOfDay.toInstant());
+
+            List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
+            if (userTodayOrders.size() >= 2) {
+                throw new TooManyOrdersException();
+            }
+        }
         List<OrdersTire> ordersTireService = new ArrayList<>();
         List<String> ordersList = bookingOrderRequest.getOrders();
 
@@ -309,7 +350,8 @@ public class OrderCreatingController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String administrator;
-        UserVersions user = userService.getActualUserVersionById(userDetails.getId());
+        Long userId = userDetails.getId();
+        UserVersions user = userService.getActualUserVersionById(userId);
 
         administrator = (bookingOrderRequest.getAdministrator() != null && !bookingOrderRequest.getAdministrator().isEmpty())
                 ? bookingOrderRequest.getAdministrator() : user.getPhone();

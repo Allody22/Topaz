@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
@@ -17,8 +18,11 @@ import java.util.List;
 @Builder
 public class BookingTireOrderRequest {
 
+    @Size(min = 1)
+    @NotNull
     private List<String> orders = null;
 
+    @Size(max = 50)
     private String wheelR = null;
 
     @NotNull
@@ -29,19 +33,24 @@ public class BookingTireOrderRequest {
     @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime = null;
 
+    @Size(max = 50)
     private String administrator = null;
 
+    @Size(max = 50)
     private String specialist = null;
 
     @NotNull
     private int boxNumber;
 
+    @Size(max = 255)
     private String sale = null;
 
     private int bonuses;
 
+    @Size(max = 200)
     private String comments = null;
 
+    @Size(max = 50)
     private String autoNumber = null;
 
     private int autoType;
@@ -49,5 +58,6 @@ public class BookingTireOrderRequest {
     private Integer price = null;
 
     @NotBlank
+    @Size(max = 100)
     private String currentStatus;
 }

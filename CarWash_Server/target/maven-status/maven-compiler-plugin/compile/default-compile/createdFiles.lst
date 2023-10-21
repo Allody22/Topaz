@@ -5,17 +5,19 @@ ru\nsu\carwash_server\payload\request\BookingTireOrderRequest$BookingTireOrderRe
 ru\nsu\carwash_server\models\secondary\constants\DestinationPrefixes.class
 ru\nsu\carwash_server\exceptions\BadBoxException.class
 ru\nsu\carwash_server\payload\response\TokenRefreshResponse$TokenRefreshResponseBuilder.class
+ru\nsu\carwash_server\configuration\sockets\config\WebSocketConfig.class
 ru\nsu\carwash_server\exceptions\ConfirmationCodeMismatchException.class
 ru\nsu\carwash_server\payload\request\UpdateUserInfoRequestByAdmin$UpdateUserInfoRequestByAdminBuilder.class
 ru\nsu\carwash_server\models\secondary\constants\StompPaths.class
 ru\nsu\carwash_server\payload\request\FreeTimeRequest.class
 ru\nsu\carwash_server\exceptions\validation\fields\NotZero.class
 ru\nsu\carwash_server\security\jwt\JwtUtils.class
+ru\nsu\carwash_server\exceptions\TooManyOrdersException.class
 ru\nsu\carwash_server\payload\request\UpdateTireServiceRequest.class
 ru\nsu\carwash_server\controllers\OperationController.class
-ru\nsu\carwash_server\sockets\config\WebSocketConfig.class
 ru\nsu\carwash_server\exceptions\NotInDataBaseException.class
 ru\nsu\carwash_server\payload\request\SignupRequest.class
+ru\nsu\carwash_server\configuration\sockets\config\WebMvcConfig.class
 ru\nsu\carwash_server\payload\response\TimeAndPriceResponse.class
 ru\nsu\carwash_server\repository\users\UserVersionsRepository.class
 ru\nsu\carwash_server\services\interfaces\OrderService.class
@@ -67,7 +69,6 @@ ru\nsu\carwash_server\models\secondary\helpers\TireOrderEntity.class
 ru\nsu\carwash_server\payload\response\ImageResponse.class
 ru\nsu\carwash_server\advice\UserControllerAdvice.class
 ru\nsu\carwash_server\payload\response\OrdersArrayResponse.class
-ru\nsu\carwash_server\sockets\config\NotificationConfig.class
 ru\nsu\carwash_server\models\users\RefreshToken.class
 ru\nsu\carwash_server\models\secondary\constants\FileTypes.class
 ru\nsu\carwash_server\payload\response\OrderInfoResponse.class
@@ -94,6 +95,7 @@ ru\nsu\carwash_server\models\secondary\constants\OrderStatuses.class
 ru\nsu\carwash_server\exceptions\UserAlreadyExistException.class
 ru\nsu\carwash_server\payload\response\UserInformationResponse.class
 ru\nsu\carwash_server\models\orders\OrderVersions.class
+ru\nsu\carwash_server\exceptions\EmptyOrdersArrayException.class
 ru\nsu\carwash_server\exceptions\validation\fields\NotZeroValidator.class
 ru\nsu\carwash_server\payload\request\GetBookedOrdersInTimeIntervalRequest.class
 ru\nsu\carwash_server\models\secondary\helpers\WashingPolishingOrderEntity.class
@@ -118,8 +120,8 @@ ru\nsu\carwash_server\repository\operations\OperationsVersionsRepository.class
 ru\nsu\carwash_server\payload\request\FreeTimeRequest$FreeTimeRequestBuilder.class
 ru\nsu\carwash_server\advice\TokenControllerAdvice.class
 ru\nsu\carwash_server\security\jwt\AuthTokenFilter.class
-ru\nsu\carwash_server\sockets\config\WebMvcConfig.class
 ru\nsu\carwash_server\payload\request\UpdateUserInfoRequest$UpdateUserInfoRequestBuilder.class
+ru\nsu\carwash_server\configuration\sockets\config\NotificationConfig.class
 ru\nsu\carwash_server\payload\response\JwtResponse.class
 ru\nsu\carwash_server\payload\request\LoginRequest$LoginRequestBuilder.class
 ru\nsu\carwash_server\models\secondary\helpers\SingleOrderResponse.class

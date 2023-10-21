@@ -82,7 +82,7 @@ const OperationsTable = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join('\n'));
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -113,7 +113,7 @@ const OperationsTable = observer(() => {
                 for (let key in error.response.data) {
                     messages.push(error.response.data[key]);
                 }
-                setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                setErrorResponse(messages.join('\n'));  // Объединяем все сообщения об ошибках через запятую
                 setErrorFlag(flag => !flag);
 
             } else {
@@ -133,7 +133,7 @@ const OperationsTable = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: 'pre-line'}}>
                 <p>Информация успешно получена из базы данных</p>
             </div>
         </Notification>
@@ -179,7 +179,7 @@ const OperationsTable = observer(() => {
             closable
             style={{border: '1px solid black'}}
         >
-            <div style={{width: 320}}>
+            <div style={{width: 320, whiteSpace: 'pre-line'}}>
                 {errorResponse}
             </div>
         </Notification>
