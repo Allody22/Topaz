@@ -889,7 +889,7 @@ const UpdateOrderInfo = observer(() => {
                     id='comments'
                     value={comments}
                     onChange={setComments}
-                    maxLength={200}
+                    maxLength={255}
                 />
                 <p style={{
                     fontWeight: 'bold', display: 'flex',

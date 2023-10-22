@@ -102,6 +102,11 @@ public class OrderCreatingController {
 
         Date startTime = bookingOrderRequest.getStartTime();
         Date endTime = bookingOrderRequest.getEndTime();
+
+        System.out.println("REQUEST TIME");
+        System.out.println(startTime);
+        System.out.println(startTime);
+
         if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
             throw new TimeSlotUnavailableException(boxNumber);
         }
@@ -161,6 +166,9 @@ public class OrderCreatingController {
 
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
+        System.out.println("orderVersion");
+        System.out.println(orderCurrentVersions.toString());
+
         String operationName = "Book_washing_order";
         String descriptionMessage = "Пользователь с логином '" + userPhone + "' забронировал заказ на автомойку";
 
@@ -184,6 +192,9 @@ public class OrderCreatingController {
         Date startTime = bookingOrderRequest.getStartTime();
         Date endTime = bookingOrderRequest.getEndTime();
 
+        System.out.println("REQUEST TIME");
+        System.out.println(startTime);
+        System.out.println(startTime);
         if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
             throw new TimeSlotUnavailableException(boxNumber);
         }
@@ -242,6 +253,9 @@ public class OrderCreatingController {
         OrderVersions orderCurrentVersions = result.getSecond();
 
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
+
+        System.out.println("orderVersion");
+        System.out.println(orderCurrentVersions.toString());
 
         String operationName = "Book_polishing_order";
         String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getPhone() + "' забронировал заказ на полировку";
@@ -324,6 +338,9 @@ public class OrderCreatingController {
 
         Order newOrder = result.getFirst();
         OrderVersions orderCurrentVersions = result.getSecond();
+
+        System.out.println("orderVersion");
+        System.out.println(orderCurrentVersions.toString());
 
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 

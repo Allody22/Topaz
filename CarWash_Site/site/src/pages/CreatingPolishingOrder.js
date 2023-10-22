@@ -768,7 +768,7 @@ const CreatingPolishingOrder = observer(() => {
                     className="input-style"
                     value={comments}
                     onChange={setComments}
-                    maxLength={200}
+                    maxLength={255}
                 />
 
                 <div className='submit-container'>

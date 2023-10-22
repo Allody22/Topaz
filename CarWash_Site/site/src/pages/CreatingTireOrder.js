@@ -875,7 +875,7 @@ const CreatingTireOrder = observer(() => {
                     onChange={setBonuses}
                 />
                 <InputField
-                    maxLength={200}
+                    maxLength={255}
                     label='Комментарии:'
                     id='comments'
                     className="input-style"
