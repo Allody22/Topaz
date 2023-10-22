@@ -14,6 +14,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UpdateUserPasswordRequest {
 
+    @Size(max = 255)
     private String password = null;
 
     @NotBlank

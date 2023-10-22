@@ -16,9 +16,10 @@ import java.util.Set;
 public class UpdateUserInfoRequest {
 
     @NotBlank
-    @Size(max = 30)
+    @Size(max = 50)
     private String phone = null;
 
+    @Size(max = 80)
     private String fullName = null;
 
     private Set<String> roles = null;
