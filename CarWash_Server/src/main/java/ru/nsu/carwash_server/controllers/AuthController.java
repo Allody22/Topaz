@@ -168,8 +168,7 @@ public class AuthController {
             return ResponseEntity.ok(jwtResponse);
         } catch (AuthenticationException e) {
             log.error("WRONG AUTH, BAD PASSWORD");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Ошибка! Пожалуйста, проверьте введённые данные и попробуйте снова.");
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Пожалуйста, проверьте введённые данные и попробуйте снова."));
         }
     }
 
@@ -243,7 +242,7 @@ public class AuthController {
         String descriptionMessage = "Клиент с логином '" + userLatestVersion.getPhone() + "' вышел из аккаунта";
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
-        return ResponseEntity.ok(new MessageResponse("Log out successful!"));
+        return ResponseEntity.ok(new MessageResponse("Успешный выход из аккаунта!"));
     }
 
 
