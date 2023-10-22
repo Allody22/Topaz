@@ -105,7 +105,7 @@ public class OrderCreatingController {
 
         System.out.println("REQUEST TIME");
         System.out.println(startTime);
-        System.out.println(startTime);
+        System.out.println(endTime);
 
         if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
             throw new TimeSlotUnavailableException(boxNumber);
@@ -167,7 +167,8 @@ public class OrderCreatingController {
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
         System.out.println("orderVersion");
-        System.out.println(orderCurrentVersions.toString());
+        System.out.println(orderCurrentVersions.getStartTime());
+        System.out.println(orderCurrentVersions.getEndTime());
 
         String operationName = "Book_washing_order";
         String descriptionMessage = "Пользователь с логином '" + userPhone + "' забронировал заказ на автомойку";
@@ -194,7 +195,7 @@ public class OrderCreatingController {
 
         System.out.println("REQUEST TIME");
         System.out.println(startTime);
-        System.out.println(startTime);
+        System.out.println(endTime);
         if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
             throw new TimeSlotUnavailableException(boxNumber);
         }
@@ -255,7 +256,8 @@ public class OrderCreatingController {
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
         System.out.println("orderVersion");
-        System.out.println(orderCurrentVersions.toString());
+        System.out.println(orderCurrentVersions.getStartTime());
+        System.out.println(orderCurrentVersions.getEndTime());
 
         String operationName = "Book_polishing_order";
         String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getPhone() + "' забронировал заказ на полировку";
@@ -281,6 +283,11 @@ public class OrderCreatingController {
 
         Date startTime = bookingOrderRequest.getStartTime();
         Date endTime = bookingOrderRequest.getEndTime();
+
+        System.out.println("REQUEST TIME");
+        System.out.println(startTime);
+        System.out.println(endTime);
+
         if (!orderService.checkIfTimeFree(startTime, endTime, boxNumber)) {
             throw new TimeSlotUnavailableException(boxNumber);
         }
@@ -340,7 +347,8 @@ public class OrderCreatingController {
         OrderVersions orderCurrentVersions = result.getSecond();
 
         System.out.println("orderVersion");
-        System.out.println(orderCurrentVersions.toString());
+        System.out.println(orderCurrentVersions.getStartTime());
+        System.out.println(orderCurrentVersions.getEndTime());
 
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
