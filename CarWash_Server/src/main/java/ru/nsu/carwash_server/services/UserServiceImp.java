@@ -63,7 +63,6 @@ public class UserServiceImp implements UserService {
         var userVersionList = userVersionsRepository.findLatestVersionByUsername
                 (phone);
         UserVersions latestUserVersion;
-        System.out.println(userVersionList);
         if (!userVersionList.isEmpty()) {
             latestUserVersion = userVersionList.get(0);
         } else {

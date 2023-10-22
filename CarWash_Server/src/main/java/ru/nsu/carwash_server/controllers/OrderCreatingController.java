@@ -196,19 +196,25 @@ public class OrderCreatingController {
 
         log.info("MISHA HERE");
         log.info(lastUserVersion.toString());
-//        ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-//        ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
-//
-//        Date startOfTheDay = Date.from(startOfDay.toInstant());
-//        Date endOfTheDay = Date.from(endOfDay.toInstant());
-//
-//        List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
-//        if (userTodayOrders.size() >= 2) {
-//            throw new TooManyOrdersException();
-//        }
+
+        ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
+        Date startOfTheDay = Date.from(startOfDay.toInstant());
+        Date endOfTheDay = Date.from(endOfDay.toInstant());
+
+        System.out.println("TIME IS OK");
+
+        List<Order> userTodayOrders = orderService.getUserOrdersInTimeInterval(startOfTheDay, endOfTheDay, userId);
+        System.out.println("USER ORDERS HERE");
+        if (userTodayOrders.size() >= 2) {
+            throw new TooManyOrdersException();
+        }
 
         List<String> ordersList = bookingOrderRequest.getOrders();
         List<OrdersPolishing> ordersPolishings = new ArrayList<>();
+
+        System.out.println("LESS THAN 2 ORDERS");
 
         for (var order : ordersList) {
             var currentOrder = ordersPolishingRepository.findByName(order.replace(" ", "_"))
@@ -233,6 +239,8 @@ public class OrderCreatingController {
         String currentStatus = bookingOrderRequest.getCurrentStatus();
         String userPhone = lastUserVersion.getPhone();
 
+        System.out.println("WE AARE SAVING");
+
         Pair<Order, OrderVersions> result = orderService.savePolishingOrder(ordersPolishings, startTime,
                 endTime, administrator, specialist, boxNumber, bonuses, comments,
                 autoNumber, autoType, userPhone, user, price,
@@ -240,6 +248,8 @@ public class OrderCreatingController {
 
         Order newOrder = result.getFirst();
         OrderVersions orderCurrentVersions = result.getSecond();
+
+        System.out.println("ORDER SAVED, NOW SOCKETS");
 
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 
