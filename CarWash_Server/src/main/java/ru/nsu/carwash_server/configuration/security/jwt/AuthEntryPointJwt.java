@@ -1,4 +1,4 @@
-package ru.nsu.carwash_server.security.jwt;
+package ru.nsu.carwash_server.configuration.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

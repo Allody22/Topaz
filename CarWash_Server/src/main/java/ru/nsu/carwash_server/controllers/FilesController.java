@@ -82,8 +82,8 @@ public class FilesController {
     @GetMapping("/get_all")
     @Transactional
     public ResponseEntity<Set<FileEntity>> getListFiles() {
-
         Set<FileEntity> fileEntityInfos = new HashSet<>();
+
         fileService.loadAll().forEach(path -> {
             String url = MvcUriComponentsBuilder
                     .fromMethodName(FilesController.class, "getFile", path.getFileName().toString()).build().toString();
@@ -117,7 +117,6 @@ public class FilesController {
     @GetMapping("/get/{filename:.+}")
     @Transactional
     public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-
         Resource file = fileService.load(filename);
 
         return ResponseEntity.ok()
@@ -137,7 +136,6 @@ public class FilesController {
     @Transactional
     public ResponseEntity<MessageResponse> deleteFile(@Valid @PathVariable String filename) {
         String message;
-
         try {
             boolean existed = fileService.delete(filename);
 

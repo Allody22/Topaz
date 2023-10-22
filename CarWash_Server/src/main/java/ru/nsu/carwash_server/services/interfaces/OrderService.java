@@ -10,6 +10,9 @@ import ru.nsu.carwash_server.models.secondary.helpers.AllOrderTypes;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.payload.request.NewServiceRequest;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
+import ru.nsu.carwash_server.payload.request.UpdatePolishingServiceRequest;
+import ru.nsu.carwash_server.payload.request.UpdateTireServiceRequest;
+import ru.nsu.carwash_server.payload.request.UpdateWashingServiceRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 
 import javax.validation.constraints.NotNull;
@@ -17,6 +20,32 @@ import java.util.Date;
 import java.util.List;
 
 public interface OrderService {
+
+    /**
+     * Обновление информации об услуге мойки
+     *
+     * @param updateWashingServiceRequest - класс с информацией об обновлении
+     * @return описание обновления
+     */
+    String updateWashingService(UpdateWashingServiceRequest updateWashingServiceRequest);
+
+    /**
+     * Обновление информации об услуге шиномонтажа
+     *
+     * @param updateTireServiceRequest - запрос на обновление с информацией
+     * @return описание обновлений
+     */
+    String updateTireService(UpdateTireServiceRequest updateTireServiceRequest);
+
+
+    /**
+     * Обновление информации об услуге полировки
+     *
+     * @param updatePolishingServiceRequest - класс с информацией для обновления
+     * @return описание обновления
+     */
+    String updatePolishingService(UpdatePolishingServiceRequest updatePolishingServiceRequest);
+
 
     /**
      * Получение всех услуг мойки

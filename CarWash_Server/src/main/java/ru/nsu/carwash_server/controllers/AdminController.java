@@ -169,7 +169,7 @@ public class AdminController {
 
     private static String getString(UpdateUserInfoRequestByAdmin updateUserInfoRequest, UserVersions newVersion) {
         String newPhone = (updateUserInfoRequest.getPhone() != null) ?
-                "новый username: '" + updateUserInfoRequest.getPhone() + "'," : null;
+                "новый телефон: '" + updateUserInfoRequest.getPhone() + "'," : null;
 
         String newFullName = (updateUserInfoRequest.getFullName() != null) ?
                 "новое ФИО: '" + updateUserInfoRequest.getFullName() + "'," : null;

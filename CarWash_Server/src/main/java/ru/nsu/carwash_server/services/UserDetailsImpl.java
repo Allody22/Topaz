@@ -12,7 +12,6 @@ import ru.nsu.carwash_server.models.users.UserVersions;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class UserDetailsImpl implements UserDetails {
@@ -92,6 +91,5 @@ public class UserDetailsImpl implements UserDetails {
             return false;
         UserDetailsImpl user = (UserDetailsImpl) o;
         return id != null && id.equals(user.id);
-//        return Objects.equals(id, user.id);
     }
 }

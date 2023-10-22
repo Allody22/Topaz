@@ -30,6 +30,7 @@ public class FieldValidationAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex, Locale locale) {
+        log.error("FIELD VALIDATION ADVICE: " + ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -43,6 +44,7 @@ public class FieldValidationAdvice {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleTypeMismatch(MethodArgumentTypeMismatchException ex, Locale locale) {
+        log.error("METHOD ARGUMENT TYPE ADVICE: " + ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         String errorKey = "Invalid." + ex.getName();  // Например: Invalid.startTime
         String defaultMessage = "Неверное значение параметра: " + ex.getName(); // или вы можете определить более специфическое сообщение

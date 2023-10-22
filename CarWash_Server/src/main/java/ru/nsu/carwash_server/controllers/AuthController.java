@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import ru.nsu.carwash_server.configuration.security.jwt.JwtUtils;
 import ru.nsu.carwash_server.exceptions.ConfirmationCodeMismatchException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.exceptions.TokenRefreshException;
@@ -39,7 +41,6 @@ import ru.nsu.carwash_server.payload.response.JwtResponse;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.TokenRefreshResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
-import ru.nsu.carwash_server.security.jwt.JwtUtils;
 import ru.nsu.carwash_server.services.RefreshTokenService;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
@@ -139,33 +140,39 @@ public class AuthController {
         if (!userService.existByPhone(userPhone)) {
             throw new UserNotFoundException(userPhone);
         }
+        try {
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(userPhone, loginRequest.getPassword()));
 
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(userPhone, loginRequest.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            User user = userService.getFullUserById(userDetails.getId());
 
-        User user = userService.getFullUserById(userDetails.getId());
+            String jwt = jwtUtils.generateJwtToken(userDetails);
+            List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
 
-        String jwt = jwtUtils.generateJwtToken(userDetails);
-        List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-
-        JwtResponse jwtResponse = JwtResponse
-                .builder()
-                .token(jwt)
-                .type("Bearer")
-                .refreshToken(refreshToken.getToken())
-                .id(userDetails.getId())
-                .phone(userDetails.getUsername())
-                .fullName(userService.getActualUserVersionById(user.getId()).getFullName())
-                .roles(roles)
-                .build();
-        return ResponseEntity.ok(jwtResponse);
+            JwtResponse jwtResponse = JwtResponse
+                    .builder()
+                    .token(jwt)
+                    .type("Bearer")
+                    .refreshToken(refreshToken.getToken())
+                    .id(userDetails.getId())
+                    .phone(userDetails.getUsername())
+                    .fullName(userService.getActualUserVersionById(user.getId()).getFullName())
+                    .roles(roles)
+                    .build();
+            return ResponseEntity.ok(jwtResponse);
+        } catch (AuthenticationException e) {
+            log.error("WRONG AUTH, BAD PASSWORD");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Ошибка! Пожалуйста, проверьте введённые данные и попробуйте снова.");
+        }
     }
+
 
     @PostMapping("/signup_v1")
     @Transactional

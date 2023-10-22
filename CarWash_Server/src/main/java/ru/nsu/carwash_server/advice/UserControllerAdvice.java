@@ -24,7 +24,7 @@ public class UserControllerAdvice {
     @ExceptionHandler(value = NotInDataBaseException.class)
     @ResponseStatus(HttpStatus.GONE)
     public Map<String, String> handleNotInDataBaseException(NotInDataBaseException ex) {
-        log.error("NotInDataBaseException encountered: {}", ex.getMessage());
+        log.error("NOT IN DATA BASE ADVICE");
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
         return errorResponse;
@@ -33,7 +33,7 @@ public class UserControllerAdvice {
     @ExceptionHandler(value = UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleUserNotFoundException(UserNotFoundException ex) {
-        log.error("UserNotFoundException encountered: {}", ex.getMessage());
+        log.error("USER NOT FOUND ADVICE");
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
         return errorResponse;
@@ -42,7 +42,7 @@ public class UserControllerAdvice {
     @ExceptionHandler(value = UserAlreadyExistException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleUserAlreadyExistException(UserAlreadyExistException ex) {
-        log.error("UserAlreadyExist encountered: {}", ex.getMessage());
+        log.error("USER ALREADY EXIST ADVICE");
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
 
@@ -52,6 +52,7 @@ public class UserControllerAdvice {
     @ExceptionHandler(value = ConfirmationCodeMismatchException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public Map<String, String> handleConfirmationCodeMismatchException(ConfirmationCodeMismatchException ex) {
+        log.error("CONFIRMATION CODE MISMATCH ADVICE");
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
 

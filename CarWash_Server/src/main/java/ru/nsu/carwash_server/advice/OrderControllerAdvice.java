@@ -24,6 +24,7 @@ public class OrderControllerAdvice {
     @ExceptionHandler(value = TimeSlotUnavailableException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleTimeSlotUnavailableException(TimeSlotUnavailableException ex) {
+        log.error("TIME SLOT UNAVAILABLE ADVICE");
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
         return errorResponse;
@@ -32,6 +33,7 @@ public class OrderControllerAdvice {
     @ExceptionHandler(value = TooManyOrdersException.class)
     @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
     public Map<String, String> handleTimeSlotUnavailableException(TooManyOrdersException ex) {
+        log.error("TOO MANY ORDERS ADVICE");
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
         return errorResponse;
@@ -40,6 +42,7 @@ public class OrderControllerAdvice {
     @ExceptionHandler(InvalidOrderTypeException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleInvalidOrderTypeException(InvalidOrderTypeException ex) {
+        log.error("INVALID ORDER TYPE ADVICE");
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
         return errorResponse;
@@ -48,6 +51,7 @@ public class OrderControllerAdvice {
     @ExceptionHandler(value = BadBoxException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleBadBoxException(BadBoxException ex) {
+        log.error("BAD BOX ADVICE");
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
         return errorResponse;
@@ -56,6 +60,8 @@ public class OrderControllerAdvice {
     @ExceptionHandler(value = EmptyOrdersArrayException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleEmptyOrdersArrayException(EmptyOrdersArrayException ex) {
+        log.error("EMPTY ORDERS ARRAY ADVICE");
+
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", ex.getMessage());
         return errorResponse;

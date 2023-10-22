@@ -1,4 +1,4 @@
-package ru.nsu.carwash_server.security;
+package ru.nsu.carwash_server.configuration.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

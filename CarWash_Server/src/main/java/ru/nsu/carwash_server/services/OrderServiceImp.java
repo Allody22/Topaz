@@ -1,6 +1,8 @@
 package ru.nsu.carwash_server.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import ru.nsu.carwash_server.exceptions.InvalidOrderTypeException;
@@ -15,6 +17,9 @@ import ru.nsu.carwash_server.models.secondary.helpers.AllOrderTypes;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.payload.request.NewServiceRequest;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
+import ru.nsu.carwash_server.payload.request.UpdatePolishingServiceRequest;
+import ru.nsu.carwash_server.payload.request.UpdateTireServiceRequest;
+import ru.nsu.carwash_server.payload.request.UpdateWashingServiceRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 import ru.nsu.carwash_server.repository.orders.OrderVersionsRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
@@ -56,6 +61,91 @@ public class OrderServiceImp implements OrderService {
     public List<String> getAllWashingOrdersByRole(String role) {
         return ordersWashingRepository.findAllByRole(role)
                 .orElse(null);
+    }
+
+    @Transactional
+    @CacheEvict(value = "washingOrders", allEntries = true)
+    public String updateWashingService(UpdateWashingServiceRequest updateWashingServiceRequest) {
+        String serviceName = updateWashingServiceRequest.getName();
+        ordersWashingRepository.findByName(updateWashingServiceRequest.getName())
+                .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга ", serviceName.replace("_", " ")));
+        int priceFirstType = updateWashingServiceRequest.getPriceFirstType();
+        int priceSecondType = updateWashingServiceRequest.getPriceSecondType();
+        int priceThirdType = updateWashingServiceRequest.getPriceThirdType();
+        int timeFirstType = updateWashingServiceRequest.getTimeFirstType();
+        int timeSecondType = updateWashingServiceRequest.getTimeSecondType();
+        int timeThirdType = updateWashingServiceRequest.getTimeThirdType();
+        String serviceRole = updateWashingServiceRequest.getRole();
+
+        ordersWashingRepository.updateWashingServiceInfo(serviceName, priceFirstType, priceSecondType, priceThirdType,
+                timeFirstType, timeSecondType, timeThirdType, serviceRole);
+
+        String descriptionMessage = getPolishingWashingOrderChangingInfo(priceFirstType,
+                priceSecondType, priceThirdType, timeFirstType, timeSecondType, timeThirdType, "Обновлена услуга", serviceName);
+
+        return descriptionMessage;
+    }
+
+    @Transactional
+    @CacheEvict(value = "polishingOrders", allEntries = true)
+    public String updatePolishingService(UpdatePolishingServiceRequest updatePolishingServiceRequest) {
+        String serviceName = updatePolishingServiceRequest.getName();
+        ordersPolishingRepository.findByName(serviceName)
+                .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга ", serviceName.replace("_", " ")));
+
+        int priceFirstType = updatePolishingServiceRequest.getPriceFirstType();
+        int priceSecondType = updatePolishingServiceRequest.getPriceSecondType();
+        int priceThirdType = updatePolishingServiceRequest.getPriceThirdType();
+        int timeFirstType = updatePolishingServiceRequest.getTimeFirstType();
+        int timeSecondType = updatePolishingServiceRequest.getTimeSecondType();
+        int timeThirdType = updatePolishingServiceRequest.getTimeThirdType();
+
+        ordersPolishingRepository.updatePolishingOrder(serviceName, priceFirstType, priceSecondType, priceThirdType,
+                timeFirstType, timeSecondType, timeThirdType);
+
+
+        return getPolishingWashingOrderChangingInfo(timeFirstType,
+                priceSecondType, priceThirdType, timeFirstType, timeSecondType, timeThirdType, "Обновлена услуга", serviceName);
+    }
+
+
+    @Transactional
+    @CacheEvict(value = "tireOrders", allEntries = true)
+    public String updateTireService(UpdateTireServiceRequest updateTireServiceRequest) {
+        String serviceName = updateTireServiceRequest.getName();
+
+        ordersTireRepository.findByName(serviceName)
+                .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга ", serviceName.replace("_", " ")));
+
+        ordersTireRepository.updateTireOrderInfo(updateTireServiceRequest.getName(), updateTireServiceRequest.getPrice_r_13(),
+                updateTireServiceRequest.getPrice_r_14(), updateTireServiceRequest.getPrice_r_15(),
+                updateTireServiceRequest.getPrice_r_16(), updateTireServiceRequest.getPrice_r_17(),
+                updateTireServiceRequest.getPrice_r_18(), updateTireServiceRequest.getPrice_r_19(), updateTireServiceRequest.getPrice_r_20(),
+                updateTireServiceRequest.getPrice_r_21(), updateTireServiceRequest.getPrice_r_22(),
+                updateTireServiceRequest.getTime_r_13(), updateTireServiceRequest.getTime_r_14(),
+                updateTireServiceRequest.getTime_r_15(), updateTireServiceRequest.getTime_r_16(),
+                updateTireServiceRequest.getTime_r_17(), updateTireServiceRequest.getTime_r_18(),
+                updateTireServiceRequest.getTime_r_19(), updateTireServiceRequest.getTime_r_20(),
+                updateTireServiceRequest.getTime_r_21(), updateTireServiceRequest.getTime_r_22(),
+                updateTireServiceRequest.getRole());
+
+        return "Услуга '" + updateTireServiceRequest.getName().replace("_", " ")
+                + "' изменена";
+    }
+
+    @Cacheable(value = "washingOrders")
+    public List<OrdersWashing> findAllWashingService() {
+        return ordersWashingRepository.findAll();
+    }
+
+    @Cacheable(value = "polishingOrders")
+    public List<OrdersPolishing> findAllPolishingService() {
+        return ordersPolishingRepository.findAll();
+    }
+
+    @Cacheable(value = "tireOrders")
+    public List<OrdersTire> findAllTireService() {
+        return ordersTireRepository.findAll();
     }
 
     public Pair<Integer, Integer> getTireOrderTimePrice(List<String> orderArray, String wheelR) {
@@ -201,18 +291,6 @@ public class OrderServiceImp implements OrderService {
             }
         }
         return Pair.of(time, price);
-    }
-
-    public List<OrdersWashing> findAllWashingService() {
-        return ordersWashingRepository.findAll();
-    }
-
-    public List<OrdersPolishing> findAllPolishingService() {
-        return ordersPolishingRepository.findAll();
-    }
-
-    public List<OrdersTire> findAllTireService() {
-        return ordersTireRepository.findAll();
     }
 
     public ConnectedOrdersResponse actualWashingOrders(String orderName) {

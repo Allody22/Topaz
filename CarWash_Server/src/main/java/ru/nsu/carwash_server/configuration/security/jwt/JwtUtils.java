@@ -1,4 +1,4 @@
-package ru.nsu.carwash_server.security.jwt;
+package ru.nsu.carwash_server.configuration.security.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

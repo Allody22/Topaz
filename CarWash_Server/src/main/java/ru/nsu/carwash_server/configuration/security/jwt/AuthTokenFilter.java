@@ -1,4 +1,4 @@
-package ru.nsu.carwash_server.security.jwt;
+package ru.nsu.carwash_server.configuration.security.jwt;
 
 
 import org.slf4j.Logger;

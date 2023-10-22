@@ -1,4 +1,4 @@
-package ru.nsu.carwash_server.security;
+package ru.nsu.carwash_server.configuration.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +11,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import ru.nsu.carwash_server.security.jwt.AuthEntryPointJwt;
-import ru.nsu.carwash_server.security.jwt.AuthTokenFilter;
+import ru.nsu.carwash_server.configuration.security.jwt.AuthEntryPointJwt;
+import ru.nsu.carwash_server.configuration.security.jwt.AuthTokenFilter;
 import ru.nsu.carwash_server.services.UserDetailsServiceImpl;
 
 @Configuration
@@ -41,14 +41,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/notifications/**").permitAll()
                 .antMatchers("/api/test/**").permitAll()
                 .antMatchers("/api/orders/**").permitAll()
-                .antMatchers("/notifications/**").permitAll()
-                .antMatchers("/websockets/**").permitAll()
                 .antMatchers("/api/user/**").authenticated()
                 .antMatchers("/api/admin/**").authenticated()
-                .antMatchers("/api/images/**").permitAll()
                 .antMatchers("/api/files/**").permitAll()
                 .anyRequest().permitAll();
 
