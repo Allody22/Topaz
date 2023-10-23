@@ -301,6 +301,7 @@ public class OrderServiceImp implements OrderService {
         return new ConnectedOrdersResponse(mainOrders, connectedOrders);
     }
 
+    @CacheEvict(value = "tireOrders", allEntries = true)
     public Pair<String, OrdersTire> createTireService(NewServiceRequest newServiceRequest) {
         OrdersTire ordersTire = OrdersTire.builder()
                 .name(newServiceRequest.getName())
@@ -333,6 +334,7 @@ public class OrderServiceImp implements OrderService {
         return Pair.of(descriptionMessage, savedService);
     }
 
+    @CacheEvict(value = "polishingOrders", allEntries = true)
     public Pair<String, OrdersPolishing> createPolishingService(NewServiceRequest newServiceRequest) {
         OrdersPolishing ordersPolishing = OrdersPolishing.builder().
                 name(newServiceRequest.getName())
@@ -352,6 +354,7 @@ public class OrderServiceImp implements OrderService {
         return Pair.of(descriptionMessage, savedService);
     }
 
+    @CacheEvict(value = "washingOrders", allEntries = true)
     public Pair<String, OrdersWashing> createWashingService(NewServiceRequest newServiceRequest) {
         StringJoiner joiner = new StringJoiner(";");
         for (String element : newServiceRequest.getIncludedIn()) {

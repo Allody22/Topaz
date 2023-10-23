@@ -12,6 +12,6 @@ public class TimeSlotUnavailableException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public TimeSlotUnavailableException(int box) {
-        super(String.format("Ошибка: выбранное время в боксе '%d' уже занято!", box));
+        super(String.format("Ошибка! Выбранное время в боксе '%d' уже занято!", box));
     }
 }

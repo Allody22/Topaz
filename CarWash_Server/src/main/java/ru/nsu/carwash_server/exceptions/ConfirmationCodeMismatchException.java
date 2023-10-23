@@ -11,7 +11,7 @@ public class ConfirmationCodeMismatchException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public ConfirmationCodeMismatchException(String userPhone) {
-        super(String.format("Ошибка: код подтверждения для телефона '%s' не совпадает!", userPhone));
+    public ConfirmationCodeMismatchException() {
+        super("Ошибка! Код подтверждения не совпадает!");
     }
 }

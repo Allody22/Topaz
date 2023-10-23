@@ -13,6 +13,6 @@ public class SMSException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public SMSException() {
-        super("Превышено количество запросов за час.");
+        super("Превышено количество смс в час.");
     }
 }

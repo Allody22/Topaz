@@ -64,7 +64,7 @@ public class UserController {
     public ResponseEntity<MessageResponse> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
         String userPhone = updateUserPasswordRequest.getPhone();
         if (!updateUserPasswordRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(userPhone) + "")) {
-            throw new ConfirmationCodeMismatchException(userPhone);
+            throw new ConfirmationCodeMismatchException();
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

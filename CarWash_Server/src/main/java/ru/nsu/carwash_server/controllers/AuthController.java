@@ -183,7 +183,7 @@ public class AuthController {
         }
 
         if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(userPhone) + "")) {
-            throw new ConfirmationCodeMismatchException(userPhone);
+            throw new ConfirmationCodeMismatchException();
         }
 
         Set<Role> roles = new HashSet<>();
