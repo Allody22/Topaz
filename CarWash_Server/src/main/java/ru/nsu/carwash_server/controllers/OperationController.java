@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.carwash_server.models.operations.OperationsUserLink;
-import ru.nsu.carwash_server.models.operations.OperationsVersions;
 import ru.nsu.carwash_server.payload.response.OperationsResponse;
-import ru.nsu.carwash_server.payload.response.UserOperationsResponse;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.UserService;
 

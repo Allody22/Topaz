@@ -139,7 +139,7 @@ public class OrderManagementController {
     @PostMapping("/updateOrderInfo_v1")
     @Transactional
     public ResponseEntity<MessageResponse> updateOrderInfo(@Valid @RequestBody UpdateOrderInfoRequest updateOrderInfoRequest) {
-        orderService.updateOrderInfo(updateOrderInfoRequest);
+        String descriptionMessage = orderService.updateOrderInfo(updateOrderInfoRequest);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserVersions userLatestVersion = userService.getActualUserVersionById(userDetails.getId());
@@ -147,54 +147,6 @@ public class OrderManagementController {
         User user = userLatestVersion.getUser();
 
         String operationName = "Update_order_info";
-
-        String newWheelR = (updateOrderInfoRequest.getWheelR() != null) ?
-                "новый размер шин: '" + updateOrderInfoRequest.getWheelR() + "', " : null;
-
-        String newUserPhone = (updateOrderInfoRequest.getUserPhone() != null) ?
-                "новый контакт клиента: '" + updateOrderInfoRequest.getUserPhone() + "', " : null;
-
-        String newOrderType = (updateOrderInfoRequest.getOrderType() != null) ?
-                "новый тип заказа: " + updateOrderInfoRequest.getOrderType() + "', " : null;
-
-        String newPrice = (updateOrderInfoRequest.getPrice() != null) ?
-                "новую цену: '" + updateOrderInfoRequest.getPrice() + "', " : null;
-
-        String newStartTime = (updateOrderInfoRequest.getStartTime() != null) ?
-                "новое время начала: '" + updateOrderInfoRequest.getStartTime() + "', " : null;
-
-        String newEndTime = (updateOrderInfoRequest.getEndTime() != null) ?
-                "новое время конца: '" + updateOrderInfoRequest.getEndTime() + "', " : null;
-
-        String newAdministrator = (updateOrderInfoRequest.getAdministrator() != null) ?
-                "нового администратора: '" + updateOrderInfoRequest.getAdministrator() + "', " : null;
-
-        String newAutoNumber = (updateOrderInfoRequest.getAutoNumber() != null) ?
-                "новый номер авто: '" + updateOrderInfoRequest.getAutoNumber() + "', " : null;
-
-        String newAutoType = (updateOrderInfoRequest.getAutoType() != null) ?
-                "новый тип авто: '" + updateOrderInfoRequest.getAutoType() + "', " : null;
-
-        String newSpecialist = (updateOrderInfoRequest.getSpecialist() != null) ?
-                "нового специалиста: '" + updateOrderInfoRequest.getSpecialist() + "', " : null;
-
-        String newBoxNumber = (updateOrderInfoRequest.getBoxNumber() != null) ?
-                "новый бокс: '" + updateOrderInfoRequest.getBoxNumber() + "', " : null;
-
-        String newComments = (updateOrderInfoRequest.getComments() != null) ?
-                "новые комментарии: '" + updateOrderInfoRequest.getComments() + "', " : null;
-
-        String newOrders = (updateOrderInfoRequest.getOrders() != null) ?
-                "новые услуги: '" + updateOrderInfoRequest.getOrders() + "', " : null;
-
-        String newCurrentStatus = (updateOrderInfoRequest.getCurrentStatus() != null) ?
-                "новое состояние: '" + updateOrderInfoRequest.getCurrentStatus() + "', " : null;
-
-
-        String descriptionMessage = "Заказ с айди'" + updateOrderInfoRequest.getOrderId() + "' получил" +
-                newWheelR + newUserPhone + newOrderType + newPrice + newStartTime + newEndTime +
-                newAdministrator + newAutoType + newAutoNumber + newSpecialist + newBoxNumber +
-                newBoxNumber + newComments + newOrders + newCurrentStatus;
 
         log.info("updateOrderInfo_v1. User with phone '{}' updated order with id '{}'.", userLatestVersion.getPhone(), updateOrderInfoRequest.getOrderId());
 
@@ -426,49 +378,13 @@ public class OrderManagementController {
         }
         Date startTimeFromRequest = ordersArrayPriceTimeRequest.getStartTime();
 
-        if (orderTime < 60) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 1, 22, 8, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (orderTime <= 120) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 2, 20, 8, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 2, 19, 9, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (orderTime <= 180) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 20, 8, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 19, 9, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 18, 10, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (orderTime <= 240) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 8, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 9, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 10, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 11, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (orderTime <= 300) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 8, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 9, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 10, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 11, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 12, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (orderTime <= 361) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 16, 8, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 15, 9, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 14, 10, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 13, 11, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 13, 12, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 14, 13, ordersArrayPriceTimeRequest.getOrderType()));
-        } else if (orderTime <= 421) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 8, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 9, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 10, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 11, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 12, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 13, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 14, ordersArrayPriceTimeRequest.getOrderType()));
-        } else {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 8, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 9, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 10, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 11, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 12, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 13, ordersArrayPriceTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 14, ordersArrayPriceTimeRequest.getOrderType()));
+        int intervalsNeeded = (int) Math.ceil(orderTime / 30.0); // определяем необходимое количество интервалов в зависимости от времени
+
+        for (int i = 0; i < intervalsNeeded; i++) {
+            int startHour = 8 + i;
+            int endHour = 22 - (intervalsNeeded - i) + 1;
+
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, intervalsNeeded, endHour, startHour, ordersArrayPriceTimeRequest.getOrderType()));
         }
         List<OrderVersions> orders = orderService.getOrdersInTimeInterval(ordersArrayPriceTimeRequest.getStartTime(),
                 ordersArrayPriceTimeRequest.getEndTime(), null, true);
@@ -492,49 +408,13 @@ public class OrderManagementController {
         time += 15;
 
         Date startTimeFromRequest = freeTimeRequest.getStartTime();
-        if (time < 60) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 1, 22, 8, freeTimeRequest.getOrderType()));
-        } else if (time <= 120) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 2, 20, 8, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 2, 19, 9, freeTimeRequest.getOrderType()));
-        } else if (time <= 180) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 20, 8, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 19, 9, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 3, 18, 10, freeTimeRequest.getOrderType()));
-        } else if (time <= 240) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 8, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 9, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 10, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 4, 19, 11, freeTimeRequest.getOrderType()));
-        } else if (time <= 300) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 8, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 9, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 10, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 11, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 5, 17, 12, freeTimeRequest.getOrderType()));
-        } else if (time <= 361) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 16, 8, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 15, 9, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 14, 10, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 13, 11, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 13, 12, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 6, 14, 13, freeTimeRequest.getOrderType()));
-        } else if (time <= 421) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 8, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 9, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 10, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 11, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 12, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 13, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 7, 17, 14, freeTimeRequest.getOrderType()));
-        } else {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 8, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 9, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 10, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 11, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 12, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 13, freeTimeRequest.getOrderType()));
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 8, 16, 14, freeTimeRequest.getOrderType()));
+        int intervalsNeeded = (int) Math.ceil(time / 30.0); // определяем необходимое количество интервалов в зависимости от времени
+
+        for (int i = 0; i < intervalsNeeded; i++) {
+            int startHour = 8 + i;
+            int endHour = 22 - (intervalsNeeded - i) + 1;
+
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, intervalsNeeded, endHour, startHour, freeTimeRequest.getOrderType()));
         }
 
         List<OrderVersions> orders = orderService.getOrdersInTimeInterval(freeTimeRequest.getStartTime(),
@@ -568,21 +448,60 @@ public class OrderManagementController {
     }
 
 
+//    public List<TimeIntervals> fillTimeIntervals(Date startTimeFromRequest, int timeSkip, int endOfFor, int startOfFor, String orderType) {
+//        List<TimeIntervals> timeIntervals = new ArrayList<>();
+//        for (int i = startOfFor; i < endOfFor; i += timeSkip) {
+//            LocalDateTime localDateStartTime = LocalDateTime.ofInstant(startTimeFromRequest.toInstant(),
+//                            ZoneId.systemDefault())
+//                    .withHour(i)
+//                    .withMinute(0)
+//                    .withSecond(0);
+//            Date startTime = Date.from(localDateStartTime.atZone(ZoneId.systemDefault()).toInstant());
+//
+//            LocalDateTime localDateEndTime = LocalDateTime.ofInstant(startTimeFromRequest.toInstant(),
+//                            ZoneId.systemDefault())
+//                    .withHour(i + timeSkip)
+//                    .withMinute(0)
+//                    .withSecond(0);
+//            Date endTime = Date.from(localDateEndTime.atZone(ZoneId.systemDefault()).toInstant());
+//
+//            switch (orderType) {
+//                case "wash" -> {
+//                    TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 1);
+//                    timeIntervals.add(singleTimeIntervalFirstBox);
+//                    TimeIntervals singleTimeIntervalSecondBox = new TimeIntervals(startTime, endTime, 2);
+//                    timeIntervals.add(singleTimeIntervalSecondBox);
+//                    TimeIntervals singleTimeIntervalThirdBox = new TimeIntervals(startTime, endTime, 3);
+//                    timeIntervals.add(singleTimeIntervalThirdBox);
+//                }
+//                case "tire" -> {
+//                    TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 0);
+//                    timeIntervals.add(singleTimeIntervalFirstBox);
+//                }
+//                case "polishing" -> {
+//                    TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 5);
+//                    timeIntervals.add(singleTimeIntervalFirstBox);
+//                }
+//                default -> throw new InvalidOrderTypeException(orderType);
+//            }
+//        }
+//        return timeIntervals;
+//    }
+
     public List<TimeIntervals> fillTimeIntervals(Date startTimeFromRequest, int timeSkip, int endOfFor, int startOfFor, String orderType) {
         List<TimeIntervals> timeIntervals = new ArrayList<>();
-        for (int i = startOfFor; i < endOfFor; i += timeSkip) {
+        for (int i = startOfFor * 2; i < endOfFor * 2; i += timeSkip) { // Умножаем на 2, потому что рассматриваем полчасовые интервалы
+            int hour = i / 2;
+            int minute = (i % 2) * 30;
+
             LocalDateTime localDateStartTime = LocalDateTime.ofInstant(startTimeFromRequest.toInstant(),
                             ZoneId.systemDefault())
-                    .withHour(i)
-                    .withMinute(0)
+                    .withHour(hour)
+                    .withMinute(minute)
                     .withSecond(0);
             Date startTime = Date.from(localDateStartTime.atZone(ZoneId.systemDefault()).toInstant());
 
-            LocalDateTime localDateEndTime = LocalDateTime.ofInstant(startTimeFromRequest.toInstant(),
-                            ZoneId.systemDefault())
-                    .withHour(i + timeSkip)
-                    .withMinute(0)
-                    .withSecond(0);
+            LocalDateTime localDateEndTime = localDateStartTime.plusMinutes(30L * timeSkip); // Добавляем 30 минут для каждого "timeSkip"
             Date endTime = Date.from(localDateEndTime.atZone(ZoneId.systemDefault()).toInstant());
 
             switch (orderType) {

@@ -1,5 +1,6 @@
 const currentOrderStatusMapFromEng = {
     "cancelled": "Отменён",
+    "technicalBoxCheck": "Техническая проверка бокса",
     "createdPaid0PercentNotDone": "Не оплачен и не сделан",
     "createdPaid5PercentNotDone": "Оплачен на 5 процентов и не сделан",
     "createdPaid10PercentNotDone": "Оплачен на 10 процентов и не сделан",

@@ -45,13 +45,17 @@ public class OrderServiceImp implements OrderService {
 
     private final OrderVersionsRepository orderVersionsRepository;
 
+    private final OperationsDescriptionService operationsDescriptionService;
+
     @Autowired
     public OrderServiceImp(OrdersRepository ordersRepository,
+                           OperationsDescriptionService operationsDescriptionService,
                            OrdersWashingRepository ordersWashingRepository,
                            OrdersTireRepository ordersTireRepository,
                            OrdersPolishingRepository ordersPolishingRepository,
                            OrderVersionsRepository orderVersionsRepository) {
         this.ordersRepository = ordersRepository;
+        this.operationsDescriptionService = operationsDescriptionService;
         this.ordersWashingRepository = ordersWashingRepository;
         this.orderVersionsRepository = orderVersionsRepository;
         this.ordersPolishingRepository = ordersPolishingRepository;
@@ -67,7 +71,7 @@ public class OrderServiceImp implements OrderService {
     @CacheEvict(value = "washingOrders", allEntries = true)
     public String updateWashingService(UpdateWashingServiceRequest updateWashingServiceRequest) {
         String serviceName = updateWashingServiceRequest.getName();
-        ordersWashingRepository.findByName(updateWashingServiceRequest.getName())
+        OrdersWashing ordersWashing = ordersWashingRepository.findByName(updateWashingServiceRequest.getName())
                 .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга ", serviceName.replace("_", " ")));
         int priceFirstType = updateWashingServiceRequest.getPriceFirstType();
         int priceSecondType = updateWashingServiceRequest.getPriceSecondType();
@@ -80,17 +84,15 @@ public class OrderServiceImp implements OrderService {
         ordersWashingRepository.updateWashingServiceInfo(serviceName, priceFirstType, priceSecondType, priceThirdType,
                 timeFirstType, timeSecondType, timeThirdType, serviceRole);
 
-        String descriptionMessage = getPolishingWashingOrderChangingInfo(priceFirstType,
-                priceSecondType, priceThirdType, timeFirstType, timeSecondType, timeThirdType, "Обновлена услуга", serviceName);
-
-        return descriptionMessage;
+        return operationsDescriptionService.getWashingOrderChangingInfo(priceFirstType, priceSecondType, priceThirdType,
+                timeFirstType, timeSecondType, timeThirdType, "Обновлена услуга", serviceName, ordersWashing);
     }
 
     @Transactional
     @CacheEvict(value = "polishingOrders", allEntries = true)
     public String updatePolishingService(UpdatePolishingServiceRequest updatePolishingServiceRequest) {
         String serviceName = updatePolishingServiceRequest.getName();
-        ordersPolishingRepository.findByName(serviceName)
+        OrdersPolishing ordersPolishing = ordersPolishingRepository.findByName(serviceName)
                 .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга ", serviceName.replace("_", " ")));
 
         int priceFirstType = updatePolishingServiceRequest.getPriceFirstType();
@@ -103,9 +105,8 @@ public class OrderServiceImp implements OrderService {
         ordersPolishingRepository.updatePolishingOrder(serviceName, priceFirstType, priceSecondType, priceThirdType,
                 timeFirstType, timeSecondType, timeThirdType);
 
-
-        return getPolishingWashingOrderChangingInfo(timeFirstType,
-                priceSecondType, priceThirdType, timeFirstType, timeSecondType, timeThirdType, "Обновлена услуга", serviceName);
+        return operationsDescriptionService.getPolishingOrderChangingInfo(priceFirstType, priceSecondType, priceThirdType,
+                timeFirstType, timeSecondType, timeThirdType, "Обновлена услуга ", serviceName, ordersPolishing);
     }
 
 
@@ -346,7 +347,7 @@ public class OrderServiceImp implements OrderService {
                 .timeThirdType(newServiceRequest.getTimeThirdType())
                 .build();
 
-        String descriptionMessage = getPolishingWashingOrderChangingInfo(ordersPolishing.getPriceFirstType(), ordersPolishing.getPriceSecondType(),
+        String descriptionMessage = operationsDescriptionService.getPolishingWashingOrderChangingInfo(ordersPolishing.getPriceFirstType(), ordersPolishing.getPriceSecondType(),
                 ordersPolishing.getPriceThirdType(), ordersPolishing.getTimeFirstType(), ordersPolishing.getTimeSecondType(),
                 ordersPolishing.getTimeThirdType(), "Создана услуга полировки '", ordersPolishing.getName().replace("_", " "));
 
@@ -374,7 +375,7 @@ public class OrderServiceImp implements OrderService {
                 .role(newServiceRequest.getRole())
                 .build();
 
-        String descriptionMessage = getPolishingWashingOrderChangingInfo(ordersWashing.getPriceFirstType(), ordersWashing.getPriceSecondType(),
+        String descriptionMessage = operationsDescriptionService.getPolishingWashingOrderChangingInfo(ordersWashing.getPriceFirstType(), ordersWashing.getPriceSecondType(),
                 ordersWashing.getPriceThirdType(), ordersWashing.getTimeFirstType(), ordersWashing.getTimeSecondType(),
                 ordersWashing.getTimeThirdType(), "Создана услуга мойки '", ordersWashing.getName().replace("_", " "));
 
@@ -383,34 +384,8 @@ public class OrderServiceImp implements OrderService {
     }
 
 
-    public String getPolishingWashingOrderChangingInfo(Integer priceFirstType, Integer priceSecondType, Integer priceThirdType,
-                                                       Integer timeFirstType, Integer timeSecondType, Integer tineThirdType,
-                                                       String context, String orderName) {
-        String newPriceFirstType = (priceFirstType != null) ?
-                " цену за 1 тип: '" + priceFirstType + "', " : null;
-
-        String newPriceSecondType = (priceSecondType != null) ?
-                " цену за 2 тип: '" + priceSecondType + "', " : null;
-
-        String newPriceThirdType = (priceThirdType != null) ?
-                " цену за 3 тип: '" + priceThirdType + "', " : null;
-
-        String newTimeFirstType = (timeFirstType != null) ?
-                " время за 1 тип: '" + timeSecondType + "', " : null;
-
-        String newTimeSecondType = (timeSecondType != null) ?
-                " время за 2 тип: '" + timeSecondType + "', " : null;
-
-        String newTimeThirdType = (tineThirdType != null) ?
-                " время за 3 тип: '" + tineThirdType + "', " : null;
-
-        return context + " '" + orderName.replace("_", " ")
-                + "', получившая " + newPriceFirstType + newPriceSecondType + newPriceThirdType +
-                newTimeFirstType + newTimeSecondType + newTimeThirdType;
-    }
-
     @Transactional
-    public void updateOrderInfo(UpdateOrderInfoRequest updateOrderInfoRequest) {
+    public String updateOrderInfo(UpdateOrderInfoRequest updateOrderInfoRequest) {
         Long orderId = updateOrderInfoRequest.getOrderId();
 
         String orderType = updateOrderInfoRequest.getOrderType();
@@ -454,6 +429,9 @@ public class OrderServiceImp implements OrderService {
                 allOrdersByTypes.getOrdersPolishing(), allOrdersByTypes.getOrdersWashing());
 
         order.addOrderVersion(newOrderVersion);
+
+        return operationsDescriptionService.getUpdateOrderDescription(updateOrderInfoRequest, actualOrderVersion);
+
     }
 
     @Transactional
@@ -695,5 +673,4 @@ public class OrderServiceImp implements OrderService {
         }
         return (new AllOrderTypes(ordersPolishing, ordersWashing, ordersTire));
     }
-
 }

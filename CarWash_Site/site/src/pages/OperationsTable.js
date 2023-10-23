@@ -16,12 +16,8 @@ import {
     getAllOperationsByUser,
     getAllOperationsInOneDay
 } from "../http/operations";
-import InputField from "../model/InputField";
-import {getAllPolishingServicesWithPriceAndTime} from "../http/orderAPI";
-import {orderStatusArray} from "../model/Constants";
 import {getAllUsers} from "../http/userAPI";
 import operationsNameMapFromEng from "../model/map/OperationsNameMapFromEng";
-import operationsNameMapFromRus from "../model/map/OperationsNameMapFromRus";
 
 const columns = [
     {
@@ -234,7 +230,7 @@ const OperationsTable = observer(() => {
             try {
                 const response = await getAllUsers();
 
-                const transformedOperations = response.map(name => ({ label: name, value: name }));
+                const transformedOperations = response.map(name => ({label: name, value: name}));
                 setUserPhones(transformedOperations)
             } catch (error) {
                 if (error.response) {
@@ -263,7 +259,7 @@ const OperationsTable = observer(() => {
 
                 const transformedOperations = response.map(name => {
                     const translatedName = operationsNameMapFromEng[name] || name; // используйте имя из словаря или оригинальное имя, если перевода нет
-                    return { label: translatedName, value: name };
+                    return {label: translatedName, value: name};
                 });
 
                 setOperationsName(transformedOperations);
@@ -461,7 +457,7 @@ const OperationsTable = observer(() => {
                 {isSubmitting ? 'Поиск заказов...' : 'Получить все операции по номеру телефона'}
             </Button>
 
-            <p className="input-style-modified">Все операции в приложении</p>
+            <p className="input-style-modified">Все операции пользователей</p>
 
             <InputPicker
                 data={operationsName}

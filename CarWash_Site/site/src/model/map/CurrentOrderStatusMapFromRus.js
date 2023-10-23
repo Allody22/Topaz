@@ -13,7 +13,7 @@ const currentOrderStatusMapFromRus = {
     "Оплачен на 80 процентов и не сделан": "createdPaid80PercentNotDone",
     "Оплачен на 90 процентов и не сделан": "createdPaid90PercentNotDone",
     "Полностью оплачен и не сделан": "createdPaid100PercentNotDone",
-    "Не оплачен: но сделан": "createdPaid0PercentAndDone",
+    "Не оплачен, но сделан": "createdPaid0PercentAndDone",
     "Оплачен на 5 процентов и сделан": "createdPaid5PercentAndDone",
     "Оплачен на 10 процентов и сделан": "createdPaid10PercentAndDone",
     "Оплачен на 20 процентов и сделан": "createdPaid20PercentAndDone",

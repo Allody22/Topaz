@@ -12,12 +12,12 @@ export const getAllOperations = async () => {
 };
 
 export const getAllOperationsByUser = async (phone) => {
-    const {data} = await $authHost.get('/api/operations/user?phone='+ encodeURIComponent(phone));
+    const {data} = await $authHost.get('/api/operations/user?phone=' + encodeURIComponent(phone));
     return data
 };
 
 export const getAllOperationsByOperationName = async (operation) => {
-    const {data} = await $authHost.get('/api/operations/operation_name?operation='+ encodeURIComponent(operation));
+    const {data} = await $authHost.get('/api/operations/operation_name?operation=' + encodeURIComponent(operation));
     return data
 };
 

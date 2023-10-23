@@ -6,8 +6,7 @@ const statusFileMapFromRus = {
     "Акция на четверг": "saleThursday",
     "Акция на пятницу": "saleFriday",
     "Акция на субботу": "saleSaturday",
-    "Акция на воскресенье": "saleSunday",
-    // ... добавьте другие статусы и их переводы по мере необходимости
+    "Акция на воскресенье": "saleSunday"
 };
 
 export default statusFileMapFromRus;

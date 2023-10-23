@@ -21,6 +21,7 @@ import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequest;
 import ru.nsu.carwash_server.payload.request.UpdateUserPasswordRequest;
 import ru.nsu.carwash_server.payload.response.ConnectedOrdersResponse;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
+import ru.nsu.carwash_server.services.OperationsDescriptionService;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.OrderService;
@@ -46,13 +47,16 @@ public class UserController {
 
     private final PasswordEncoder encoder;
 
+    private final OperationsDescriptionService operationsDescriptionService;
 
     @Autowired
     public UserController(
             OperationService operationsService,
             OrderService orderService,
+            OperationsDescriptionService operationsDescriptionService,
             PasswordEncoder encoder,
             UserService userService) {
+        this.operationsDescriptionService = operationsDescriptionService;
         this.operationsService = operationsService;
         this.encoder = encoder;
         this.userService = userService;
@@ -104,7 +108,7 @@ public class UserController {
 
         String operationName = "Update_user_info_by_user";
 
-        String descriptionMessage = getString(updateUserInfoRequest, newVersion.getPhone());
+        String descriptionMessage = operationsDescriptionService.updateUserDescription(updateUserInfoRequest, newVersion.getPhone());
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
         log.info("updateUserInfo_v1. User with phone '{}' updated his profile.", updateUserInfoRequest.getPhone());
 
@@ -133,25 +137,6 @@ public class UserController {
         return ResponseEntity.ok(userOrders);
     }
 
-    private static String getString(UpdateUserInfoRequest updateUserInfoRequest, String username) {
-        String newUsername = (updateUserInfoRequest.getPhone() != null) ?
-                "новый username: '" + updateUserInfoRequest.getPhone() + "'," : null;
-
-        String newFullName = (updateUserInfoRequest.getFullName() != null) ?
-                "новое ФИО: '" + updateUserInfoRequest.getFullName() + "'," : null;
-
-        String newAdminNote = (updateUserInfoRequest.getAdminNote() != null) ?
-                "новую заметку от администратора: '" + updateUserInfoRequest.getAdminNote() + "'," : null;
-
-        String newEmail = (updateUserInfoRequest.getEmail() != null) ?
-                "новую почту: '" + updateUserInfoRequest.getEmail() + "'," : null;
-
-        String newUserNote = (updateUserInfoRequest.getUserNote() != null) ?
-                "новую заметку от самого пользователя: '" + updateUserInfoRequest.getUserNote() + "'," : null;
-
-        return "Пользователь '" + username + "' получил" + newUsername +
-                newFullName + newAdminNote + newEmail + newUserNote;
-    }
 
     public ConnectedOrdersResponse getDividedOrders(OrderVersions orderVersion) {
         ConnectedOrdersResponse allOrders = new ConnectedOrdersResponse(null, null);

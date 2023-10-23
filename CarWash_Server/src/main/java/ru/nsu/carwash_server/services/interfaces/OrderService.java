@@ -148,8 +148,9 @@ public interface OrderService {
      * @param updateOrderInfoRequest - запрос со всей информацией о заказе,
      *                               а не представленная информация копируется из
      *                               прошлой версии
+     * @return сообщение с описанием обновления
      */
-    void updateOrderInfo(UpdateOrderInfoRequest updateOrderInfoRequest);
+    String updateOrderInfo(UpdateOrderInfoRequest updateOrderInfoRequest);
 
     /**
      * Удаление заказа, но в нашем случае
@@ -327,23 +328,4 @@ public interface OrderService {
      * @return последняя версия нужного заказа
      */
     OrderVersions getActualOrderVersion(@NotNull Long id);
-
-
-    /**
-     * Выдаём описание изменений при создании или редактировании
-     * услуги мойки или полировки
-     *
-     * @param priceFirstType  - цена за первый тип автомобиля
-     * @param priceSecondType - цена за второй тип автомобиля
-     * @param priceThirdType  - цена за третьи тип автомобиля
-     * @param timeFirstType   - время за первый тип автомобиля
-     * @param timeSecondType  - время за второй тип автомобиля
-     * @param tineThirdType   - время за третий тип автомобиля
-     * @param context         - описание действия: создание или изменении услуги
-     * @param orderName       - имя услуги
-     * @return сообщение, объединяющее все изменения
-     */
-    String getPolishingWashingOrderChangingInfo(Integer priceFirstType, Integer priceSecondType, Integer priceThirdType,
-                                                Integer timeFirstType, Integer timeSecondType, Integer tineThirdType,
-                                                String context, String orderName);
 }
