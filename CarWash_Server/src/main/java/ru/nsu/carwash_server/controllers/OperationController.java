@@ -64,7 +64,11 @@ public class OperationController {
             currentOperation.setId(thisOperation.getId());
             currentOperation.setDescription(thisOperation.getDescription());
             currentOperation.setDateOfCreation(thisOperation.getDateOfCreation());
-            currentOperation.setUsername(userService.getActualUserVersionById(thisOperation.getUser().getId()).getPhone());
+            if (thisOperation.getUser() != null) {
+                currentOperation.setUsername(userService.getActualUserVersionById(thisOperation.getUser().getId()).getPhone());
+            } else {
+                currentOperation.setUsername("Не зарегистрирован");
+            }
             allOperationsInThisTime.add(currentOperation);
         }
 

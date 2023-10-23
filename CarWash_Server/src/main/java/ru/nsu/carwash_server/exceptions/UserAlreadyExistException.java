@@ -11,7 +11,7 @@ public class UserAlreadyExistException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public UserAlreadyExistException(String userNumber) {
-        super(String.format("Пользователь '%s' уже существует", userNumber));
+    public UserAlreadyExistException() {
+        super("Пользователь уже существует");
     }
 }

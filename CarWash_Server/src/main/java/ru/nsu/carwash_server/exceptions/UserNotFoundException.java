@@ -11,7 +11,7 @@ public class UserNotFoundException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public UserNotFoundException(String userName) {
-        super(String.format("Пользователь с телефоном '%s' не найден", userName));
+    public UserNotFoundException() {
+        super("Пользователь с таким телефоном не найден");
     }
 }

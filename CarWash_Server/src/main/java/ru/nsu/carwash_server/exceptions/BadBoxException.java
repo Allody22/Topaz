@@ -12,6 +12,6 @@ public class BadBoxException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public BadBoxException(int box, String orderType) {
-        super(String.format("Ошибка! Бокс '%d' нельзя использовать для типа заказа '%s' !", box, orderType));
+        super(String.format("Ошибка! Бокс %d нельзя использовать для типа заказа %s !", box, orderType));
     }
 }

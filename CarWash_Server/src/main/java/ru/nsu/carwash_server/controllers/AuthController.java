@@ -138,7 +138,7 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         String userPhone = loginRequest.getPhone();
         if (!userService.existByPhone(userPhone)) {
-            throw new UserNotFoundException(userPhone);
+            throw new UserNotFoundException();
         }
         try {
             Authentication authentication = authenticationManager
@@ -179,7 +179,7 @@ public class AuthController {
         String userPhone = signUpRequest.getPhone();
         if (userService.existByPhone(userPhone)) {
             log.warn("SignUp_v1.Registration failed: Phone '{}' is already taken", userPhone);
-            throw new UserAlreadyExistException(userPhone);
+            throw new UserAlreadyExistException();
         }
 
         if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(userPhone) + "")) {
@@ -234,13 +234,6 @@ public class AuthController {
         User user = userService.getFullUserById(userDetails.getId());
 
         refreshTokenService.deleteAllByUserId(user.getId());
-
-        Long currentUserId = userDetails.getId();
-        UserVersions userLatestVersion = userService.getActualUserVersionById(currentUserId);
-
-        String operationName = "User_sign_out";
-        String descriptionMessage = "Клиент с логином '" + userLatestVersion.getPhone() + "' вышел из аккаунта";
-        operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         return ResponseEntity.ok(new MessageResponse("Успешный выход из аккаунта!"));
     }

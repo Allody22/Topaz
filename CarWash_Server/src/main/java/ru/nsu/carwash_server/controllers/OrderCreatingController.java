@@ -247,7 +247,6 @@ public class OrderCreatingController {
         String operationName = "Book_polishing_order";
         String descriptionMessage = "Пользователь с логином '" + lastUserVersion.getPhone() + "' забронировал заказ на полировку";
 
-
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         log.info("bookPolishingOrder_v1. User with phone '{}' booked a car wash order.", userPhone);
@@ -326,10 +325,6 @@ public class OrderCreatingController {
 
         Order newOrder = result.getFirst();
         OrderVersions orderCurrentVersions = result.getSecond();
-
-        System.out.println("orderVersion");
-        System.out.println(orderCurrentVersions.getStartTime());
-        System.out.println(orderCurrentVersions.getEndTime());
 
         simpMessagingTemplate.convertAndSend(orderCurrentVersions);
 

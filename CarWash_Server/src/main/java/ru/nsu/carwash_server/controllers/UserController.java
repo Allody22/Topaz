@@ -67,14 +67,11 @@ public class UserController {
             throw new ConfirmationCodeMismatchException();
         }
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = userDetails.getId();
-
-        User user = userService.getFullUserById(userId);
-
         var latestUserVersion = userService.getActualUserVersionByPhone(updateUserPasswordRequest.getPhone());
 
         String password = (encoder.encode(updateUserPasswordRequest.getPassword()));
+
+        User user = latestUserVersion.getUser();
 
         UserVersions newVersion = new UserVersions(latestUserVersion, password, userPhone);
         user.addUserVersion(newVersion);
@@ -85,8 +82,7 @@ public class UserController {
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         log.info("updateUserPassword_v1. User with phone '{}' updated password.", updateUserPasswordRequest.getPhone());
-        return ResponseEntity.ok(new MessageResponse("Пользователь с айди '" + userId
-                + "' с телефоном " + updateUserPasswordRequest.getPhone() + "обновил пароль или телефон"));
+        return ResponseEntity.ok(new MessageResponse("Пароль успешно обновлён!"));
     }
 
     @Transactional
