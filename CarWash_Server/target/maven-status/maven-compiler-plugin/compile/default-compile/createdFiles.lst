@@ -53,6 +53,7 @@ ru\nsu\carwash_server\models\secondary\helpers\TimeIntervals.class
 ru\nsu\carwash_server\payload\response\UpdateOrderInfoResponse$UpdateOrderInfoResponseBuilder.class
 ru\nsu\carwash_server\controllers\UserController.class
 ru\nsu\carwash_server\payload\request\UpdateOrderInfoRequest.class
+ru\nsu\carwash_server\services\OperationsDescriptionService.class
 ru\nsu\carwash_server\services\UserDetailsImpl.class
 ru\nsu\carwash_server\models\orders\OrdersPolishing.class
 ru\nsu\carwash_server\payload\request\TokenRefreshRequest$TokenRefreshRequestBuilder.class
