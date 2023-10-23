@@ -17,6 +17,7 @@ import ru.nsu.carwash_server.payload.request.MessagesSms;
 import ru.nsu.carwash_server.payload.request.Smooth;
 import ru.nsu.carwash_server.payload.request.SmsRequest;
 import ru.nsu.carwash_server.payload.response.UserOperationsResponse;
+import ru.nsu.carwash_server.repository.operations.OperationsRepository;
 import ru.nsu.carwash_server.repository.operations.OperationsUsersLinkRepository;
 import ru.nsu.carwash_server.repository.operations.OperationsVersionsRepository;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
@@ -42,15 +43,27 @@ public class OperationsServiceIml implements OperationService {
 
     private final OperationsUsersLinkRepository operationsUsersLinkRepository;
 
+    private final OperationsRepository operationsRepository;
+
     private final UserService userServiceImp;
 
     @Autowired
-    public OperationsServiceIml(OperationsVersionsRepository operationsVersionsRepository,
+    public OperationsServiceIml(OperationsRepository operationsRepository,
+                                OperationsVersionsRepository operationsVersionsRepository,
                                 UserServiceImp userServiceImp,
                                 OperationsUsersLinkRepository operationsUsersLinkRepository) {
         this.userServiceImp = userServiceImp;
+        this.operationsRepository = operationsRepository;
         this.operationsUsersLinkRepository = operationsUsersLinkRepository;
         this.operationsVersionsRepository = operationsVersionsRepository;
+    }
+
+    public List<String> getAllOperationsNames() {
+        return operationsRepository.findAllOperationNames();
+    }
+
+    public List<OperationsUserLink> getAllOperationsByName(String operationName) {
+        return operationsUsersLinkRepository.getAllByOperationName(operationName);
     }
 
     public List<OperationsUserLink> getAllOperations() {
@@ -178,13 +191,13 @@ public class OperationsServiceIml implements OperationService {
     }
 
 
-    public List<OperationsVersions> getAllUserOperationsByIdOrPhone(Long id, String phone) {
+    public List<OperationsUserLink> getAllUserOperationsByIdOrPhone(Long id, String phone) {
         if (id != null) {
-            return operationsUsersLinkRepository.findAllOperationsByUserId(id);
+            return operationsUsersLinkRepository.findAllByUserId(id);
         }
         Long userIdByName = userServiceImp.getActualUserVersionByPhone(phone).getUser().getId();
         if (userIdByName != null) {
-            return operationsUsersLinkRepository.findAllOperationsByUserId(userIdByName);
+            return operationsUsersLinkRepository.findAllByUserId(userIdByName);
         } else {
             return null;
         }

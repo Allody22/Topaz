@@ -16,14 +16,21 @@ import java.util.Optional;
 @Repository
 public interface OperationsUsersLinkRepository extends JpaRepository<OperationsUserLink, Long> {
 
+    @Query(value = "SELECT oul.* FROM operations_users_link oul " +
+            "JOIN operations_versions ov ON oul.operations_versions_id = ov.id " +
+            "JOIN operations o ON ov.operations_id = o.id " +
+            "WHERE o.name = :operation " +
+            "ORDER BY oul.creation_time DESC", nativeQuery = true)
+    List<OperationsUserLink> getAllByOperationName(
+            @Param("operation") String operationName);
+
 
     @Query(value = "SELECT * FROM operations_users_link " +
             "WHERE creation_time BETWEEN :startTime AND :endTime " +
             "ORDER BY creation_time DESC", nativeQuery = true)
     List<OperationsUserLink> findAllByCreationTimeBetween(
             @Param("startTime") Date startTime,
-            @Param("endTime") Date endTime
-    );
+            @Param("endTime") Date endTime);
 
     @Query(value = "SELECT * FROM operations_users_link WHERE user_id = :UserId", nativeQuery = true)
     Optional<User> findByUserId(@Param("UserId") Long userId);
@@ -50,8 +57,12 @@ public interface OperationsUsersLinkRepository extends JpaRepository<OperationsU
     Optional<User> findByOperation_Id(@Param("OperationId") Long operationId);
 
 
+    @Query("SELECT oul FROM OperationsUserLink oul WHERE oul.user.id = :userId")
+    List<OperationsUserLink> findAllByUserId(@Param("userId") Long userId);
+
     @Query("SELECT oul.operation FROM OperationsUserLink oul WHERE oul.user.id = :userId")
-    List<OperationsVersions> findAllOperationsByUserId(@Param("userId") Long userId);
+    List<OperationsUserLink> findAllOperationsByUserId(@Param("userId") Long userId);
+
 
     @Query("SELECT oul.operation FROM OperationsUserLink oul WHERE oul.user.id = :userId")
     List<OperationsVersions> findAllOperationsByUserUser(@Param("userId") Long userId);

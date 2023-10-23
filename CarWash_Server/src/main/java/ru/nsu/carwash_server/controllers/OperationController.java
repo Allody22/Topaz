@@ -19,8 +19,10 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -42,12 +44,59 @@ public class OperationController {
 
     }
 
+    @GetMapping("/names")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
+    @Transactional
+    public ResponseEntity<List<String>> getOperationsNames() {
+        List<String> operationsNames = operationsService.getAllOperationsNames();
+
+        return ResponseEntity.ok(operationsNames);
+    }
+
     @GetMapping("/user")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<List<UserOperationsResponse>> getUserOperations(@Valid @RequestParam("username") String username) {
-        List<OperationsVersions> userOperations = operationsService.getAllUserOperationsByIdOrPhone(null, username);
-        return ResponseEntity.ok(operationsService.getRationalOperationForm(userOperations));
+    public ResponseEntity<List<OperationsResponse>> getUserOperations(@Valid @NotBlank @RequestParam("phone") String phone) {
+        List<OperationsUserLink> userOperations = operationsService.getAllUserOperationsByIdOrPhone(null, phone);
+
+        List<OperationsResponse> allOperationsInThisTime = new ArrayList<>();
+        for (OperationsUserLink thisOperation : userOperations) {
+            OperationsResponse currentOperation = new OperationsResponse();
+            currentOperation.setId(thisOperation.getId());
+            currentOperation.setDescription(thisOperation.getDescription());
+            currentOperation.setDateOfCreation(thisOperation.getDateOfCreation());
+            if (thisOperation.getUser() != null) {
+                currentOperation.setUsername(userService.getActualUserVersionById(thisOperation.getUser().getId()).getPhone());
+            } else {
+                currentOperation.setUsername("Не зарегистрирован");
+            }
+            allOperationsInThisTime.add(currentOperation);
+        }
+
+        return ResponseEntity.ok(allOperationsInThisTime);
+    }
+
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
+    @GetMapping("/operation_name")
+    @Transactional
+    public ResponseEntity<List<OperationsResponse>> getOperationsByName(@Valid @NotBlank @RequestParam("operation") String operation) {
+        List<OperationsUserLink> allOperationsInATime = operationsService.getAllOperationsByName(operation);
+
+        List<OperationsResponse> allOperationsByName = new ArrayList<>();
+        for (OperationsUserLink thisOperation : allOperationsInATime) {
+            OperationsResponse currentOperation = new OperationsResponse();
+            currentOperation.setId(thisOperation.getId());
+            currentOperation.setDescription(thisOperation.getDescription());
+            currentOperation.setDateOfCreation(thisOperation.getDateOfCreation());
+            if (thisOperation.getUser() != null) {
+                currentOperation.setUsername(userService.getActualUserVersionById(thisOperation.getUser().getId()).getPhone());
+            } else {
+                currentOperation.setUsername("Не зарегистрирован");
+            }
+            allOperationsByName.add(currentOperation);
+        }
+
+        return ResponseEntity.ok(allOperationsByName);
     }
 
     @GetMapping("/get_all_day")
@@ -95,6 +144,8 @@ public class OperationController {
             }
             allOperationsInThisTime.add(currentOperation);
         }
+
+        Collections.reverse(allOperationsInThisTime);
 
         return ResponseEntity.ok(allOperationsInThisTime);
     }

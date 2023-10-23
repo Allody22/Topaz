@@ -16,6 +16,14 @@ import java.util.Optional;
 public interface OperationService {
 
     /**
+     * Поиск всех операций по названию операции
+     *
+     * @param operationName - название операции
+     * @return список найденных операций
+     */
+    List<OperationsUserLink> getAllOperationsByName(String operationName);
+
+    /**
      * Просто достаём все операции из таблицы
      *
      * @return список из всех операций
@@ -103,7 +111,14 @@ public interface OperationService {
      * @param phone - номер телефона пользователя
      * @return список операций пользователя
      */
-    List<OperationsVersions> getAllUserOperationsByIdOrPhone(Long id, String phone);
+    List<OperationsUserLink> getAllUserOperationsByIdOrPhone(Long id, String phone);
+
+    /**
+     * Получение названий всех операций на английском
+     *
+     * @return список из названий всех операций
+     */
+    List<String> getAllOperationsNames();
 
     /**
      * Получение определённой версии операции по её названии

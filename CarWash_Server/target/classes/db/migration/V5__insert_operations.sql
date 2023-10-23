@@ -3,25 +3,25 @@ VALUES ('User_sign_up', 'Регистрация клиента');
 INSERT INTO operations_versions (operations_id, creation_time, version, changes)
 VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
 
-INSERT INTO operations (name, description)
-VALUES ('User_sign_in', 'Логин клиента');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('User_sign_out', 'Выход клиента');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Admin_log_in', 'Вход админа с проверкой роли');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Admin_role_check', 'Проверки роли админа');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+-- INSERT INTO operations (name, description)
+-- VALUES ('User_sign_in', 'Логин клиента');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('User_sign_out', 'Выход клиента');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Admin_log_in', 'Вход админа с проверкой роли');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Admin_role_check', 'Проверки роли админа');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
 
 INSERT INTO operations (name, description)
 VALUES ('User_get_phone_code', 'Проверка номера телефона');
@@ -113,77 +113,77 @@ VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novos
 
 --Получение различной информации
 
-INSERT INTO operations (name, description)
-VALUES ('Get_service_info', 'Получение информации об услуге');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_service_info', 'Получение информации об услуге');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_order_info', 'Получение информации о заказе');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_all_washing_services', 'Получение всех услуг мойки');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_actual_washing_services', 'Получение всех актуальных услуг мойки');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_all_washing_services_price_time', 'Получение всех услуг мойки с ценой и временем выполнения');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_actual_polishing_orders', 'Получение актуальных услуг полировки');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_all_polishing_services_price_time', 'Получение услуг полировки с ценой и временем');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_actual_tire_orders', 'Получение услуг шиномонтажа');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_all_tire_services_price_time', 'Получение услуг шиномонтажа с ценой и временем');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_booked_time_in_one_day', 'Получение заказов за один день');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_not_made_orders', 'Получение не сделанных заказов');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+--
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_price_time_of_orders_site', 'Получение цены и времени заказов для сайта');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
 
-INSERT INTO operations (name, description)
-VALUES ('Get_order_info', 'Получение информации о заказе');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_all_washing_services', 'Получение всех услуг мойки');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_actual_washing_services', 'Получение всех актуальных услуг мойки');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_all_washing_services_price_time', 'Получение всех услуг мойки с ценой и временем выполнения');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_actual_polishing_orders', 'Получение актуальных услуг полировки');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_all_polishing_services_price_time', 'Получение услуг полировки с ценой и временем');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_actual_tire_orders', 'Получение услуг шиномонтажа');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_all_tire_services_price_time', 'Получение услуг шиномонтажа с ценой и временем');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_booked_time_in_one_day', 'Получение заказов за один день');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_not_made_orders', 'Получение не сделанных заказов');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_price_time_of_orders_site', 'Получение цены и времени заказов для сайта');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
-
-INSERT INTO operations (name, description)
-VALUES ('Get_price_time', 'Получение цены и времени заказов');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_price_time', 'Получение цены и времени заказов');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
 
 INSERT INTO operations (name, description)
 VALUES ('Update_user_info_by_user', 'Обновление профиля пользователя');
 INSERT INTO operations_versions (operations_id, creation_time, version, changes)
 VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
 
-INSERT INTO operations (name, description)
-VALUES ('Get_user_orders_by_user', 'Получение своих заказов');
-INSERT INTO operations_versions (operations_id, creation_time, version, changes)
-VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+-- INSERT INTO operations (name, description)
+-- VALUES ('Get_user_orders_by_user', 'Получение своих заказов');
+-- INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+-- VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');

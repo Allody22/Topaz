@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,8 +22,14 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import ru.nsu.carwash_server.models.FileEntity;
+import ru.nsu.carwash_server.models.users.User;
+import ru.nsu.carwash_server.models.users.UserVersions;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.services.FileServiceIml;
+import ru.nsu.carwash_server.services.UserDetailsImpl;
+import ru.nsu.carwash_server.services.interfaces.FileService;
+import ru.nsu.carwash_server.services.interfaces.OperationService;
+import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -38,10 +45,16 @@ import java.util.Set;
 @RequestMapping("/api/files")
 public class FilesController {
 
-    private final FileServiceIml fileService;
+    private final FileService fileService;
+
+    private final OperationService operationService;
+
+    private final UserService userService;
 
     @Autowired
-    public FilesController(FileServiceIml fileService) {
+    public FilesController(UserService userService, OperationService operationService, FileService fileService) {
+        this.operationService = operationService;
+        this.userService = userService;
         this.fileService = fileService;
     }
 
@@ -75,6 +88,16 @@ public class FilesController {
             fileService.saveByStatus(file, decodedDescription, decodedStatus, newFileName);
         }
         log.info("upload_file_v1.Image with description: '{}' and status: '{}' successfully uploaded", decodedDescription, decodedStatus);
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+        var latestUserVersion = userService.getActualUserVersionById(userId);
+
+        String operationName = "Update_user_info_by_user";
+
+        String descriptionMessage = String.format("Пользователь %s загрузил картинку с описанием %s ", latestUserVersion.getPhone(), decodedDescription);
+
+        operationService.SaveUserOperation(operationName, latestUserVersion.getUser(), descriptionMessage, 1);
+
 
         return ResponseEntity.ok(new MessageResponse("Изображение успешно добавлено"));
     }
