@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.exceptions.SMSException;
+import ru.nsu.carwash_server.exceptions.UserNotFoundException;
 import ru.nsu.carwash_server.models.operations.OperationsUserLink;
 import ru.nsu.carwash_server.models.operations.OperationsVersions;
 import ru.nsu.carwash_server.models.users.User;
@@ -75,7 +76,7 @@ public class OperationsServiceIml implements OperationService {
     }
 
     public void checkUserSMS(String number) {
-        if (getAllDescriptionOperationsByTime(number, "получил код:", LocalDateTime.now().minusHours(1)).size() >= 2) {
+        if (getAllDescriptionOperationsByTime(number, "получил код:", LocalDateTime.now().minusMinutes(5)).size() >= 2) {
             throw new SMSException();
         }
     }
@@ -86,6 +87,10 @@ public class OperationsServiceIml implements OperationService {
                 advice, LocalDateTime.now().minusHours(hourNumber));
     }
 
+    public Optional<OperationsUserLink> findLatestByPhoneInMinutes(String phoneNumber, String context, int minutesNumber) {
+        return operationsUsersLinkRepository.findLatestByDescriptionContainingWithAdviceInLastHour(phoneNumber,
+                context, LocalDateTime.now().minusMinutes(minutesNumber));
+    }
 
     public int extractCodeFromDescription(String description) {
         Pattern pattern = Pattern.compile("код:(\\d+)");
@@ -170,12 +175,12 @@ public class OperationsServiceIml implements OperationService {
     }
 
     public int getLatestCodeByPhoneNumber(String phoneNumber) {
-        Optional<OperationsUserLink> operationsUserLinkOptional = findLatestByPhoneInLastHours(phoneNumber, "получил код:", 1);
+        Optional<OperationsUserLink> operationsUserLinkOptional = findLatestByPhoneInMinutes(phoneNumber, "получил код:", 5);
         if (operationsUserLinkOptional.isPresent()) {
             String description = operationsUserLinkOptional.get().getDescription();
             return extractCodeFromDescription(description);
         }
-        throw new IllegalArgumentException("Объект с таким номером телефона не найден");
+        throw new UserNotFoundException();
     }
 
     public void SaveUserOperation(String operationName, User user, String descriptionMessage, int version) {

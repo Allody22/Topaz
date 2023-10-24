@@ -74,6 +74,7 @@ const CreatingPolishingOrder = observer(() => {
     const [errorResponse, setErrorResponse] = useState();
     const [errorFlag, setErrorFlag] = useState(false);
     const [successResponse, setSuccessResponse] = useState();
+    const [successFlag, setSuccessFlag] = useState(false);
     const toaster = useToaster();
 
     const [selectedSaleDescription, setSelectedSaleDescription] = useState('');
@@ -254,6 +255,8 @@ const CreatingPolishingOrder = observer(() => {
 
             const sentence = `Свободное время успешно получено!`;
             setSuccessResponse(sentence)
+
+            setSuccessFlag(flag => !flag);
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -421,7 +424,7 @@ const CreatingPolishingOrder = observer(() => {
                 toaster.push(successMessage, {placement: "bottomEnd"});
             }, 100);
         }
-    }, [successResponse]);
+    }, [successFlag]);
 
     const handleCreateOrder = async (e) => {
         e.preventDefault();

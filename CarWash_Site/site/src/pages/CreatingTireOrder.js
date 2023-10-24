@@ -85,6 +85,8 @@ const CreatingTireOrder = observer(() => {
     const [errorResponse, setErrorResponse] = useState();
     const [errorFlag, setErrorFlag] = useState(false);
     const [successResponse, setSuccessResponse] = useState();
+    const [successFlag, setSuccessFlag] = useState(false);
+
     const toaster = useToaster();
 
     const [carNumber, setCarNumber] = useState('');
@@ -211,6 +213,9 @@ const CreatingTireOrder = observer(() => {
             setNewTime(newTimeArray);
             const sentence = `Свободное время успешно получено!`;
             setSuccessResponse(sentence)
+
+            setSuccessFlag(flag => !flag);
+
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -477,7 +482,7 @@ const CreatingTireOrder = observer(() => {
         if (successResponse) {
             toaster.push(successMessage, {placement: "bottomEnd"});
         }
-    }, [successResponse]);
+    }, [successFlag]);
 
 
     const handleCreateOrder = async (e) => {

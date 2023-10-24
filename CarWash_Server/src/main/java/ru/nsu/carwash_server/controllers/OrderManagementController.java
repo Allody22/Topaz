@@ -378,14 +378,23 @@ public class OrderManagementController {
         }
         Date startTimeFromRequest = ordersArrayPriceTimeRequest.getStartTime();
 
-        int intervalsNeeded = (int) Math.ceil(orderTime / 30.0); // определяем необходимое количество интервалов в зависимости от времени
+        if (orderTime >= 820) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 28, 22, 8, ordersArrayPriceTimeRequest.getOrderType()));
+        } else {
+            int intervalsNeeded = (int) Math.ceil(orderTime / 30.0);
+            int startHour = 8;
+            int endHour = 22;
+            for (int i = 0; i < intervalsNeeded; i++) {
+                if (startHour < 8 || startHour > 22 || endHour < 8 || endHour > 22) {
+                    continue;
+                }
+                timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, intervalsNeeded, endHour, startHour, ordersArrayPriceTimeRequest.getOrderType()));
+                startHour++;
+                endHour--;
 
-        for (int i = 0; i < intervalsNeeded; i++) {
-            int startHour = 8 + i;
-            int endHour = 22 - (intervalsNeeded - i) + 1;
-
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, intervalsNeeded, endHour, startHour, ordersArrayPriceTimeRequest.getOrderType()));
+            }
         }
+
         List<OrderVersions> orders = orderService.getOrdersInTimeInterval(ordersArrayPriceTimeRequest.getStartTime(),
                 ordersArrayPriceTimeRequest.getEndTime(), null, true);
 
@@ -408,13 +417,21 @@ public class OrderManagementController {
         time += 15;
 
         Date startTimeFromRequest = freeTimeRequest.getStartTime();
-        int intervalsNeeded = (int) Math.ceil(time / 30.0); // определяем необходимое количество интервалов в зависимости от времени
+        if (time >= 820) {
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 28, 22, 8, freeTimeRequest.getOrderType()));
+        } else {
+            int intervalsNeeded = (int) Math.ceil(time / 30.0);
+            int startHour = 8;
+            int endHour = 22;
+            for (int i = 0; i < intervalsNeeded; i++) {
+                if (startHour < 8 || startHour > 22 || endHour < 8 || endHour > 22) {
+                    continue;
+                }
+                timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, intervalsNeeded, endHour, startHour, freeTimeRequest.getOrderType()));
+                startHour++;
+                endHour--;
 
-        for (int i = 0; i < intervalsNeeded; i++) {
-            int startHour = 8 + i;
-            int endHour = 22 - (intervalsNeeded - i) + 1;
-
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, intervalsNeeded, endHour, startHour, freeTimeRequest.getOrderType()));
+            }
         }
 
         List<OrderVersions> orders = orderService.getOrdersInTimeInterval(freeTimeRequest.getStartTime(),
@@ -448,49 +465,9 @@ public class OrderManagementController {
     }
 
 
-//    public List<TimeIntervals> fillTimeIntervals(Date startTimeFromRequest, int timeSkip, int endOfFor, int startOfFor, String orderType) {
-//        List<TimeIntervals> timeIntervals = new ArrayList<>();
-//        for (int i = startOfFor; i < endOfFor; i += timeSkip) {
-//            LocalDateTime localDateStartTime = LocalDateTime.ofInstant(startTimeFromRequest.toInstant(),
-//                            ZoneId.systemDefault())
-//                    .withHour(i)
-//                    .withMinute(0)
-//                    .withSecond(0);
-//            Date startTime = Date.from(localDateStartTime.atZone(ZoneId.systemDefault()).toInstant());
-//
-//            LocalDateTime localDateEndTime = LocalDateTime.ofInstant(startTimeFromRequest.toInstant(),
-//                            ZoneId.systemDefault())
-//                    .withHour(i + timeSkip)
-//                    .withMinute(0)
-//                    .withSecond(0);
-//            Date endTime = Date.from(localDateEndTime.atZone(ZoneId.systemDefault()).toInstant());
-//
-//            switch (orderType) {
-//                case "wash" -> {
-//                    TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 1);
-//                    timeIntervals.add(singleTimeIntervalFirstBox);
-//                    TimeIntervals singleTimeIntervalSecondBox = new TimeIntervals(startTime, endTime, 2);
-//                    timeIntervals.add(singleTimeIntervalSecondBox);
-//                    TimeIntervals singleTimeIntervalThirdBox = new TimeIntervals(startTime, endTime, 3);
-//                    timeIntervals.add(singleTimeIntervalThirdBox);
-//                }
-//                case "tire" -> {
-//                    TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 0);
-//                    timeIntervals.add(singleTimeIntervalFirstBox);
-//                }
-//                case "polishing" -> {
-//                    TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 5);
-//                    timeIntervals.add(singleTimeIntervalFirstBox);
-//                }
-//                default -> throw new InvalidOrderTypeException(orderType);
-//            }
-//        }
-//        return timeIntervals;
-//    }
-
     public List<TimeIntervals> fillTimeIntervals(Date startTimeFromRequest, int timeSkip, int endOfFor, int startOfFor, String orderType) {
         List<TimeIntervals> timeIntervals = new ArrayList<>();
-        for (int i = startOfFor * 2; i < endOfFor * 2; i += timeSkip) { // Умножаем на 2, потому что рассматриваем полчасовые интервалы
+        for (int i = startOfFor * 2; i < endOfFor * 2; i += timeSkip) {
             int hour = i / 2;
             int minute = (i % 2) * 30;
 
@@ -501,8 +478,16 @@ public class OrderManagementController {
                     .withSecond(0);
             Date startTime = Date.from(localDateStartTime.atZone(ZoneId.systemDefault()).toInstant());
 
-            LocalDateTime localDateEndTime = localDateStartTime.plusMinutes(30L * timeSkip); // Добавляем 30 минут для каждого "timeSkip"
+            if (localDateStartTime.getHour() < 8 || localDateStartTime.getHour() >= 22) {
+                continue;
+            }
+
+            LocalDateTime localDateEndTime = localDateStartTime.plusMinutes(30L * timeSkip);
             Date endTime = Date.from(localDateEndTime.atZone(ZoneId.systemDefault()).toInstant());
+
+            if (localDateEndTime.getHour() < 8 || localDateEndTime.getHour() > 22) {
+                continue;
+            }
 
             switch (orderType) {
                 case "wash" -> {

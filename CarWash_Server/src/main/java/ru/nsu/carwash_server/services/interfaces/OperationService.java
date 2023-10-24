@@ -32,7 +32,7 @@ public interface OperationService {
 
 
     /**
-     * Пользователь не может получать смс больше 2 штук в час.
+     * Пользователь не может получать смс больше 2 штук в 5 минут.
      * Этот метод это проверяет и выбрасывает ошибку,
      * если оказывается что уже было сделано 2 смс пользователем,
      * а он пробует получить третью
@@ -93,6 +93,17 @@ public interface OperationService {
      * @return сам секретный код
      */
     int getLatestCodeByPhoneNumber(String phoneNumber);
+
+    /**
+     * Получаем последний код, отправленные пользователю за
+     * последние несколько минут
+     *
+     * @param phoneNumber   - телефон для проверки
+     * @param context       - указываем что нас интересует операция с смс
+     * @param minutesNumber - какой промежуток времени проверяем
+     * @return действие пользователя с кодом, если такое есть
+     */
+    Optional<OperationsUserLink> findLatestByPhoneInMinutes(String phoneNumber, String context, int minutesNumber);
 
     /**
      * Сохраняем операцию, сделанную конкретным пользователем

@@ -36,6 +36,7 @@ const CreatingWashingOrder = observer(() => {
     const [showModal, setShowModal] = useState(false);
     const [showModalB, setShowModalB] = useState(false);
     const [newTime, setNewTime] = useState([{startTime: null, endTime: null, box: 0}]);
+    const [successFlag, setSuccessFlag] = useState(false);
 
     const [stringTimeForCurrentDay, setStringTimeForCurrentDay] = useState([]);
     const [currentStatus, setCurrentStatus] = useState('');
@@ -263,6 +264,9 @@ const CreatingWashingOrder = observer(() => {
 
             const sentence = `Свободное время успешно получено!`;
             setSuccessResponse(sentence)
+
+            setSuccessFlag(flag => !flag);
+
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -434,7 +438,7 @@ const CreatingWashingOrder = observer(() => {
         if (successResponse) {
             toaster.push(successMessage, {placement: "bottomEnd"});
         }
-    }, [successResponse]);
+    }, [successFlag]);
 
 
     const handleCreateOrder = async (e) => {

@@ -167,8 +167,7 @@ public class AuthController {
                     .build();
             return ResponseEntity.ok(jwtResponse);
         } catch (AuthenticationException e) {
-            log.error("WRONG AUTH, BAD PASSWORD");
-            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Пожалуйста, проверьте введённые данные и попробуйте снова."));
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Пожалуйста, проверьте введённые данные."));
         }
     }
 
