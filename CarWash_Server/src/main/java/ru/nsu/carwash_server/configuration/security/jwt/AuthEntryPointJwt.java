@@ -1,8 +1,7 @@
 package ru.nsu.carwash_server.configuration.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -15,15 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException {
-        logger.error("Unauthorized error: {}", authException.getMessage());
-
+        log.error("Unauthorized error: {}", authException.getMessage());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 

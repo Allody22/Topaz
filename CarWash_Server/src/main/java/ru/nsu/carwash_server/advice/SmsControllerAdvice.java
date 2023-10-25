@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.nsu.carwash_server.exceptions.SMSException;
+import ru.nsu.carwash_server.exceptions.TooManyAttemptsInCodeException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,4 +25,14 @@ public class SmsControllerAdvice {
         errorResponse.put("message", ex.getMessage());
         return errorResponse;
     }
+
+    @ExceptionHandler(TooManyAttemptsInCodeException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleTooManyAttemptsInCodeException(TooManyAttemptsInCodeException ex) {
+        log.error("TOO MANY ATTEMPTS IN CODE ADVICE");
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", ex.getMessage());
+        return errorResponse;
+    }
+
 }

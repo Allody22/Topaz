@@ -525,6 +525,8 @@ const CreatingTireOrder = observer(() => {
 
             const sentence = `Заказы ${ordersSentence.replace(/_/g, ' ')} забронированы с ${formattedStartTime} до ${formattedEndTime}.`;
             setSuccessResponse(sentence)
+            setSuccessFlag(flag => !flag);
+
         } catch (error) {
             if (error.response) {
                 let messages = [];

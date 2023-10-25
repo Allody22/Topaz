@@ -13,19 +13,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.nsu.carwash_server.configuration.security.jwt.AuthEntryPointJwt;
 import ru.nsu.carwash_server.configuration.security.jwt.AuthTokenFilter;
-import ru.nsu.carwash_server.services.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserDetailsServiceImpl userDetailsService;
-
     private final AuthEntryPointJwt unauthorizedHandler;
 
-    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt authEntryPointJwt) {
-        this.userDetailsService = userDetailsService;
+    public WebSecurityConfig(AuthEntryPointJwt authEntryPointJwt) {
         this.unauthorizedHandler = authEntryPointJwt;
     }
 

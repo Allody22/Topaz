@@ -24,9 +24,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import ru.nsu.carwash_server.configuration.security.jwt.JwtUtils;
-import ru.nsu.carwash_server.exceptions.ConfirmationCodeMismatchException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
+import ru.nsu.carwash_server.exceptions.SMSException;
 import ru.nsu.carwash_server.exceptions.TokenRefreshException;
+import ru.nsu.carwash_server.exceptions.TooManyAttemptsInCodeException;
 import ru.nsu.carwash_server.exceptions.UserAlreadyExistException;
 import ru.nsu.carwash_server.exceptions.UserNotFoundException;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
@@ -48,6 +49,7 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -101,9 +103,12 @@ public class AuthController {
     @Transactional
     public ResponseEntity<MessageResponse> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
         //Смотрим сколько раз человек с таким phone уже получал код и если больше 2 раз за час, то не даём код
-        operationsService.checkUserSMS(number);
-        String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
 
+        if (operationsService.getAllDescriptionOperationsByTime(number, "получил код:", LocalDateTime.now().minusMinutes(50)).size() >= 2) {
+            throw new SMSException();
+        }
+
+        String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
         Pair<HttpEntity<String>, Integer> resultOfSmsCreating = operationsService.createSmsCode(number);
 
         HttpEntity<String> entity = resultOfSmsCreating.getFirst();
@@ -181,8 +186,17 @@ public class AuthController {
             throw new UserAlreadyExistException();
         }
 
+        if (operationsService.getAllDescriptionOperationsByTime(userPhone, "ввёл неверный код подтверждения для регистрации", LocalDateTime.now().minusMinutes(30)).size() >= 4) {
+            log.warn("SignUp_v1.Registration failed: A lot of code attempts ");
+            throw new TooManyAttemptsInCodeException();
+        }
+
         if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(userPhone) + "")) {
-            throw new ConfirmationCodeMismatchException();
+            log.warn("SignUp_v1.Registration failed: Bad code ");
+            String operationName = "User_write_wrong_code";
+            String descriptionMessage = "Номер телефона:'" + userPhone + "' ввёл неверный код подтверждения для регистрации";
+            operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Код подтверждения не совпадает!"));
         }
 
         Set<Role> roles = new HashSet<>();

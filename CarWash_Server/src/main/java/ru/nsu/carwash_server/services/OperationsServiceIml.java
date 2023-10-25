@@ -8,9 +8,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import ru.nsu.carwash_server.exceptions.ConfirmationCodeMismatchException;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
-import ru.nsu.carwash_server.exceptions.SMSException;
-import ru.nsu.carwash_server.exceptions.UserNotFoundException;
 import ru.nsu.carwash_server.models.operations.OperationsUserLink;
 import ru.nsu.carwash_server.models.operations.OperationsVersions;
 import ru.nsu.carwash_server.models.users.User;
@@ -75,12 +74,6 @@ public class OperationsServiceIml implements OperationService {
         return operationsUsersLinkRepository.findAllByCreationTimeBetween(startTime, endTime);
     }
 
-    public void checkUserSMS(String number) {
-        if (getAllDescriptionOperationsByTime(number, "получил код:", LocalDateTime.now().minusMinutes(5)).size() >= 2) {
-            throw new SMSException();
-        }
-    }
-
 
     public Optional<OperationsUserLink> findLatestByPhoneInLastHours(String phoneNumber, String advice, int hourNumber) {
         return operationsUsersLinkRepository.findLatestByDescriptionContainingWithAdviceInLastHour(phoneNumber,
@@ -102,6 +95,7 @@ public class OperationsServiceIml implements OperationService {
     }
 
     public List<OperationsUserLink> getAllDescriptionOperationsByTime(String phoneNumber, String descriptionMessage, LocalDateTime time) {
+        System.out.println(operationsUsersLinkRepository.findAllByDescriptionContainingWithAdvice(phoneNumber, descriptionMessage, time).toString());
         return operationsUsersLinkRepository.findAllByDescriptionContainingWithAdvice(phoneNumber, descriptionMessage, time);
     }
 
@@ -175,12 +169,10 @@ public class OperationsServiceIml implements OperationService {
     }
 
     public int getLatestCodeByPhoneNumber(String phoneNumber) {
-        Optional<OperationsUserLink> operationsUserLinkOptional = findLatestByPhoneInMinutes(phoneNumber, "получил код:", 5);
-        if (operationsUserLinkOptional.isPresent()) {
-            String description = operationsUserLinkOptional.get().getDescription();
-            return extractCodeFromDescription(description);
-        }
-        throw new UserNotFoundException();
+        OperationsUserLink operationsUserLink = findLatestByPhoneInMinutes(phoneNumber, "получил код:", 5)
+                .orElseThrow(ConfirmationCodeMismatchException::new);
+        String description = operationsUserLink.getDescription();
+        return extractCodeFromDescription(description);
     }
 
     public void SaveUserOperation(String operationName, User user, String descriptionMessage, int version) {

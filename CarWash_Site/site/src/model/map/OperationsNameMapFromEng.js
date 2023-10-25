@@ -8,6 +8,7 @@ const operationsNameMapFromEng = {
     "Find_user_by_telephone": "Поиск информации о клиента по телефону",
     "Get_user_orders_by_admin": "Получение заказов клиента",
     "Create_new_service_by_admin": "Создание новой услуги",
+    "User_write_wrong_code": "Пользователь вводит неверный код подтверждения для номера",
 
     "Update_washing_service_by_admin": "Обновление информации об услуге мойки",
     "Update_polishing_service_by_admin": "Обновление информации об услуге полировки",

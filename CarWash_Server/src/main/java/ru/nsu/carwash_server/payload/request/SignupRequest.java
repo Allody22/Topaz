@@ -23,6 +23,7 @@ public class SignupRequest {
     private String password = null;
 
     @Size(min = 4, max = 4)
+    @NotBlank
     private String secretCode = null;
 
 }

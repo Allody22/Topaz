@@ -7,10 +7,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.users.UserVersions;
 import ru.nsu.carwash_server.repository.users.UserVersionsRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Service
@@ -31,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (!userVersions.isEmpty()) {
             latestUserVersion = userVersions.get(0);
         } else {
-            throw new EntityNotFoundException("Информация о пользователи не найдена с логином: " + username);
+            throw new NotInDataBaseException("пользователей не найден пользователь с телефоном: ", username);
         }
 
         var user = latestUserVersion.getUser();

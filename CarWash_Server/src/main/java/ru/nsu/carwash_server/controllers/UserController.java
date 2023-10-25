@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.nsu.carwash_server.exceptions.ConfirmationCodeMismatchException;
+import ru.nsu.carwash_server.exceptions.TooManyAttemptsInCodeException;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.secondary.helpers.OrderMainInfo;
 import ru.nsu.carwash_server.models.users.Role;
@@ -29,6 +29,7 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -67,8 +68,15 @@ public class UserController {
     @PostMapping("/updateUserPassword_v1")
     public ResponseEntity<MessageResponse> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
         String userPhone = updateUserPasswordRequest.getPhone();
+
+        if (operationsService.getAllDescriptionOperationsByTime(userPhone, "ввёл неверный код подтверждения для смены пароля", LocalDateTime.now().minusMinutes(30)).size() >= 4) {
+            throw new TooManyAttemptsInCodeException();
+        }
         if (!updateUserPasswordRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(userPhone) + "")) {
-            throw new ConfirmationCodeMismatchException();
+            String operationName = "User_write_wrong_code";
+            String descriptionMessage = "Номер телефона:'" + userPhone + "' ввёл неверный код подтверждения для смены пароля";
+            operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Код подтверждения не совпадает!"));
         }
 
         var latestUserVersion = userService.getActualUserVersionByPhone(updateUserPasswordRequest.getPhone());
