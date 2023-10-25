@@ -95,7 +95,6 @@ public class OperationsServiceIml implements OperationService {
     }
 
     public List<OperationsUserLink> getAllDescriptionOperationsByTime(String phoneNumber, String descriptionMessage, LocalDateTime time) {
-        System.out.println(operationsUsersLinkRepository.findAllByDescriptionContainingWithAdvice(phoneNumber, descriptionMessage, time).toString());
         return operationsUsersLinkRepository.findAllByDescriptionContainingWithAdvice(phoneNumber, descriptionMessage, time);
     }
 
