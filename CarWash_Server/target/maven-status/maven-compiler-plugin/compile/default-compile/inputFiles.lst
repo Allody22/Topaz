@@ -11,6 +11,7 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\TimeAndPriceResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\controllers\OrderCreatingController.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\UserOperationsResponse.java
+C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\exceptions\TooManyAttemptsInCodeException.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\services\OrderServiceImp.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\controllers\OperationController.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\configuration\security\jwt\JwtUtils.java

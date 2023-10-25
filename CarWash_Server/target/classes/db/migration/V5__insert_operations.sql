@@ -9,6 +9,11 @@ INSERT INTO operations_versions (operations_id, creation_time, version, changes)
 VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
 
 INSERT INTO operations (name, description)
+VALUES ('User_write_wrong_code', 'Пользователь вводит неверный код подтверждения для номера');
+INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+
+INSERT INTO operations (name, description)
 VALUES ('Create_new_service_by_admin', 'Создание новой услуги');
 INSERT INTO operations_versions (operations_id, creation_time, version, changes)
 VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');

@@ -65,6 +65,7 @@ ru\nsu\carwash_server\payload\response\UserOrdersResponse.class
 ru\nsu\carwash_server\payload\request\UpdateOrderInfoRequest$UpdateOrderInfoRequestBuilder.class
 ru\nsu\carwash_server\payload\request\UpdatePolishingServiceRequest.class
 ru\nsu\carwash_server\repository\FileRepository.class
+ru\nsu\carwash_server\exceptions\TooManyAttemptsInCodeException.class
 ru\nsu\carwash_server\models\secondary\helpers\TireOrderEntity.class
 ru\nsu\carwash_server\payload\response\ImageResponse.class
 ru\nsu\carwash_server\advice\UserControllerAdvice.class
