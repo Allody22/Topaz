@@ -83,6 +83,8 @@ const OperationsTable = observer(() => {
     const [errorResponse, setErrorResponse] = useState();
     const [errorFlag, setErrorFlag] = useState(false);
     const [successResponse, setSuccessResponse] = useState();
+    const [successFlag, setSuccessFlag] = useState(false);
+
     const toaster = useToaster();
     start.setHours(0, 0, 0, 0);
     end.setHours(23, 59, 59, 999);
@@ -97,8 +99,9 @@ const OperationsTable = observer(() => {
             const response = await getAllOperationsInOneDay(start.toISOString(), end.toISOString());
             setOperations(response)
 
-            setSuccessResponse(null)
             setSuccessResponse("Все операции успешно получены!")
+            setSuccessFlag(flag => !flag);
+
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -129,8 +132,8 @@ const OperationsTable = observer(() => {
 
             setOperations(response)
 
-            setSuccessResponse(null)
-            setSuccessResponse("Yes all orders")
+            setSuccessResponse("Все операции успешно получены!")
+            setSuccessFlag(flag => !flag);
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -166,8 +169,9 @@ const OperationsTable = observer(() => {
             const response = await getAllOperationsByUser(userContacts);
             setOperations(response)
 
-            setSuccessResponse(null)
-            setSuccessResponse("Yes all orders")
+            setSuccessResponse("Все операции успешно получены!")
+            setSuccessFlag(flag => !flag);
+
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -204,8 +208,8 @@ const OperationsTable = observer(() => {
             const response = await getAllOperationsByOperationName(currentOperation);
             setOperations(response)
 
-            setSuccessResponse(null)
-            setSuccessResponse("Yes all orders")
+            setSuccessResponse("Все операции успешно получены!")
+            setSuccessFlag(flag => !flag);
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -258,7 +262,7 @@ const OperationsTable = observer(() => {
                 const response = await getAllNamesOperations();
 
                 const transformedOperations = response.map(name => {
-                    const translatedName = operationsNameMapFromEng[name] || name; // используйте имя из словаря или оригинальное имя, если перевода нет
+                    const translatedName = operationsNameMapFromEng[name] || name;
                     return {label: translatedName, value: name};
                 });
 
@@ -291,7 +295,7 @@ const OperationsTable = observer(() => {
             style={{border: '1px solid black'}}
         >
             <div style={{width: 320, whiteSpace: 'pre-line'}}>
-                <p>Информация успешно получена из базы данных</p>
+                <p>{successResponse}</p>
             </div>
         </Notification>
     );
@@ -352,7 +356,7 @@ const OperationsTable = observer(() => {
         if (successResponse) {
             toaster.push(successMessage, {placement: "bottomEnd"});
         }
-    }, [successResponse]);
+    }, [successFlag]);
 
 
     const {getTableProps, getTableBodyProps, headerGroups, rows, prepareRow} = useTable({

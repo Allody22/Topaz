@@ -1,9 +1,9 @@
 import '../css/CreatingOrder.css';
-import {findUserByPhone, getAllUsers, updateUserInfo} from "../http/userAPI";
+import {findUserByPhone, getAllUsers, getOrdersByUser, updateUserInfo} from "../http/userAPI";
 import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import InputField from "../model/InputField";
-import {InputPicker, Notification, TagPicker, useToaster} from "rsuite";
+import {Divider, InputPicker, Notification, TagPicker, useToaster} from "rsuite";
 import {BrowserRouter as Router, useHistory, useParams} from "react-router-dom";
 import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
@@ -12,6 +12,8 @@ import {format, parseISO} from "date-fns";
 import rolesFromEnglishMap from "../model/map/RolesFromEnglishMap";
 import rolesFromRussianMap from "../model/map/RolesFromRussianMap";
 import {rolesArray} from "../model/Constants";
+import currentOrderStatusMapFromEng from "../model/map/CurrentOrderStatusMapFromEng";
+import {useSortBy, useTable} from "react-table";
 
 
 const styles = {
@@ -19,10 +21,191 @@ const styles = {
     marginBottom: 10, marginLeft: 'auto', marginRight: 'auto', marginTop: 10
 };
 
+const inputStyle = {
+    fontWeight: 'bold', display: 'flex',
+    fontSize: '17px', justifyContent: 'center', alignItems: 'center', marginTop: '5px'
+}
+
+
+const columns = [
+    {
+        Header: 'Айди',
+        accessor: 'id',
+        sortType: 'alphanumeric',
+        Cell: ({value}) => {
+            const history = useHistory();
+            return <div onClick={() => history.push(`/updateOrderInfo/${value}`)}>{value}</div>;
+        }
+    },
+    {
+        Header: 'Дата и время начала',
+        accessor: 'startTime',
+        Cell: ({value}) => (
+            value ? (
+                <div>
+                    <span>{format(parseISO(value), 'dd.MM.yyyy ')}</span>
+                    <span style={{fontWeight: 'bold'}}>{format(parseISO(value), 'HH:mm:ss')}</span>
+                </div>
+            ) : 'Неизвестно'
+        ),
+        sortType: (rowA, rowB, columnId) => {
+            const dateA = parseISO(rowA.values[columnId]);
+            const dateB = parseISO(rowB.values[columnId]);
+
+            return dateA.getTime() - dateB.getTime();
+        },
+    },
+    {
+        Header: 'Дата и время конца',
+        accessor: 'endTime',
+        Cell: ({value}) => (
+            value ? (
+                <div>
+                    <span>{format(parseISO(value), 'dd.MM.yyyy ')}</span>
+                    <span style={{fontWeight: 'bold'}}>{format(parseISO(value), 'HH:mm:ss')}</span>
+                </div>
+            ) : 'Неизвестно'
+        ),
+        sortType: (rowA, rowB, columnId) => {
+            const dateA = parseISO(rowA.values[columnId]);
+            const dateB = parseISO(rowB.values[columnId]);
+
+            return dateA.getTime() - dateB.getTime();
+        },
+    },
+    {
+        Header: 'Тип заказа',
+        accessor: 'orderType',
+        sortType: 'alphanumeric',
+        Cell: ({value}) => value ? orderTypeMap[value] || value : "Неизвестно"
+    },
+    {
+        Header: 'Клиент',
+        sortType: 'alphanumeric',
+        accessor: 'userNumber',
+        Cell: ({value}) => {
+            const history = useHistory();
+            return <div onClick={() => history.push(`/changeUserInfo/${value}`)}>{value}</div>;
+        }
+    },
+    {
+        Header: 'Взятые услуги',
+        sortType: 'alphanumeric',
+        accessor: 'orders',
+        Cell: ({value}) => {
+            return value.join(', ');
+        }
+    },
+    {
+        Header: 'Номер авто', accessor: 'autoNumber',
+        sortType: 'alphanumeric',
+        Cell: ({value}) => {
+            return value === null ? 'Неизвестно' : value;
+        }
+    },
+    {
+        Header: 'Тип кузова', accessor: 'autoType', sortType: 'basic',
+        Cell: ({value}) => {
+            return value === null ? 'Неизвестно' : value;
+        }
+    },
+    {
+        Header: 'Текущие состояние заказа',
+        accessor: 'currentStatus',
+        sortType: 'basic',
+        Cell: ({value}) => {
+            const textColor =
+                value && value.includes('NotDone') ? 'red' :
+                    value && value.includes('cancelled') ? 'blue' :
+                        value && value.includes('Done') ? '#008000' : // темно-зеленый
+                            'brown';
+            return (
+                <div style={{color: textColor}}>
+                    {value ? currentOrderStatusMapFromEng[value] || value : "Неизвестно"}
+                </div>
+            );
+        }
+    },
+    {
+        Header: 'Админ',
+        accessor: 'administrator',
+        sortType: 'basic',
+        Cell: ({value}) => {
+            return value === null ? 'Неизвестно' : value;
+        }
+    },
+    {
+        Header: 'Специалист', accessor: 'specialist',
+        sortType: 'basic',
+        Cell: ({value}) => {
+            return value === null ? 'Неизвестно' : value;
+        }
+    },
+    {
+        Header: 'Бокс',
+        accessor: 'boxNumber',
+        sortType: (rowA, rowB) => {
+            const boxNumberA = rowA.original.boxNumber;
+            const boxNumberB = rowB.original.boxNumber;
+
+            if (boxNumberA === null && boxNumberB === null) {
+                return 0;
+            } else if (boxNumberA === null) {
+                return 1;
+            } else if (boxNumberB === null) {
+                return -1;
+            } else {
+                return boxNumberA - boxNumberB;
+            }
+        },
+        Cell: ({value}) => {
+            return value === null ? 'Неизвестно' : Number(value);
+        },
+    },
+    {
+        Header: 'Комментарии', accessor: 'comments',
+        sortType: 'basic',
+        Cell: ({value}) => {
+            return value === null ? 'Отсутствуют' : value;
+        }
+    },
+    {
+        Header: 'Дата создания заказа',
+        accessor: 'dateOfCreation',
+        Cell: ({value}) => (
+            value ? (
+                <div>
+                    <span>{format(parseISO(value), 'dd.MM.yyyy ')}</span>
+                    <span style={{fontWeight: 'bold'}}>{format(parseISO(value), 'HH:mm:ss')}</span>
+                </div>
+            ) : 'Неизвестно'
+        ),
+        sortType: (rowA, rowB, columnId) => {
+            const dateA = parseISO(rowA.values[columnId]);
+            const dateB = parseISO(rowB.values[columnId]);
+
+            return dateA.getTime() - dateB.getTime();
+        },
+    },
+    {
+        Header: 'Акция',
+        accessor: 'sale',
+        sortType: 'alphanumeric',
+        Cell: ({value}) => value ? value || value : "Неизвестно"
+    },
+    {
+        Header: 'Цена',
+        accessor: 'price',
+        sortType: (rowA, rowB) => rowA.original.price - rowB.original.price,
+        Cell: ({value}) => Number(value),
+    },
+];
 
 const ChangeUserInfo = observer(() => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [getUsers, setGetUsers] = useState(false);
+
+    const [orders, setOrders] = useState([]);
 
     const [fullName, setFullName] = useState('');
     const [adminNote, setAdminNote] = useState('');
@@ -38,7 +221,12 @@ const ChangeUserInfo = observer(() => {
 
     const [errorResponse, setErrorResponse] = useState('');
     const [errorFlag, setErrorFlag] = useState(false);
-    const [successResponse, setSuccessResponse] = useState();
+
+    const [successFlag, setSuccessFlag] = useState(false);
+
+    const [successResponse, setSuccessResponse] = useState('');
+
+
     const toaster = useToaster();
     useHistory();
 
@@ -111,7 +299,7 @@ const ChangeUserInfo = observer(() => {
         if (successResponse) {
             toaster.push(successMessage, {placement: "bottomEnd"});
         }
-    }, [successResponse]);
+    }, [successFlag]);
 
 
     useEffect(() => {
@@ -121,9 +309,9 @@ const ChangeUserInfo = observer(() => {
                     const response = await getAllUsers();
                     setUsersArray(response);
                     setGetUsers(true)
-                    setSuccessResponse(null)
                     const sentence = `Список всех пользователей успешно получен.`;
                     setSuccessResponse(sentence)
+                    setSuccessFlag(flag => !flag);
                 }
             } catch (error) {
                 if (error.response) {
@@ -146,38 +334,75 @@ const ChangeUserInfo = observer(() => {
 
     useEffect(() => {
         async function findUserInfo() {
-            if (username != null && username !== "" && typeof username !== "undefined" && username !== ":username") {
-                try {
-                    const response = await findUserByPhone(username);
-                    setFullName(response.fullName || '');
-                    setAdminNote(response.adminNotes || '');
-                    setUserNote(response.userNotes || '');
-                    setEmail(response.email || '')
-                    const roles = response.roles.map(role => rolesToRussianMap(role)) || [];
+            if (username == null && username === "" && typeof username === "undefined" && username === ":username") {
+                setErrorResponse("Обязательно укажите телефон существующего пользователя")
+                setErrorFlag(flag => !flag)
+                return;
+            }
+            try {
+                const response = await findUserByPhone(username);
+                setFullName(response.fullName || '');
+                setAdminNote(response.adminNotes || '');
+                setUserNote(response.userNotes || '');
+                setEmail(response.email || '')
+                const roles = response.roles.map(role => rolesToRussianMap(role)) || [];
 
-                    setSelectedRoles(roles);
+                setSelectedRoles(roles);
 
-                    setGetUsers(true)
-                    setSuccessResponse(null)
-                    const sentence = `Информация о пользователе получена.`;
-                    setSuccessResponse(sentence)
-                } catch (error) {
-                    if (error.response) {
-                        let messages = [];
-                        for (let key in error.response.data) {
-                            messages.push(error.response.data[key]);
-                        }
-                        setErrorResponse(messages.join('\n'));
-                        setErrorFlag(flag => !flag);
-                    } else {
-                        setErrorResponse("Системная ошибка, проверьте правильность " +
-                            "введённой информации и попробуйте еще раз")
-                        setErrorFlag(flag => !flag)
+                setGetUsers(true)
+                const sentence = `Информация о пользователе получена.`;
+                setSuccessResponse(sentence)
+
+                setSuccessFlag(flag => !flag);
+            } catch (error) {
+                if (error.response) {
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
                     }
+                    setErrorResponse(messages.join('\n'));
+                    setErrorFlag(flag => !flag);
+                } else {
+                    setErrorResponse("Системная ошибка, проверьте правильность " +
+                        "введённой информации и попробуйте еще раз")
+                    setErrorFlag(flag => !flag)
                 }
             }
         }
 
+        async function getUserOrders() {
+            if (username == null && username === "" && typeof username === "undefined" && username === ":username") {
+                setErrorResponse("Обязательно укажите телефон существующего пользователя")
+                setErrorFlag(flag => !flag)
+                return;
+            }
+            try {
+                const response = await getOrdersByUser(username);
+                setOrders(response);
+
+                setGetUsers(true)
+
+                const sentence = `Заказы пользователя успешно получены.`;
+                setSuccessResponse(sentence)
+
+                setSuccessFlag(flag => !flag);
+            } catch (error) {
+                if (error.response) {
+                    let messages = [];
+                    for (let key in error.response.data) {
+                        messages.push(error.response.data[key]);
+                    }
+                    setErrorResponse(messages.join('\n'));
+                    setErrorFlag(flag => !flag);
+                } else {
+                    setErrorResponse("Системная ошибка, проверьте правильность " +
+                        "введённой информации и попробуйте еще раз")
+                    setErrorFlag(flag => !flag)
+                }
+            }
+        }
+
+        getUserOrders();
         findUserInfo();
     }, [username]);
 
@@ -232,8 +457,9 @@ const ChangeUserInfo = observer(() => {
                 const data = (await updateUserInfo(username, fullName, enSelectedRoles,
                     adminNote, userNote, email)).message;
 
-                setSuccessResponse(null)
                 setSuccessResponse(data)
+
+                setSuccessFlag(flag => !flag);
             } catch (error) {
                 if (error.response) {
                     let messages = [];
@@ -254,6 +480,11 @@ const ChangeUserInfo = observer(() => {
             setShowConfirmation(true);
         }
     }
+
+    const {getTableProps, getTableBodyProps, headerGroups, rows, prepareRow} = useTable({
+        columns,
+        data: orders,
+    }, useSortBy);
 
 
     return (
@@ -347,6 +578,39 @@ const ChangeUserInfo = observer(() => {
                     </Button>
                 </div>
             </Form>
+
+
+            <p style={inputStyle}>Заказы пользователя</p>
+            <Divider></Divider>
+
+            <table {...getTableProps()} className="MyTable" style={{marginBottom: '100px'}}>
+                <thead>
+                {headerGroups.map((headerGroup) => (
+                    <tr {...headerGroup.getHeaderGroupProps()}>
+                        {headerGroup.headers.map((column) => (
+                            <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                                {column.render('Header')}
+                                <span>
+              {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
+            </span>
+                            </th>
+                        ))}
+                    </tr>
+                ))}
+                </thead>
+                <tbody {...getTableBodyProps()}>
+                {rows.map((row) => {
+                    prepareRow(row);
+                    return (
+                        <tr {...row.getRowProps()}>
+                            {row.cells.map((cell) => {
+                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
+                            })}
+                        </tr>
+                    );
+                })}
+                </tbody>
+            </table>
         </>
     );
 });

@@ -36,7 +36,6 @@ const CreatingWashingOrder = observer(() => {
     const [showModal, setShowModal] = useState(false);
     const [showModalB, setShowModalB] = useState(false);
     const [newTime, setNewTime] = useState([{startTime: null, endTime: null, box: 0}]);
-    const [successFlag, setSuccessFlag] = useState(false);
 
     const [stringTimeForCurrentDay, setStringTimeForCurrentDay] = useState([]);
     const [currentStatus, setCurrentStatus] = useState('');
@@ -62,7 +61,6 @@ const CreatingWashingOrder = observer(() => {
     const [userContacts, setUserContacts] = useState('');
     const [price, setPrice] = useState(0);
 
-
     const [selectedSaleDescription, setSelectedSaleDescription] = useState('');
     const [files, setFiles] = useState([]);
 
@@ -85,6 +83,8 @@ const CreatingWashingOrder = observer(() => {
     const [errorResponse, setErrorResponse] = useState();
     const [errorFlag, setErrorFlag] = useState(false);
     const [successResponse, setSuccessResponse] = useState();
+    const [successFlag, setSuccessFlag] = useState(false);
+
     const toaster = useToaster();
 
     const [carNumber, setCarNumber] = useState('');
@@ -368,6 +368,7 @@ const CreatingWashingOrder = observer(() => {
 
         getAllService();
     }, []);
+
     useHistory();
     const newOrderMessage = (
         <Router>
@@ -465,8 +466,6 @@ const CreatingWashingOrder = observer(() => {
                 userContacts, requestStartTime.toISOString(), requestEndTime.toISOString(),
                 administrator, specialist, boxNumber, bonuses, comments,
                 carNumber, carType, price, currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription);
-
-            setSuccessResponse(null)
 
             const ordersForResponse = response.orders.map(order => `"${order}"`);
             const ordersSentence = ordersForResponse.join(" и ");

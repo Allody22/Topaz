@@ -1,7 +1,6 @@
 import {$authHost, $host} from "./index";
 import jwt_decode from "jwt-decode";
 
-//Версия с вроде как правильным рефреш токеном
 export const login = async (phone, password) => {
     const {data} = await $host.post('api/auth/admin/signin_v1', {phone, password})
     const {token, refreshToken} = data
@@ -9,6 +8,11 @@ export const login = async (phone, password) => {
     localStorage.setItem('refreshToken', refreshToken)
     return jwt_decode(token)
 }
+
+export const getOrdersByUser = async (username) => {
+    const {data: {orders}} = await $authHost.get('api/admin/users/getUserOrdersByAdmin_v1?username=' + username);
+    return orders;
+};
 
 export const signOut = async () => {
     await $authHost.post('api/auth/signout_v1');

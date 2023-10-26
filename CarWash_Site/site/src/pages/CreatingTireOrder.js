@@ -336,7 +336,7 @@ const CreatingTireOrder = observer(() => {
                     for (let key in error.response.data) {
                         messages.push(error.response.data[key]);
                     }
-                    setErrorResponse(messages.join(''));  // Объединяем все сообщения об ошибках через запятую
+                    setErrorResponse(messages.join('\n'));
                     setErrorFlag(flag => !flag);
 
                 } else {
@@ -413,6 +413,7 @@ const CreatingTireOrder = observer(() => {
         setBoxNumber(boxNumber);
     };
     useHistory();
+
     const newOrderMessage = (
         <Router>
             <Notification
@@ -509,7 +510,6 @@ const CreatingTireOrder = observer(() => {
                 requestEndTime.toISOString(), administrator, specialist,
                 boxNumber, bonuses, comments, carNumber, null, price,
                 currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription);
-            setSuccessResponse(null)
 
             const ordersForResponse = response.orders.map(order => `"${order}"`);
             const ordersSentence = ordersForResponse.join(" и ");
@@ -537,8 +537,8 @@ const CreatingTireOrder = observer(() => {
                 setErrorFlag(flag => !flag);
 
             } else {
-                setErrorResponse("Системная ошибка с созданием заказа. Проверьте правильность введённой информации" +
-                    " и попробуйте еще")
+                setErrorResponse("Системная ошибка с созданием заказа. " +
+                    "Проверьте правильность введённой информации и попробуйте еще")
                 setErrorFlag(flag => !flag)
             }
         } finally {

@@ -78,6 +78,7 @@ const UpdateOrderInfo = observer(() => {
     const [errorFlag, setErrorFlag] = useState(false);
 
     const [successResponse, setSuccessResponse] = useState();
+    const [successFlag, setSuccessFlag] = useState(false);
 
     const [isSubmitting] = useState(false);
     const [submitTime] = useState(0);
@@ -269,7 +270,6 @@ const UpdateOrderInfo = observer(() => {
                 setCarTypeMap(responseCarType)
                 setCurrentStatus(currentOrderStatusMapFromEng[response.currentStatus])
 
-
                 setOrderId(response.id)
                 setAutoNumber(response.autoNumber)
                 setAdministrator(response.administrator)
@@ -445,7 +445,7 @@ const UpdateOrderInfo = observer(() => {
         if (successResponse) {
             toaster.push(successMessage, {placement: "bottomEnd"});
         }
-    }, [successResponse]);
+    }, [successFlag]);
 
     const sendUpdateRequest = async (e) => {
         e.preventDefault();
@@ -467,6 +467,7 @@ const UpdateOrderInfo = observer(() => {
                     currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription);
 
                 setSuccessResponse(data.message);
+                setSuccessFlag(flag => !flag);
             } catch (error) {
                 if (error.response) {
                     let messages = [];
@@ -505,6 +506,8 @@ const UpdateOrderInfo = observer(() => {
             try {
                 const data = await deleteOrderById(orderId);
                 setSuccessResponse(data.message)
+                setSuccessFlag(flag => !flag);
+
             } catch (error) {
                 if (error.response) {
                     let messages = [];

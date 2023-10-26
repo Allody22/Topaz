@@ -54,6 +54,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -355,6 +356,25 @@ public class OrderManagementController {
         return ResponseEntity.ok(new OrdersArrayResponse(ordersForResponse));
     }
 
+    @GetMapping("/getPriceAndTime_v1")
+    @Transactional
+    public ResponseEntity<TimeAndPriceResponse> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
+        Pair<Integer, Integer> timeAndPrice = Pair.of(0, 0);
+        switch (ordersArrayPriceTimeRequest.getOrderType()) {
+            case "wash" ->
+                    timeAndPrice = orderService.getWashingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+            case "tire" ->
+                    timeAndPrice = orderService.getTireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
+            case "polishing" ->
+                    timeAndPrice = orderService.getPolishingOrderPriceAndTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
+            default -> throw new InvalidOrderTypeException(ordersArrayPriceTimeRequest.getOrderType());
+        }
+        if (timeAndPrice.getFirst() == 0 || timeAndPrice.getSecond() == 0) {
+            throw new EmptyOrdersArrayException();
+        }
+        return ResponseEntity.ok(new TimeAndPriceResponse(timeAndPrice.getSecond(), timeAndPrice.getFirst()));
+    }
+
 
     @PostMapping("/getPriceAndEndTime_v1")
     @Transactional
@@ -379,19 +399,26 @@ public class OrderManagementController {
         Date startTimeFromRequest = ordersArrayPriceTimeRequest.getStartTime();
 
         if (orderTime >= 820) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 28, 22, 8, ordersArrayPriceTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 28, 22, 8, ordersArrayPriceTimeRequest.getOrderType(), timeIntervals));
         } else {
-            int intervalsNeeded = (int) Math.ceil(orderTime / 30.0);
+            int intervalDuration = (orderTime - 1) / 30 + 1;
+            if (intervalDuration > 28) {
+                intervalDuration = 28;
+            }
+            int timeSkip = intervalDuration;
+
             int startHour = 8;
             int endHour = 22;
-            for (int i = 0; i < intervalsNeeded; i++) {
-                if (startHour < 8 || startHour > 22 || endHour < 8 || endHour > 22) {
-                    continue;
+
+            for (int i = 0; i < timeSkip; i++) {
+
+                if (startHour < 8 || endHour < 8 || endHour > 22 || startHour >= endHour) {
+                    break;
                 }
-                timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, intervalsNeeded, endHour, startHour, ordersArrayPriceTimeRequest.getOrderType()));
+
+                timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, timeSkip, endHour, startHour, ordersArrayPriceTimeRequest.getOrderType(), timeIntervals));
                 startHour++;
                 endHour--;
-
             }
         }
 
@@ -417,20 +444,28 @@ public class OrderManagementController {
         time += 15;
 
         Date startTimeFromRequest = freeTimeRequest.getStartTime();
+
         if (time >= 820) {
-            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 28, 22, 8, freeTimeRequest.getOrderType()));
+            timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, 28, 22, 8, freeTimeRequest.getOrderType(), timeIntervals));
         } else {
-            int intervalsNeeded = (int) Math.ceil(time / 30.0);
+            int intervalDuration = (time - 1) / 30 + 1;
+            if (intervalDuration > 28) {
+                intervalDuration = 28;
+            }
+            int timeSkip = intervalDuration;
+
             int startHour = 8;
             int endHour = 22;
-            for (int i = 0; i < intervalsNeeded; i++) {
-                if (startHour < 8 || startHour > 22 || endHour < 8 || endHour > 22) {
-                    continue;
+
+            for (int i = 0; i < timeSkip; i++) {
+
+                if (startHour < 8 || endHour < 8 || endHour > 22 || startHour >= endHour) {
+                    break;
                 }
-                timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, intervalsNeeded, endHour, startHour, freeTimeRequest.getOrderType()));
+
+                timeIntervals.addAll(fillTimeIntervals(startTimeFromRequest, timeSkip, endHour, startHour, freeTimeRequest.getOrderType(), timeIntervals));
                 startHour++;
                 endHour--;
-
             }
         }
 
@@ -445,66 +480,59 @@ public class OrderManagementController {
     }
 
 
-    @GetMapping("/getPriceAndTime_v1")
-    @Transactional
-    public ResponseEntity<TimeAndPriceResponse> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
-        Pair<Integer, Integer> timeAndPrice = Pair.of(0, 0);
-        switch (ordersArrayPriceTimeRequest.getOrderType()) {
-            case "wash" ->
-                    timeAndPrice = orderService.getWashingOrderPriceTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
-            case "tire" ->
-                    timeAndPrice = orderService.getTireOrderTimePrice(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getWheelR());
-            case "polishing" ->
-                    timeAndPrice = orderService.getPolishingOrderPriceAndTime(ordersArrayPriceTimeRequest.getOrders(), ordersArrayPriceTimeRequest.getBodyType());
-            default -> throw new InvalidOrderTypeException(ordersArrayPriceTimeRequest.getOrderType());
-        }
-        if (timeAndPrice.getFirst() == 0 || timeAndPrice.getSecond() == 0) {
-            throw new EmptyOrdersArrayException();
-        }
-        return ResponseEntity.ok(new TimeAndPriceResponse(timeAndPrice.getSecond(), timeAndPrice.getFirst()));
-    }
-
-
-    public List<TimeIntervals> fillTimeIntervals(Date startTimeFromRequest, int timeSkip, int endOfFor, int startOfFor, String orderType) {
+    public List<TimeIntervals> fillTimeIntervals(Date startTimeFromRequest, int timeSkip, int endOfFor, int startOfFor,
+                                                 String orderType, List<TimeIntervals> currentTimeIntervals) {
         List<TimeIntervals> timeIntervals = new ArrayList<>();
-        for (int i = startOfFor * 2; i < endOfFor * 2; i += timeSkip) {
-            int hour = i / 2;
-            int minute = (i % 2) * 30;
+        for (int i = startOfFor; i < endOfFor * 2; i++) {
+            LocalTime startTimeBoundary = LocalTime.of(8, 0);
+            LocalTime endTimeBoundary = LocalTime.of(22, 0);
 
             LocalDateTime localDateStartTime = LocalDateTime.ofInstant(startTimeFromRequest.toInstant(),
-                            ZoneId.systemDefault())
-                    .withHour(hour)
-                    .withMinute(minute)
-                    .withSecond(0);
+                    ZoneId.systemDefault()).plusMinutes(30L * i);
+
             Date startTime = Date.from(localDateStartTime.atZone(ZoneId.systemDefault()).toInstant());
 
-            if (localDateStartTime.getHour() < 8 || localDateStartTime.getHour() >= 22) {
+            if (localDateStartTime.toLocalTime().isBefore(startTimeBoundary) ||
+                    localDateStartTime.toLocalTime().isAfter(endTimeBoundary)) {
                 continue;
             }
 
             LocalDateTime localDateEndTime = localDateStartTime.plusMinutes(30L * timeSkip);
             Date endTime = Date.from(localDateEndTime.atZone(ZoneId.systemDefault()).toInstant());
 
-            if (localDateEndTime.getHour() < 8 || localDateEndTime.getHour() > 22) {
+            if (localDateEndTime.toLocalTime().isBefore(startTimeBoundary)
+                    || localDateEndTime.toLocalTime().isAfter(endTimeBoundary)
+                    || (localDateEndTime.getDayOfYear() != localDateStartTime.getDayOfYear())
+                    || localDateEndTime.isBefore(localDateStartTime)) {
                 continue;
             }
 
             switch (orderType) {
                 case "wash" -> {
                     TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 1);
-                    timeIntervals.add(singleTimeIntervalFirstBox);
+                    if (!currentTimeIntervals.contains(singleTimeIntervalFirstBox)) {
+                        timeIntervals.add(singleTimeIntervalFirstBox);
+                    }
                     TimeIntervals singleTimeIntervalSecondBox = new TimeIntervals(startTime, endTime, 2);
-                    timeIntervals.add(singleTimeIntervalSecondBox);
+                    if (!currentTimeIntervals.contains(singleTimeIntervalSecondBox)) {
+                        timeIntervals.add(singleTimeIntervalSecondBox);
+                    }
                     TimeIntervals singleTimeIntervalThirdBox = new TimeIntervals(startTime, endTime, 3);
-                    timeIntervals.add(singleTimeIntervalThirdBox);
+                    if (!currentTimeIntervals.contains(singleTimeIntervalThirdBox)) {
+                        timeIntervals.add(singleTimeIntervalThirdBox);
+                    }
                 }
                 case "tire" -> {
-                    TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 0);
-                    timeIntervals.add(singleTimeIntervalFirstBox);
+                    TimeIntervals singleTimeIntervalZeroBox = new TimeIntervals(startTime, endTime, 0);
+                    if (!currentTimeIntervals.contains(singleTimeIntervalZeroBox)) {
+                        timeIntervals.add(singleTimeIntervalZeroBox);
+                    }
                 }
                 case "polishing" -> {
-                    TimeIntervals singleTimeIntervalFirstBox = new TimeIntervals(startTime, endTime, 5);
-                    timeIntervals.add(singleTimeIntervalFirstBox);
+                    TimeIntervals singleTimeIntervalFifths = new TimeIntervals(startTime, endTime, 5);
+                    if (!currentTimeIntervals.contains(singleTimeIntervalFifths)) {
+                        timeIntervals.add(singleTimeIntervalFifths);
+                    }
                 }
                 default -> throw new InvalidOrderTypeException(orderType);
             }

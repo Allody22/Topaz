@@ -39,9 +39,11 @@ const ChangeServiceInfo = observer(() => {
 
         const [showConfirmation, setShowConfirmation] = useState(false);
 
-        const [response, setResponse] = useState();
+        const [successResponse, setSuccessResponse] = useState();
         const [errorResponse, setErrorResponse] = useState();
         const [errorFlag, setErrorFlag] = useState(false);
+        const [successFlag, setSuccessFlag] = useState(false);
+
 
         const [currentService, setCurrentService] = useState([{
             name: null, priceFirstType: null, priceSecondType: null, priceThirdType: null,
@@ -100,8 +102,6 @@ const ChangeServiceInfo = observer(() => {
         useEffect(() => {
             async function getAllOrders() {
                 try {
-
-                    //Версия с ценой и временем
                     const tireOrdersResponse = await getAllTireServicesWithPriceAndTime();
                     const filteredTireOrders = tireOrdersResponse.map(item => ({
                         ...item,
@@ -190,17 +190,17 @@ const ChangeServiceInfo = observer(() => {
                 style={{border: '1px solid black'}}
             >
                 <div style={{width: 320, whiteSpace: "pre-line"}}>
-                    <p>{response}</p>
+                    <p>{successResponse}</p>
                     <p>Вы успешно обновили информацию в базе данных.</p>
                 </div>
             </Notification>
         );
 
         useEffect(() => {
-            if (response) {
+            if (successResponse) {
                 toaster.push(message, {placement: "bottomEnd"});
             }
-        }, [response]);
+        }, [successFlag]);
 
         const handleSubmit = async (event) => {
             event.preventDefault();
@@ -236,7 +236,8 @@ const ChangeServiceInfo = observer(() => {
                             break;
                     }
 
-                    setResponse(response.message);
+                    setSuccessResponse(response.message);
+                    setSuccessFlag(flag => !flag);
 
                 } catch (error) {
                     if (error.response) {

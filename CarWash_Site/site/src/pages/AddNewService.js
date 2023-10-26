@@ -65,6 +65,7 @@ const AddNewService = observer(() => {
     const [errorResponse, setErrorResponse] = useState();
     const [errorFlag, setErrorFlag] = useState(false);
     const [successResponse, setSuccessResponse] = useState();
+    const [successFlag, setSuccessFlag] = useState(false);
 
 
     const [wheelSizeAndPrice, setWheelSizeAndPrice] = useState([{wheelR: null, price: null}]);
@@ -245,7 +246,7 @@ const AddNewService = observer(() => {
         if (successResponse) {
             toaster.push(successMessage, {placement: "bottomEnd"});
         }
-    }, [successResponse]);
+    }, [successFlag]);
 
     useEffect(() => {
         setWashingTypeIncludedEnglish(washingTypeIncluded.map(item => includedServiceMap[item]))
@@ -278,8 +279,8 @@ const AddNewService = observer(() => {
                     getTimeByWheelR('18'), getTimeByWheelR('19'), getTimeByWheelR('20'),
                     getTimeByWheelR('21'), getTimeByWheelR('22'),
                     serviceRoleMapFromRus[role], [...washingTypeIncludedEnglish, ...washingTypeConnectedEnglish])
-                setSuccessResponse(null)
                 setSuccessResponse("В базе данных появилась услуга '" + (response.name).replaceAll('_', ' ') + "'")
+                setSuccessFlag(flag => !flag);
             } catch
                 (error) {
                 if (error.response) {

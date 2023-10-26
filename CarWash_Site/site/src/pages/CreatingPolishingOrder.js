@@ -71,9 +71,9 @@ const CreatingPolishingOrder = observer(() => {
     const [requestEndTime, setRequestEndTime] = useState(new Date());
     const [requestStartTime, setRequestStartTime] = useState(new Date());
 
-    const [errorResponse, setErrorResponse] = useState();
+    const [errorResponse, setErrorResponse] = useState('');
     const [errorFlag, setErrorFlag] = useState(false);
-    const [successResponse, setSuccessResponse] = useState();
+    const [successResponse, setSuccessResponse] = useState('');
     const [successFlag, setSuccessFlag] = useState(false);
     const toaster = useToaster();
 
@@ -448,7 +448,6 @@ const CreatingPolishingOrder = observer(() => {
                 requestStartTime.toISOString(), requestEndTime.toISOString(),
                 administrator, specialist, boxNumber, bonuses, comments,
                 carNumber, carType, price, currentOrderStatusMapFromRus[currentStatus], selectedSaleDescription);
-            setSuccessResponse(null)
 
             const ordersForResponse = response.orders.map(order => `"${order}"`);
             const ordersSentence = ordersForResponse.join(" и ");
