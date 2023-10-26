@@ -543,11 +543,12 @@ const CreatingWashingOrder = observer(() => {
     ];
     return (
         <>
-            <p className="input-style-modified">Страница добавления заказов на мойку</p>
+            <p className="input-style-modified">Страница добавления заказов на мойку.</p>
             <p className="small-input-style">Здесь вы можете сами создать какой-то заказ мойки на автомойку из всех
-                актуальных услуг, а потом получить всю информацию о нём</p>
+                актуальных услуг, а потом получить всю информацию о нём.</p>
+            <p className="small-input-style">К длительности заказа автоматически прибавляется 15.</p>
             <p className="small-input-style"><strong>Обязательно</strong>: все элементы с красными
-                под красным текстом</p>
+                под красным текстом.</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
                 Основные услуги
@@ -791,7 +792,7 @@ const CreatingWashingOrder = observer(() => {
                 <InputPicker
                     data={filesOptions}
                     style={{...styles, WebkitTextFillColor: "#000000"}}
-                    value={selectedFileId} // здесь изменено на selectedFileId
+                    value={selectedFileId}
                     menuStyle={{fontSize: "17px"}}
                     onChange={(selectedValue) => {
                         const selectedFile = files.find(file => file.id === selectedValue);

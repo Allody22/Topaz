@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.carwash_server.exceptions.NotInDataBaseException;
 import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.secondary.constants.ERole;
-import ru.nsu.carwash_server.models.secondary.helpers.OrderPriceTimeDoneTypeInfo;
+import ru.nsu.carwash_server.models.secondary.helpers.SingleOrderResponse;
 import ru.nsu.carwash_server.models.users.Role;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
 import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequestByAdmin;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
+import ru.nsu.carwash_server.payload.response.OrdersArrayResponse;
 import ru.nsu.carwash_server.payload.response.UserInformationResponse;
-import ru.nsu.carwash_server.payload.response.UserOrdersResponse;
 import ru.nsu.carwash_server.repository.users.RoleRepository;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
@@ -95,21 +95,21 @@ public class AdminController {
     @GetMapping("/getUserOrdersByAdmin_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
-    public ResponseEntity<UserOrdersResponse> getUserOrdersByAdmin(@Valid @NotBlank @RequestParam("username") String username) {
+    public ResponseEntity<OrdersArrayResponse> getUserOrdersByAdmin(@Valid @NotBlank @RequestParam("username") String username) {
 
         User user = userService.getActualUserVersionByPhone(username).getUser();
 
-        List<OrderPriceTimeDoneTypeInfo> userOrders = new ArrayList<>();
+        List<OrderVersions> userOrders = new ArrayList<>();
 
         for (var item : user.getOrders()) {
             OrderVersions latestOrderVersion = orderService.getActualOrderVersion(item.getId());
 
-            userOrders.add(new OrderPriceTimeDoneTypeInfo(latestOrderVersion.getOrderType(),
-                    latestOrderVersion.getPrice(), item.getId(),
-                    latestOrderVersion.getStartTime(), latestOrderVersion.getCurrentStatus()));
+            userOrders.add(latestOrderVersion);
         }
 
-        return ResponseEntity.ok(new UserOrdersResponse(userOrders));
+        List<SingleOrderResponse> ordersForResponse = getTimeAndPriceOfOrders(userOrders);
+
+        return ResponseEntity.ok(new OrdersArrayResponse(ordersForResponse));
     }
 
     @GetMapping("/getAllUserTelephones_v1")
@@ -197,5 +197,57 @@ public class AdminController {
 
         return "Пользователь '" + newVersion.getPhone() + "' получил" + newPhone +
                 newFullName + newRoles + newAdminNote + newEmail + newUserNote;
+    }
+
+    public List<SingleOrderResponse> getTimeAndPriceOfOrders(List<OrderVersions> orders) {
+        List<SingleOrderResponse> ordersForResponse = new ArrayList<>();
+
+        for (var item : orders) {
+            SingleOrderResponse newItem = null;
+
+            String orderType = item.getOrderType();
+            List<String> stringOrders = new ArrayList<>();
+            String userContact;
+
+            if (orderType.contains("polishing")) {
+                for (var currentOrder : item.getOrdersPolishings()) {
+                    stringOrders.add(currentOrder.getName().replace("_", " "));
+                }
+                userContact = item.getUserContacts();
+                newItem = new SingleOrderResponse(item.getOrder().getId(), item.getDateOfCreation(), item.getStartTime()
+                        , item.getEndTime(), item.getAdministrator(), item.getSpecialist(),
+                        item.getAutoNumber(), item.getAutoType(), item.getBoxNumber(),
+                        item.getBonuses(), item.getPrice(), item.getWheelR(),
+                        item.getComments(), stringOrders, userContact,
+                        item.getOrderType(), item.getCurrentStatus(), item.getSale());
+            } else if (orderType.contains("tire")) {
+                for (var currentOrder : item.getOrdersTires()) {
+                    stringOrders.add(currentOrder.getName().replace("_", " "));
+                }
+                userContact = item.getUserContacts();
+                newItem = new SingleOrderResponse(item.getOrder().getId(), item.getDateOfCreation(),
+                        item.getStartTime(), item.getEndTime(), item.getAdministrator(),
+                        item.getSpecialist(), item.getAutoNumber(),
+                        item.getAutoType(), item.getBoxNumber(), item.getBonuses(),
+                        item.getPrice(), item.getWheelR(), item.getComments(),
+                        stringOrders, userContact, item.getOrderType(), item.getCurrentStatus(), item.getSale());
+            } else if (orderType.contains("wash")) {
+                for (var currentOrder : item.getOrdersWashing()) {
+                    stringOrders.add(currentOrder.getName().replace("_", " "));
+                }
+                userContact = item.getUserContacts();
+
+                newItem = new SingleOrderResponse(item.getOrder().getId(), item.getDateOfCreation(),
+                        item.getStartTime(), item.getEndTime(), item.getAdministrator(),
+                        item.getSpecialist(), item.getAutoNumber(), item.getAutoType(),
+                        item.getBoxNumber(), item.getBonuses(), item.getPrice(), item.getWheelR(),
+                        item.getComments(), stringOrders, userContact,
+                        item.getOrderType(), item.getCurrentStatus(), item.getSale());
+            }
+
+            ordersForResponse.add(newItem);
+        }
+
+        return ordersForResponse;
     }
 }

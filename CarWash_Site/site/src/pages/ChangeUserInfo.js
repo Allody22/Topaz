@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import InputField from "../model/InputField";
 import {Divider, InputPicker, Notification, TagPicker, useToaster} from "rsuite";
-import {BrowserRouter as Router, useHistory, useParams} from "react-router-dom";
+import {BrowserRouter as Router, useHistory} from "react-router-dom";
 import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
@@ -216,8 +216,7 @@ const ChangeUserInfo = observer(() => {
 
     const [usersArray, setUsersArray] = useState([]);
 
-    const {username: paramsUsername} = useParams();
-    const [username, setUsername] = useState(paramsUsername);
+    const [username, setUsername] = useState('');
 
     const [errorResponse, setErrorResponse] = useState('');
     const [errorFlag, setErrorFlag] = useState(false);
@@ -334,7 +333,9 @@ const ChangeUserInfo = observer(() => {
 
     useEffect(() => {
         async function findUserInfo() {
-            if (username == null && username === "" && typeof username === "undefined" && username === ":username") {
+            console.log(username)
+
+            if ((!username || typeof username !== "string") || username === ":username" || username === '') {
                 setErrorResponse("Обязательно укажите телефон существующего пользователя")
                 setErrorFlag(flag => !flag)
                 return;
@@ -371,7 +372,7 @@ const ChangeUserInfo = observer(() => {
         }
 
         async function getUserOrders() {
-            if (username == null && username === "" && typeof username === "undefined" && username === ":username") {
+            if ((!username || typeof username !== "string") || username === ":username" || username === '') {
                 setErrorResponse("Обязательно укажите телефон существующего пользователя")
                 setErrorFlag(flag => !flag)
                 return;

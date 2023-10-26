@@ -588,11 +588,12 @@ const CreatingTireOrder = observer(() => {
     ];
     return (
         <>
-            <p className="input-style-modified">Страница добавления заказов на шиномонтаж</p>
+            <p className="input-style-modified">Страница добавления заказов на шиномонтаж.</p>
             <p className="small-input-style">Здесь вы можете сами создать какой-то заказ
-                на шиномонтаж из всех актуальных услуг, а потом получить всю информацию о нём</p>
+                на шиномонтаж из всех актуальных услуг, а потом получить всю информацию о нём.</p>
+            <p className="small-input-style">К длительности заказа автоматически прибавляется 15.</p>
             <p className="small-input-style"><strong>Обязательно</strong>: все элементы под красным
-                текстом</p>
+                текстом.</p>
 
             <Button className='full-width' variant='secondary' onClick={handleOpenModal}>
                 Выберите услуги
