@@ -479,7 +479,7 @@ const CreatingPolishingOrder = observer(() => {
                 setErrorFlag(flag => !flag)
             }
         } finally {
-            setTimeout(() => setIsSubmitting(false), 2000);
+            setTimeout(() => setIsSubmitting(false), 4000);
         }
     };
 

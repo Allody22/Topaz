@@ -33,6 +33,7 @@ public class AllOrdersEntity {
     private Integer price_r_18 = null;
 
     private Integer price_r_19 = null;
+
     private Integer price_r_20 = null;
 
     private Integer price_r_21 = null;
@@ -54,7 +55,14 @@ public class AllOrdersEntity {
     private Integer time_r_19 = null;
 
     private Integer time_r_20 = null;
+
     private Integer time_r_21 = null;
+
     private Integer time_r_22 = null;
-    private String type;
+
+    private String type = null;
+
+    private String role = null;
+
+    private String associatedOrder = null;
 }

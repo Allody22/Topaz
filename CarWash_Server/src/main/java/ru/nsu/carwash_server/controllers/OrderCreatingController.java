@@ -146,10 +146,6 @@ public class OrderCreatingController {
         String currentStatus = bookingOrderRequest.getCurrentStatus();
         String userPhone = lastUserVersion.getPhone();
 
-        if (lastUserVersion.getFullName() != null && !lastUserVersion.getFullName().isBlank()) {
-            userPhone += "; " + lastUserVersion.getFullName();
-        }
-
         if (price == null || price == 0) {
             price = orderService.getWashingOrderPriceTime(ordersList, autoType).getSecond();
         }
@@ -238,10 +234,6 @@ public class OrderCreatingController {
         String currentStatus = bookingOrderRequest.getCurrentStatus();
         String userPhone = lastUserVersion.getPhone();
 
-        if (lastUserVersion.getFullName() != null && !lastUserVersion.getFullName().isBlank()) {
-            userPhone += "; " + lastUserVersion.getFullName();
-        }
-
         Pair<Order, OrderVersions> result = orderService.savePolishingOrder(ordersPolishings, startTime,
                 endTime, administrator, specialist, boxNumber, bonuses, comments,
                 autoNumber, autoType, userPhone, user, price,
@@ -323,10 +315,6 @@ public class OrderCreatingController {
         int bonuses = bookingOrderRequest.getBonuses();
         String currentStatus = bookingOrderRequest.getCurrentStatus();
         String userPhone = lastUserVersion.getPhone();
-
-        if (lastUserVersion.getFullName() != null && !lastUserVersion.getFullName().isBlank()) {
-            userPhone += "; " + lastUserVersion.getFullName();
-        }
 
         int autoType = bookingOrderRequest.getAutoType();
 

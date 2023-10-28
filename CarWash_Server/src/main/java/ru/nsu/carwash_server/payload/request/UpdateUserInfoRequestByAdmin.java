@@ -28,9 +28,6 @@ public class UpdateUserInfoRequestByAdmin {
     @Size(max = 120)
     private String adminNote = null;
 
-    @Size(max = 120)
-    private String userNote = null;
-
     @Email
     private String email = null;
 }

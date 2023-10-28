@@ -57,9 +57,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -280,7 +282,7 @@ public class OrderManagementController {
                     null, null, null, null, null, null, null,
                     null, null, null, null, null,
                     null, null, null, null, null, null, null,
-                    "Washing"));
+                    "Washing", services.getRole(), services.getAssociatedOrder()));
         }
         for (var services : polishingOrdersWithTimeAndPrice) {
             allOrdersEntities.add(new AllOrdersEntity(services.getName().replace("_", " "), services.getPriceFirstType(),
@@ -288,7 +290,7 @@ public class OrderManagementController {
                     services.getTimeThirdType(), null, null, null, null,
                     null, null, null, null, null, null, null, null,
                     null, null, null, null, null, null, null,
-                    null, "Polishing"));
+                    null, "Polishing", null, null));
         }
         for (var services : tireServicesWithTimeAndPrice) {
             allOrdersEntities.add(new AllOrdersEntity(services.getName().replace("_", " "),
@@ -298,7 +300,7 @@ public class OrderManagementController {
                     services.getPrice_r_19(), services.getPrice_r_20(), services.getPrice_r_21(), services.getPrice_r_22(),
                     services.getTime_r_13(), services.getTime_r_14(), services.getTime_r_15(), services.getTime_r_16(),
                     services.getTime_r_17(), services.getTime_r_18(), services.getTime_r_19(), services.getTime_r_20(),
-                    services.getTime_r_21(), services.getTime_r_22(), "Tire"));
+                    services.getTime_r_21(), services.getTime_r_22(), "Tire", null, null));
         }
         return ResponseEntity.ok(allOrdersEntities);
     }
@@ -429,7 +431,7 @@ public class OrderManagementController {
 
         List<TimeIntervals> clearOrdersWithoutDuplicates = getClearOrdersWithoutDuplicates(timeIntervals, bookedOrders);
 
-        return ResponseEntity.ok(new TimeAndPriceAndFreeTimeResponse(timeAndPrice.getSecond(), timeAndPrice.getFirst(), clearOrdersWithoutDuplicates, new Date()));
+        return ResponseEntity.ok(new TimeAndPriceAndFreeTimeResponse(timeAndPrice.getSecond(), timeAndPrice.getFirst(), clearOrdersWithoutDuplicates));
     }
 
     @PostMapping("/getFreeTime_v1")
@@ -476,7 +478,7 @@ public class OrderManagementController {
 
         List<TimeIntervals> clearOrdersWithoutDuplicates = getClearOrdersWithoutDuplicates(timeIntervals, bookedOrders);
 
-        return ResponseEntity.ok(new FreeTimeAndBoxResponse(time, clearOrdersWithoutDuplicates, new Date()));
+        return ResponseEntity.ok(new FreeTimeAndBoxResponse(time, clearOrdersWithoutDuplicates));
     }
 
 
@@ -564,19 +566,11 @@ public class OrderManagementController {
             }
         }
 
-        List<TimeIntervals> noDuplicatesTimeList = new ArrayList<>(clearOrders);
+        Set<TimeIntervals> noDuplicatesTimeSet = new TreeSet<>(Comparator.comparing(TimeIntervals::getStartTime)
+                .thenComparing(TimeIntervals::getEndTime));
+        noDuplicatesTimeSet.addAll(clearOrders);
 
-        for (var firstInterval : clearOrders) {
-            for (var secondInterval : clearOrders) {
-                if (noDuplicatesTimeList.contains(secondInterval) && (firstInterval.getStartTime().equals(secondInterval.getStartTime())
-                        && firstInterval.getEndTime().equals(secondInterval.getEndTime())
-                        && !Objects.equals(firstInterval.getBox(), secondInterval.getBox()))
-                        && noDuplicatesTimeList.contains(secondInterval) && noDuplicatesTimeList.contains(firstInterval)) {
-                    noDuplicatesTimeList.remove(secondInterval);
-                }
-            }
-        }
-        return noDuplicatesTimeList;
+        return new ArrayList<>(noDuplicatesTimeSet);
     }
 
 
@@ -595,6 +589,7 @@ public class OrderManagementController {
                     stringOrders.add(currentOrder.getName().replace("_", " "));
                 }
                 userContact = item.getUserContacts();
+
                 newItem = new SingleOrderResponse(item.getOrder().getId(), item.getDateOfCreation(), item.getStartTime()
                         , item.getEndTime(), item.getAdministrator(), item.getSpecialist(),
                         item.getAutoNumber(), item.getAutoType(), item.getBoxNumber(),
@@ -616,8 +611,8 @@ public class OrderManagementController {
                 for (var currentOrder : item.getOrdersWashing()) {
                     stringOrders.add(currentOrder.getName().replace("_", " "));
                 }
-                userContact = item.getUserContacts();
 
+                userContact = item.getUserContacts();
                 newItem = new SingleOrderResponse(item.getOrder().getId(), item.getDateOfCreation(),
                         item.getStartTime(), item.getEndTime(), item.getAdministrator(),
                         item.getSpecialist(), item.getAutoNumber(), item.getAutoType(),

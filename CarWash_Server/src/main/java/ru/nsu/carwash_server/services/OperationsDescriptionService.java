@@ -218,10 +218,6 @@ public class OperationsDescriptionService {
             message.append(" новую почту: '").append(updateUserInfoRequest.getEmail()).append("',");
         }
 
-        if (updateUserInfoRequest.getUserNote() != null) {
-            message.append(" новую заметку от самого пользователя: '").append(updateUserInfoRequest.getUserNote()).append("',");
-        }
-
         if (message.charAt(message.length() - 1) == ',') {
             message.deleteCharAt(message.length() - 1);
         }

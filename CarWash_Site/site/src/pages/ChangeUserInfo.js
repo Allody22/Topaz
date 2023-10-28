@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {Button, Form} from 'react-bootstrap';
 import InputField from "../model/InputField";
 import {Divider, InputPicker, Notification, TagPicker, useToaster} from "rsuite";
-import {BrowserRouter as Router, useHistory} from "react-router-dom";
+import {BrowserRouter as Router, useHistory, useParams} from "react-router-dom";
 import {observer} from "mobx-react-lite";
 import socketStore from "../store/SocketStore";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
@@ -83,10 +83,6 @@ const columns = [
         Header: 'Клиент',
         sortType: 'alphanumeric',
         accessor: 'userNumber',
-        Cell: ({value}) => {
-            const history = useHistory();
-            return <div onClick={() => history.push(`/changeUserInfo/${value}`)}>{value}</div>;
-        }
     },
     {
         Header: 'Взятые услуги',
@@ -203,26 +199,25 @@ const columns = [
 
 const ChangeUserInfo = observer(() => {
     const [showConfirmation, setShowConfirmation] = useState(false);
-    const [getUsers, setGetUsers] = useState(false);
+
+    const [usersArray, setUsersArray] = useState([]);
 
     const [orders, setOrders] = useState([]);
 
     const [fullName, setFullName] = useState('');
     const [adminNote, setAdminNote] = useState('');
-    const [userNote, setUserNote] = useState('');
     const [email, setEmail] = useState('');
     const [selectedRoles, setSelectedRoles] = useState([]);
     const [enSelectedRoles, setEnSelectedRoles] = useState([]);
 
-    const [usersArray, setUsersArray] = useState([]);
 
-    const [username, setUsername] = useState('');
+    const {userFromParams} = useParams();
+    const [username, setUsername] = useState(userFromParams);
 
     const [errorResponse, setErrorResponse] = useState('');
     const [errorFlag, setErrorFlag] = useState(false);
 
     const [successFlag, setSuccessFlag] = useState(false);
-
     const [successResponse, setSuccessResponse] = useState('');
 
 
@@ -304,14 +299,11 @@ const ChangeUserInfo = observer(() => {
     useEffect(() => {
         async function getAllPeopleInformation() {
             try {
-                if (!getUsers) {
-                    const response = await getAllUsers();
-                    setUsersArray(response);
-                    setGetUsers(true)
-                    const sentence = `Список всех пользователей успешно получен.`;
-                    setSuccessResponse(sentence)
-                    setSuccessFlag(flag => !flag);
-                }
+                const response = await getAllUsers();
+                setUsersArray(response);
+                const sentence = `Список всех пользователей успешно получен.`;
+                setSuccessResponse(sentence)
+                setSuccessFlag(flag => !flag);
             } catch (error) {
                 if (error.response) {
                     let messages = [];
@@ -331,81 +323,83 @@ const ChangeUserInfo = observer(() => {
         getAllPeopleInformation();
     }, []);
 
+    async function findUserInfo() {
+
+        if ((!username || typeof username !== "string") || username === ":username" || username === ":userFromParams" || username === '') {
+            setErrorResponse("Обязательно укажите телефон существующего пользователя")
+            setErrorFlag(flag => !flag)
+            return;
+        }
+        try {
+            const response = await findUserByPhone(username);
+            setFullName(response.fullName || '');
+            setAdminNote(response.adminNotes || '');
+            setEmail(response.email || '')
+            const roles = response.roles.map(role => rolesToRussianMap(role)) || [];
+
+            setSelectedRoles(roles);
+
+            const sentence = `Информация о пользователе получена.`;
+            setSuccessResponse(sentence)
+
+            setSuccessFlag(flag => !flag);
+        } catch (error) {
+            if (error.response) {
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join('\n'));
+                setErrorFlag(flag => !flag);
+            } else {
+                setErrorResponse("Системная ошибка, проверьте правильность " +
+                    "введённой информации и попробуйте еще раз")
+                setErrorFlag(flag => !flag)
+            }
+        }
+    }
+
+    async function getUserOrders() {
+        if ((!username || typeof username !== "string") || username === ":username" || username === ":userFromParams" || username === '') {
+            setErrorResponse("Обязательно укажите телефон существующего пользователя")
+            setErrorFlag(flag => !flag)
+            return;
+        }
+        try {
+            const response = await getOrdersByUser(username);
+            setOrders(response);
+
+            const sentence = `Заказы пользователя успешно получены.`;
+            setSuccessResponse(sentence)
+
+            setSuccessFlag(flag => !flag);
+        } catch (error) {
+            if (error.response) {
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join('\n'));
+                setErrorFlag(flag => !flag);
+            } else {
+                setErrorResponse("Системная ошибка, проверьте правильность " +
+                    "введённой информации и попробуйте еще раз")
+                setErrorFlag(flag => !flag)
+            }
+        }
+    }
+
     useEffect(() => {
-        async function findUserInfo() {
-            console.log(username)
-
-            if ((!username || typeof username !== "string") || username === ":username" || username === '') {
-                setErrorResponse("Обязательно укажите телефон существующего пользователя")
-                setErrorFlag(flag => !flag)
-                return;
-            }
-            try {
-                const response = await findUserByPhone(username);
-                setFullName(response.fullName || '');
-                setAdminNote(response.adminNotes || '');
-                setUserNote(response.userNotes || '');
-                setEmail(response.email || '')
-                const roles = response.roles.map(role => rolesToRussianMap(role)) || [];
-
-                setSelectedRoles(roles);
-
-                setGetUsers(true)
-                const sentence = `Информация о пользователе получена.`;
-                setSuccessResponse(sentence)
-
-                setSuccessFlag(flag => !flag);
-            } catch (error) {
-                if (error.response) {
-                    let messages = [];
-                    for (let key in error.response.data) {
-                        messages.push(error.response.data[key]);
-                    }
-                    setErrorResponse(messages.join('\n'));
-                    setErrorFlag(flag => !flag);
-                } else {
-                    setErrorResponse("Системная ошибка, проверьте правильность " +
-                        "введённой информации и попробуйте еще раз")
-                    setErrorFlag(flag => !flag)
-                }
-            }
-        }
-
-        async function getUserOrders() {
-            if ((!username || typeof username !== "string") || username === ":username" || username === '') {
-                setErrorResponse("Обязательно укажите телефон существующего пользователя")
-                setErrorFlag(flag => !flag)
-                return;
-            }
-            try {
-                const response = await getOrdersByUser(username);
-                setOrders(response);
-
-                setGetUsers(true)
-
-                const sentence = `Заказы пользователя успешно получены.`;
-                setSuccessResponse(sentence)
-
-                setSuccessFlag(flag => !flag);
-            } catch (error) {
-                if (error.response) {
-                    let messages = [];
-                    for (let key in error.response.data) {
-                        messages.push(error.response.data[key]);
-                    }
-                    setErrorResponse(messages.join('\n'));
-                    setErrorFlag(flag => !flag);
-                } else {
-                    setErrorResponse("Системная ошибка, проверьте правильность " +
-                        "введённой информации и попробуйте еще раз")
-                    setErrorFlag(flag => !flag)
-                }
-            }
-        }
-
         getUserOrders();
         findUserInfo();
     }, [username]);
+
+    useEffect(() => {
+        if (!(userFromParams === ":username" || userFromParams === ":userFromParams"
+            || userFromParams === '')) {
+            setUsername(userFromParams)
+        }
+    }, [userFromParams]);
 
     useEffect(() => {
         changeRolesToEnglish()
@@ -456,7 +450,7 @@ const ChangeUserInfo = observer(() => {
         if (showConfirmation) {
             try {
                 const data = (await updateUserInfo(username, fullName, enSelectedRoles,
-                    adminNote, userNote, email)).message;
+                    adminNote, email)).message;
 
                 setSuccessResponse(data)
 
@@ -540,14 +534,6 @@ const ChangeUserInfo = observer(() => {
                     id='adminNote'
                     value={adminNote}
                     onChange={setAdminNote}
-                />
-                <InputField
-                    maxLength={120}
-                    className="input-style"
-                    label='Комментарии самого пользователя (возможно, более точная информация о машине и тп)'
-                    id='userNote'
-                    value={userNote}
-                    onChange={setUserNote}
                 />
                 {showConfirmation && (
                     <div className='confirmation-container'>

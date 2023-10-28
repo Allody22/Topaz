@@ -71,9 +71,6 @@ public class UserVersions {
     @Column(name = "admin_note")
     private String adminNote;
 
-    @Column(name = "comments")
-    private String comments;
-
     @Column(name = "version")
     private int version;
 
@@ -97,9 +94,6 @@ public class UserVersions {
 
         this.adminNote = (updateUserInfoRequest.getAdminNote() != null) ?
                 updateUserInfoRequest.getAdminNote() : userVersions.getAdminNote();
-
-        this.comments = (updateUserInfoRequest.getUserNote() != null) ?
-                updateUserInfoRequest.getUserNote() : userVersions.getComments();
 
         this.email = (updateUserInfoRequest.getEmail() != null) ?
                 updateUserInfoRequest.getEmail() : userVersions.getEmail();
@@ -125,9 +119,6 @@ public class UserVersions {
         this.adminNote = (updateUserInfoRequest.getAdminNote() != null) ?
                 updateUserInfoRequest.getAdminNote() : userVersions.getAdminNote();
 
-        this.comments = (updateUserInfoRequest.getUserNote() != null) ?
-                updateUserInfoRequest.getUserNote() : userVersions.getComments();
-
         this.email = (updateUserInfoRequest.getEmail() != null) ?
                 updateUserInfoRequest.getEmail() : userVersions.getEmail();
     }
@@ -150,8 +141,6 @@ public class UserVersions {
         this.fullName = userVersions.getFullName();
 
         this.adminNote = userVersions.getAdminNote();
-
-        this.comments = userVersions.getComments();
 
         this.email = userVersions.getEmail();
     }

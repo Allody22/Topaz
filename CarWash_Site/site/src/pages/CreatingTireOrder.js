@@ -84,7 +84,7 @@ const CreatingTireOrder = observer(() => {
 
     const [errorResponse, setErrorResponse] = useState();
     const [errorFlag, setErrorFlag] = useState(false);
-    const [successResponse, setSuccessResponse] = useState();
+    const [successResponse, setSuccessResponse] = useState('');
     const [successFlag, setSuccessFlag] = useState(false);
 
     const toaster = useToaster();

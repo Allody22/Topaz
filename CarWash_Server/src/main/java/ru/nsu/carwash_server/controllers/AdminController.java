@@ -89,7 +89,7 @@ public class AdminController {
 
         return ResponseEntity.ok(new UserInformationResponse(user.getId(),
                 latestUserVersion.getFullName(), latestUserVersion.getPhone(), latestUserVersion.getEmail(),
-                latestUserVersion.getBonuses(), userRoles, latestUserVersion.getComments(), latestUserVersion.getAdminNote()));
+                latestUserVersion.getBonuses(), userRoles, latestUserVersion.getAdminNote()));
     }
 
     @GetMapping("/getUserOrdersByAdmin_v1")
@@ -168,11 +168,21 @@ public class AdminController {
     }
 
     private static String getString(UpdateUserInfoRequestByAdmin updateUserInfoRequest, UserVersions newVersion) {
-        String newPhone = (updateUserInfoRequest.getPhone() != null) ?
-                "новый телефон: '" + updateUserInfoRequest.getPhone() + "'," : null;
+        StringBuilder result = new StringBuilder("Пользователь '")
+                .append(newVersion.getPhone())
+                .append("' получил");
 
-        String newFullName = (updateUserInfoRequest.getFullName() != null) ?
-                "новое ФИО: '" + updateUserInfoRequest.getFullName() + "'," : null;
+        if (updateUserInfoRequest.getPhone() != null) {
+            result.append(" новый телефон: '")
+                    .append(updateUserInfoRequest.getPhone())
+                    .append("',");
+        }
+
+        if (updateUserInfoRequest.getFullName() != null) {
+            result.append(" новое ФИО: '")
+                    .append(updateUserInfoRequest.getFullName())
+                    .append("',");
+        }
 
         List<String> ruRoles = new ArrayList<>();
         for (String role : updateUserInfoRequest.getRoles()) {
@@ -184,19 +194,29 @@ public class AdminController {
                 case "ROLE_SPECIALIST" -> ruRoles.add("Специалист (мойщик)");
             }
         }
-        String newRoles = "новый набор ролей: " + ruRoles + "',";
+        if (!ruRoles.isEmpty()) {
+            result.append(" новый набор ролей: ")
+                    .append(ruRoles)
+                    .append("',");
+        }
 
-        String newAdminNote = (updateUserInfoRequest.getAdminNote() != null) ?
-                "новую заметку от администратора: '" + updateUserInfoRequest.getAdminNote() + "'," : null;
+        if (updateUserInfoRequest.getAdminNote() != null) {
+            result.append(" новую заметку от администратора: '")
+                    .append(updateUserInfoRequest.getAdminNote())
+                    .append("',");
+        }
 
-        String newEmail = (updateUserInfoRequest.getEmail() != null) ?
-                "новую почту: '" + updateUserInfoRequest.getEmail() + "'," : null;
+        if (updateUserInfoRequest.getEmail() != null) {
+            result.append(" новую почту: '")
+                    .append(updateUserInfoRequest.getEmail())
+                    .append("',");
+        }
 
-        String newUserNote = (updateUserInfoRequest.getUserNote() != null) ?
-                "новую заметку от самого пользователя: '" + updateUserInfoRequest.getUserNote() + "'," : null;
+        if (result.charAt(result.length() - 1) == ',') {
+            result.deleteCharAt(result.length() - 1);
+        }
 
-        return "Пользователь '" + newVersion.getPhone() + "' получил" + newPhone +
-                newFullName + newRoles + newAdminNote + newEmail + newUserNote;
+        return result.toString();
     }
 
     public List<SingleOrderResponse> getTimeAndPriceOfOrders(List<OrderVersions> orders) {

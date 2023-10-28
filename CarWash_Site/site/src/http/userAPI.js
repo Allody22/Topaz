@@ -55,13 +55,12 @@ export const check = async () => {
     await $authHost.get('api/admin/users/adminRoleCheck_v1');
 }
 
-export const updateUserInfo = async (phone, fullName, roles, adminNote, userNote, email) => {
+export const updateUserInfo = async (phone, fullName, roles, adminNote, email) => {
     const requestBody = {
         fullName: fullName,
         phone: phone,
         roles: roles,
         adminNote: adminNote,
-        userNote: userNote,
         email: email
     };
     const response = await $authHost.post('api/admin/users/updateUserInfo_v1', requestBody);

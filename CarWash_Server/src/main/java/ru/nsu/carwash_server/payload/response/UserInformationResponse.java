@@ -23,7 +23,5 @@ public class UserInformationResponse {
 
     private Set<String> roles;
 
-    private String userNotes;
-
     private String adminNotes;
 }

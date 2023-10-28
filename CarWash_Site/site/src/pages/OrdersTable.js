@@ -204,7 +204,10 @@ const OrderTable = observer(() => {
 
     const [errorResponse, setErrorResponse] = useState("");
     const [errorFlag, setErrorFlag] = useState(false);
-    const [successResponse, setSuccessResponse] = useState();
+    const [successResponse, setSuccessResponse] = useState('');
+    const [successFlag, setSuccessFlag] = useState(false);
+
+
     const toaster = useToaster();
     start.setHours(0, 0, 0, 0);
     end.setHours(23, 59, 59, 999);
@@ -219,8 +222,8 @@ const OrderTable = observer(() => {
             const response = await getOrdersBookedInOneDay(start.toISOString(), end.toISOString(), includeCancelled);
             setOrders(response);
 
-            setSuccessResponse(null)
-            setSuccessResponse("Yes all orders")
+            setSuccessResponse("Список всех заказов за день успешно получен!")
+            setSuccessFlag(flag => !flag);
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -236,7 +239,7 @@ const OrderTable = observer(() => {
                 setErrorFlag(flag => !flag)
             }
         } finally {
-            setIsSubmitting(false)
+            setTimeout(() => setIsSubmitting(false), 4000);
         }
     };
 
@@ -250,8 +253,8 @@ const OrderTable = observer(() => {
             const response = await getOrdersCreatedInOneDay(start.toISOString(), end.toISOString(), includeCancelled);
             setOrders(response);
 
-            setSuccessResponse(null)
-            setSuccessResponse("Yes all orders")
+            setSuccessResponse("Список всех заказов на день успешно получен!")
+            setSuccessFlag(flag => !flag);
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -340,7 +343,7 @@ const OrderTable = observer(() => {
         if (successResponse) {
             toaster.push(successMessage, {placement: "bottomEnd"});
         }
-    }, [successResponse]);
+    }, [successFlag]);
 
     const handleNotMadeOrders = async (event) => {
         event.preventDefault();
@@ -352,8 +355,9 @@ const OrderTable = observer(() => {
         try {
             const response = await getNotMadeOrders(includeCancelled);
             setOrders(response);
-            setSuccessResponse(null)
-            setSuccessResponse("Yes not made orders")
+
+            setSuccessResponse("Список всех не сделанных заказов успешно получен!")
+            setSuccessFlag(flag => !flag);
         } catch (error) {
             if (error.response) {
                 let messages = [];
@@ -478,6 +482,7 @@ const OrderTable = observer(() => {
             </Button>
 
             <p style={inputStyle}>Вы можете нажать на цифру айди, чтобы перейти на страницу изменения этого заказа</p>
+            <p style={inputStyle}>Вы можете нажать на телефон клиента, чтобы перейти на страницу этого человека</p>
             <Divider></Divider>
 
             <table {...getTableProps()} className="MyTable" style={{marginBottom: '100px'}}>
