@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class AllOrdersEntity {
+
     private String name = null;
 
     private Integer priceFirstType = null;

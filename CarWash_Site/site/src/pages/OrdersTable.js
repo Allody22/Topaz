@@ -239,7 +239,7 @@ const OrderTable = observer(() => {
                 setErrorFlag(flag => !flag)
             }
         } finally {
-            setTimeout(() => setIsSubmitting(false), 4000);
+            setTimeout(() => setIsSubmitting(false), 2000);
         }
     };
 
@@ -270,7 +270,7 @@ const OrderTable = observer(() => {
                 setErrorFlag(flag => !flag)
             }
         } finally {
-            setIsSubmitting(false)
+            setTimeout(() => setIsSubmitting(false), 2000);
         }
     };
 
@@ -373,7 +373,7 @@ const OrderTable = observer(() => {
                 setErrorFlag(flag => !flag)
             }
         } finally {
-            setIsSubmitting(false)
+            setTimeout(() => setIsSubmitting(false), 2000);
         }
     };
 

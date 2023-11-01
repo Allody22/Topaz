@@ -6,6 +6,7 @@ import ru.nsu.carwash_server.models.orders.OrdersPolishing;
 import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
 import ru.nsu.carwash_server.models.secondary.constants.OrderStatuses;
+import ru.nsu.carwash_server.models.users.UserVersions;
 import ru.nsu.carwash_server.payload.request.UpdateOrderInfoRequest;
 import ru.nsu.carwash_server.payload.request.UpdateUserInfoRequest;
 
@@ -197,24 +198,24 @@ public class OperationsDescriptionService {
         return sb.toString();
     }
 
-    public String updateUserDescription(UpdateUserInfoRequest updateUserInfoRequest, String username) {
+    public String updateUserDescription(UpdateUserInfoRequest updateUserInfoRequest, String username, UserVersions previousUserVersion) {
         StringBuilder message = new StringBuilder();
 
         message.append("Пользователь '").append(username).append("' получил");
 
-        if (updateUserInfoRequest.getPhone() != null) {
+        if (updateUserInfoRequest.getPhone() != null && !previousUserVersion.getPhone().equals(updateUserInfoRequest.getPhone())) {
             message.append(" новый телефон: '").append(updateUserInfoRequest.getPhone()).append("',");
         }
 
-        if (updateUserInfoRequest.getFullName() != null) {
+        if (updateUserInfoRequest.getFullName() != null && !previousUserVersion.getFullName().equals(updateUserInfoRequest.getFullName())) {
             message.append(" новое ФИО: '").append(updateUserInfoRequest.getFullName()).append("',");
         }
 
-        if (updateUserInfoRequest.getAdminNote() != null) {
+        if (updateUserInfoRequest.getAdminNote() != null && !updateUserInfoRequest.getAdminNote().equals(previousUserVersion.getAdminNote())) {
             message.append(" новую заметку от администратора: '").append(updateUserInfoRequest.getAdminNote()).append("',");
         }
 
-        if (updateUserInfoRequest.getEmail() != null) {
+        if (updateUserInfoRequest.getEmail() != null && !updateUserInfoRequest.getEmail().equals(previousUserVersion.getEmail())) {
             message.append(" новую почту: '").append(updateUserInfoRequest.getEmail()).append("',");
         }
 

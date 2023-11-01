@@ -116,7 +116,7 @@ public class UserController {
 
         String operationName = "Update_user_info_by_user";
 
-        String descriptionMessage = operationsDescriptionService.updateUserDescription(updateUserInfoRequest, newVersion.getPhone());
+        String descriptionMessage = operationsDescriptionService.updateUserDescription(updateUserInfoRequest, newVersion.getPhone(), latestUserVersion);
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
         log.info("updateUserInfo_v1. User with phone '{}' updated his profile.", updateUserInfoRequest.getPhone());
 

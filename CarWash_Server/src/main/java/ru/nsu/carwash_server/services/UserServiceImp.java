@@ -67,7 +67,7 @@ public class UserServiceImp implements UserService {
             latestUserVersion = userVersionList.get(0);
         } else {
             throw new NotInDataBaseException("пользователей не найден" +
-                    " пользователь с именем: ", phone);
+                    " пользователь с телефоном: ", phone);
         }
         return latestUserVersion;
     }

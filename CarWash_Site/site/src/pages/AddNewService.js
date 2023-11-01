@@ -262,7 +262,7 @@ const AddNewService = observer(() => {
             setErrorResponse("Обязательно укажите название новой услуги.")
             setErrorFlag(flag => !flag)
             return;
-        } else if (serviceType === "Мойка" && (!role || role === "")) {
+        } else if ((serviceType === "Мойка" || serviceType === "Шиномонтаж") && (!role || role === "")) {
             setErrorResponse("Обязательно укажите роль новой услуги для мойки.")
             setErrorFlag(flag => !flag)
             return;

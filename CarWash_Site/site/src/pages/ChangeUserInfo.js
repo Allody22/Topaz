@@ -522,6 +522,7 @@ const ChangeUserInfo = observer(() => {
 
                 <InputField
                     label='Почта'
+                    className="input-style"
                     id='email'
                     value={email}
                     onChange={setEmail}

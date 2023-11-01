@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class TimeAndPriceAndFreeTimeResponse {
+
     private Integer price;
 
     private Integer time;

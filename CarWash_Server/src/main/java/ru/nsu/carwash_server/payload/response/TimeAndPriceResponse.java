@@ -8,6 +8,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class TimeAndPriceResponse {
+
     int price;
+
     int time;
 }

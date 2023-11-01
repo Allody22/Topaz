@@ -107,7 +107,7 @@ public class OrderManagementController {
         UserVersions userLatestVersion = userService.getActualUserVersionById(userId);
 
         String operationName = "Delete_order";
-        String descriptionMessage = "Заказ с айди'" + orderId + "' отменён";
+        String descriptionMessage = "Заказ с айди '" + orderId + "' отменён";
         operationsService.SaveUserOperation(operationName, userLatestVersion.getUser(), descriptionMessage, 1);
 
         log.info("deleteOrder_v1. User with phone '{}' cancelled order with id '{}'.", userLatestVersion.getPhone(), orderId);

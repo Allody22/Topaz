@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +23,6 @@ import ru.nsu.carwash_server.models.orders.OrderVersions;
 import ru.nsu.carwash_server.models.orders.OrdersPolishing;
 import ru.nsu.carwash_server.models.orders.OrdersTire;
 import ru.nsu.carwash_server.models.orders.OrdersWashing;
-import ru.nsu.carwash_server.models.secondary.constants.DestinationPrefixes;
 import ru.nsu.carwash_server.models.secondary.constants.OrderTypes;
 import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
@@ -93,9 +91,9 @@ public class OrderCreatingController {
 
     @Transactional
     @PostMapping("/bookWashingOrder_v1")
-    @SendTo(DestinationPrefixes.NOTIFICATIONS)
     public ResponseEntity<?> newWashingOrder(@Valid @RequestBody BookingWashingPolishingOrderRequest bookingOrderRequest) {
         int boxNumber = bookingOrderRequest.getBoxNumber();
+
         if (boxNumber < 1 || boxNumber > 3) {
             throw new BadBoxException(boxNumber, "мойка");
         }
@@ -129,7 +127,7 @@ public class OrderCreatingController {
         List<OrdersWashing> ordersWashings = new ArrayList<>();
 
         for (var order : ordersList) {
-            var currentOrder = ordersWashingRepository.findByName(order.replace(" ", "_"))
+            OrdersWashing currentOrder = ordersWashingRepository.findByName(order.replace(" ", "_"))
                     .orElseThrow(() -> new NotInDataBaseException("услуг мойки не найдена услуга: ", order));
             ordersWashings.add(currentOrder);
         }
@@ -212,7 +210,7 @@ public class OrderCreatingController {
         List<OrdersPolishing> ordersPolishings = new ArrayList<>();
 
         for (var order : ordersList) {
-            var currentOrder = ordersPolishingRepository.findByName(order.replace(" ", "_"))
+            OrdersPolishing currentOrder = ordersPolishingRepository.findByName(order.replace(" ", "_"))
                     .orElseThrow(() -> new NotInDataBaseException("услуг полировки не найдена услуга: ", order.replace("_", " ")));
             ordersPolishings.add(currentOrder);
         }
@@ -294,7 +292,7 @@ public class OrderCreatingController {
         List<String> ordersList = bookingOrderRequest.getOrders();
 
         for (var order : ordersList) {
-            var currentOrder = ordersTireRepository.findByName(order.replace(" ", "_"))
+            OrdersTire currentOrder = ordersTireRepository.findByName(order.replace(" ", "_"))
                     .orElseThrow(() -> new NotInDataBaseException("услуг шиномонтажа не найдена услуга: ",
                             order.replace("_", " ")));
             ordersTireService.add(currentOrder);

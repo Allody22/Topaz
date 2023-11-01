@@ -49,6 +49,7 @@ import ru.nsu.carwash_server.services.interfaces.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
@@ -101,11 +102,26 @@ public class AuthController {
 
     @GetMapping("/generate_code_v1")
     @Transactional
-    public ResponseEntity<MessageResponse> numberCheck(@Valid @RequestParam("number") String number) throws JsonProcessingException {
-        //Смотрим сколько раз человек с таким phone уже получал код и если больше 2 раз за час, то не даём код
+    public ResponseEntity<MessageResponse> numberCheck(@Valid @NotBlank @RequestParam("number") String number, @Valid @NotBlank @RequestParam("context") String context) throws JsonProcessingException {
 
-        if (operationsService.getAllDescriptionOperationsByTime(number, "получил код:", LocalDateTime.now().minusMinutes(50)).size() >= 2) {
-            throw new SMSException();
+        //Смотрим сколько раз человек с таким phone уже получал код и если больше 2 раз за 60 минут для регистрации или смены пароля, то не даём код
+        String contextMessage;
+        if (context.equals("пароль")) {
+            contextMessage = "' для восстановления пароля получил код:";
+
+            if (operationsService.getAllDescriptionOperationsByTime(number, contextMessage, LocalDateTime.now().minusMinutes(60)).size() >= 2) {
+                throw new SMSException();
+            }
+
+            if (!userService.existByPhone(number)) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Сначала необходимо зарегистрироваться"));
+            }
+        } else {
+            contextMessage = "' для регистрации получил код:";
+
+            if (operationsService.getAllDescriptionOperationsByTime(number, contextMessage, LocalDateTime.now().minusMinutes(60)).size() >= 2) {
+                throw new SMSException();
+            }
         }
 
         String smsServerUrl = "https://lcab.smsint.ru/json/v1.0/sms/send/text";
@@ -121,13 +137,12 @@ public class AuthController {
             log.info("generate_code_v1 .Random number is: '{}'", resultOfSmsCreating.getSecond());
 
             String operationName = "User_get_phone_code";
-            String descriptionMessage = "Номер телефона:'" + number + "' получил код:" + resultOfSmsCreating.getSecond();
+            String descriptionMessage = "Номер телефона:'" + number + contextMessage + resultOfSmsCreating.getSecond();
             operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
         } else {
             log.warn("generate_code_v1 .SmsInt failure");
 
-            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка на стороне сервера для отправки смс: "
-                    + smsResponse.getBody()));
+            return ResponseEntity.badRequest().body(new MessageResponse("Ошибка на стороне сервера для отправки смс: " + smsResponse.getBody()));
         }
 
         return ResponseEntity.ok(new MessageResponse("Код успешно отправлен"));
@@ -194,7 +209,7 @@ public class AuthController {
         if (!signUpRequest.getSecretCode().equals(operationsService.getLatestCodeByPhoneNumber(userPhone) + "")) {
             log.warn("SignUp_v1.Registration failed: Bad code ");
             String operationName = "User_write_wrong_code";
-            String descriptionMessage = "Номер телефона:'" + userPhone + "' ввёл неверный код подтверждения для регистрации";
+            String descriptionMessage = "Номер телефона '" + userPhone + "' ввёл неверный код подтверждения для регистрации";
             operationsService.SaveUserOperation(operationName, null, descriptionMessage, 1);
             return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Код подтверждения не совпадает!"));
         }

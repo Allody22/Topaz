@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class FreeTimeAndBoxResponse {
+
     private Integer time;
 
     private List<TimeIntervals> availableTime;
