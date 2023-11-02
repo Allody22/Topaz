@@ -391,8 +391,6 @@ public class OrderCreatingController {
         Order newOrder = result.getFirst();
         OrderVersions orderVersions = result.getSecond();
 
-        //TODO убрать!!!
-//        simpMessagingTemplate.convertAndSend(orderVersions);
         String adminPhone = user.getPhone();
 
         String operationName = "Create_washing_order";

@@ -9,6 +9,7 @@ class SocketStore {
     message = null;
     isAlreadyShown = false;
 
+
     constructor() {
         makeAutoObservable(this);
     }
@@ -23,11 +24,15 @@ class SocketStore {
                 this.isConnected = true;
 
                 this.stompClient.subscribe('/notifications/newOrder', (message) => {
-                    const messageFromServer = message.body;
-                    this.isAlreadyShown = false;
-                    this.message = messageFromServer;
-                });
 
+                    if (JSON.parse(message.body).notification) {
+                        this.isAlreadyShown = false;
+                        this.message = message.body;
+                    } else {
+                        this.isAlreadyShown = false;
+                        this.message = message.body;
+                    }
+                });
             });
         }
     }

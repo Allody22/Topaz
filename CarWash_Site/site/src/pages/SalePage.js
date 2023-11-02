@@ -159,17 +159,47 @@ const SalePage = observer(() => {
                 style={{border: '1px solid black'}}
             >
                 <div style={{width: 320}}>
-                    {socketStore.message && (
-                        <>
-                            <div style={{textAlign: 'left'}}>
-                                <p>Тип заказа: {orderTypeMap[JSON.parse(socketStore.message).orderType]}</p>
-                                <p>Время начала
-                                    заказа: {format(parseISO(JSON.parse(socketStore.message).startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                                <p>Время конца
-                                    заказа: {format(parseISO(JSON.parse(socketStore.message).endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
-                            </div>
-                        </>
-                    )}
+                    {socketStore.message && (() => {
+                        const messageData = JSON.parse(socketStore.message);
+                        return (
+                            <>
+                                <div style={{textAlign: 'left'}}>
+                                    <p>Тип заказа: {orderTypeMap[messageData.orderType]}</p>
+                                    {messageData.startTime && (
+                                        <p>Время начала заказа: {format(parseISO(messageData.startTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                    )}
+                                    {messageData.endTime && (
+                                        <p>Время конца заказа: {format(parseISO(messageData.endTime), 'dd.MM.yyyy HH:mm:ss')}</p>
+                                    )}
+                                </div>
+                            </>
+                        );
+                    })()}
+                </div>
+            </Notification>
+        </Router>
+    );
+
+    const newNotification = (
+        <Router>
+            <Notification
+                type="info"
+                header="Новое уведомление!"
+                closable
+                timeout={null}
+                style={{border: '1px solid black'}}
+            >
+                <div style={{width: 320, whiteSpace: "pre-line"}}>
+                    {socketStore.message && (() => {
+                        const messageData = JSON.parse(socketStore.message);
+                        return (
+                            <>
+                                <div style={{textAlign: 'left'}}>
+                                    {messageData.notification}
+                                </div>
+                            </>
+                        );
+                    })()}
                 </div>
             </Notification>
         </Router>
@@ -177,7 +207,12 @@ const SalePage = observer(() => {
 
     useEffect(() => {
         if (socketStore.message && !socketStore.isAlreadyShown) {
-            toaster.push(newOrderMessage, {placement: "bottomEnd"});
+            const messageData = JSON.parse(socketStore.message);
+            if (messageData.notification) {
+                toaster.push(newNotification, {placement: "bottomEnd"});
+            } else {
+                toaster.push(newOrderMessage, {placement: "bottomEnd"});
+            }
             socketStore.isAlreadyShown = true;
         }
     }, [socketStore.message]);

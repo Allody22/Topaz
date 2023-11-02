@@ -115,8 +115,8 @@ public class OrderManagementController {
         String descriptionMessage = "Заказ с айди '" + orderId + "' отменён";
         operationsService.SaveUserOperation(operationName, userLatestVersion.getUser(), descriptionMessage, 1);
 
-//        String message = "{\"notification\":\"Заказ с айди " + orderId + " отменён\"}";
-//        simpMessagingTemplate.convertAndSend(message);
+        String message = "{\"notification\":\"Заказ с айди " + orderId + " отменён\"}";
+        simpMessagingTemplate.convertAndSend(message);
 
         log.info("deleteOrder_v1. User with phone '{}' cancelled order with id '{}'.", userLatestVersion.getPhone(), orderId);
 
