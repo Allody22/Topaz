@@ -203,23 +203,30 @@ public class OperationsDescriptionService {
 
         message.append("Пользователь '").append(username).append("' получил");
 
-        if (updateUserInfoRequest.getPhone() != null && !previousUserVersion.getPhone().equals(updateUserInfoRequest.getPhone())) {
-            message.append(" новый телефон: '").append(updateUserInfoRequest.getPhone()).append("',");
+        if (updateUserInfoRequest.getPhone() != null && !(previousUserVersion.getPhone() == null)) {
+            if (!updateUserInfoRequest.getPhone().equals(previousUserVersion.getPhone())) {
+                message.append(" новый телефон: '").append(updateUserInfoRequest.getPhone()).append("',");
+            }
         }
 
-        if (updateUserInfoRequest.getFullName() != null && !previousUserVersion.getFullName().equals(updateUserInfoRequest.getFullName())) {
-            message.append(" новое ФИО: '").append(updateUserInfoRequest.getFullName()).append("',");
+        if (updateUserInfoRequest.getFullName() != null && !(previousUserVersion.getFullName() == null)) {
+            if (!updateUserInfoRequest.getFullName().equals(previousUserVersion.getFullName())) {
+                message.append(" новое ФИО: '").append(updateUserInfoRequest.getFullName()).append("',");
+            }
         }
 
-        if (updateUserInfoRequest.getAdminNote() != null && !updateUserInfoRequest.getAdminNote().equals(previousUserVersion.getAdminNote())) {
-            message.append(" новую заметку от администратора: '").append(updateUserInfoRequest.getAdminNote()).append("',");
+        if (updateUserInfoRequest.getAdminNote() != null && !(previousUserVersion.getAdminNote() == null)) {
+            if (!updateUserInfoRequest.getAdminNote().equals(previousUserVersion.getAdminNote())) {
+                message.append(" новую заметку от администратора: '").append(updateUserInfoRequest.getAdminNote()).append("',");
+            }
         }
 
-        if (updateUserInfoRequest.getEmail() != null && !updateUserInfoRequest.getEmail().equals(previousUserVersion.getEmail())) {
-            message.append(" новую почту: '").append(updateUserInfoRequest.getEmail()).append("',");
+        if (updateUserInfoRequest.getEmail() != null && !(previousUserVersion.getEmail() == null)) {
+            if (!updateUserInfoRequest.getEmail().equals(previousUserVersion.getEmail())) {
+                message.append(" новую почту: '").append(updateUserInfoRequest.getEmail()).append("',");
+            }
         }
-
-        if (message.charAt(message.length() - 1) == ',') {
+        if (!message.isEmpty() && message.charAt(message.length() - 1) == ',') {
             message.deleteCharAt(message.length() - 1);
         }
 

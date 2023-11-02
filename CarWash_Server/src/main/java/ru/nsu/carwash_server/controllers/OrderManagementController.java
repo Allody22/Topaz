@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -82,15 +83,19 @@ public class OrderManagementController {
 
     private final OperationService operationsService;
 
+    private SimpMessagingTemplate simpMessagingTemplate;
+
     @Autowired
     public OrderManagementController(
             OperationService operationsService,
+            SimpMessagingTemplate simpMessagingTemplate,
             OrdersWashingRepository ordersWashingRepository,
             OrdersTireRepository ordersTireRepository,
             UserService userService,
             OrdersPolishingRepository ordersPolishingRepository,
             OrderService orderService) {
         this.ordersWashingRepository = ordersWashingRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
         this.ordersPolishingRepository = ordersPolishingRepository;
         this.ordersTireRepository = ordersTireRepository;
         this.userService = userService;
@@ -109,6 +114,9 @@ public class OrderManagementController {
         String operationName = "Delete_order";
         String descriptionMessage = "Заказ с айди '" + orderId + "' отменён";
         operationsService.SaveUserOperation(operationName, userLatestVersion.getUser(), descriptionMessage, 1);
+
+//        String message = "{\"notification\":\"Заказ с айди " + orderId + " отменён\"}";
+//        simpMessagingTemplate.convertAndSend(message);
 
         log.info("deleteOrder_v1. User with phone '{}' cancelled order with id '{}'.", userLatestVersion.getPhone(), orderId);
 
@@ -425,7 +433,7 @@ public class OrderManagementController {
         }
 
         List<OrderVersions> orders = orderService.getOrdersInTimeInterval(ordersArrayPriceTimeRequest.getStartTime(),
-                ordersArrayPriceTimeRequest.getEndTime(), null, true);
+                ordersArrayPriceTimeRequest.getEndTime(), null, false);
 
         List<SingleOrderResponse> bookedOrders = getTimeAndPriceOfOrders(orders);
 
@@ -472,7 +480,7 @@ public class OrderManagementController {
         }
 
         List<OrderVersions> orders = orderService.getOrdersInTimeInterval(freeTimeRequest.getStartTime(),
-                freeTimeRequest.getEndTime(), null, true);
+                freeTimeRequest.getEndTime(), null, false);
 
         List<SingleOrderResponse> bookedOrders = getTimeAndPriceOfOrders(orders);
 

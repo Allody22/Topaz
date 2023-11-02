@@ -15,7 +15,6 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\services\OrderServiceImp.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\controllers\OperationController.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\configuration\security\jwt\JwtUtils.java
-C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\ImageResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\WashingOrdersPriceTimeAndPart.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\advice\UserControllerAdvice.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\SignupRequest.java
@@ -27,7 +26,6 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\configuration\security\jwt\AuthEntryPointJwt.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\operations\OperationsVersions.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\advice\OrderControllerAdvice.java
-C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\UpdateOrderInfoResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\orders\OrdersWashing.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\orders\OrdersTire.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\configuration\sockets\config\NotificationConfig.java
@@ -123,7 +121,6 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\AllOrdersEntity.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\constants\FileTypes.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\repository\users\UserVersionsRepository.java
-C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\GetBookedOrdersInTimeIntervalRequest.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\NewServiceRequest.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\MessageResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\services\UserDetailsServiceImpl.java

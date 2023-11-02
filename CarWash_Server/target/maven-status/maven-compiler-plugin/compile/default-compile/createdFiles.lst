@@ -50,7 +50,6 @@ ru\nsu\carwash_server\payload\request\LoginRequest.class
 ru\nsu\carwash_server\payload\request\CreatingPolishingOrder.class
 ru\nsu\carwash_server\repository\orders\OrdersTireRepository.class
 ru\nsu\carwash_server\models\secondary\helpers\TimeIntervals.class
-ru\nsu\carwash_server\payload\response\UpdateOrderInfoResponse$UpdateOrderInfoResponseBuilder.class
 ru\nsu\carwash_server\controllers\UserController.class
 ru\nsu\carwash_server\payload\request\UpdateOrderInfoRequest.class
 ru\nsu\carwash_server\services\OperationsDescriptionService.class
@@ -67,7 +66,6 @@ ru\nsu\carwash_server\payload\request\UpdatePolishingServiceRequest.class
 ru\nsu\carwash_server\repository\FileRepository.class
 ru\nsu\carwash_server\exceptions\TooManyAttemptsInCodeException.class
 ru\nsu\carwash_server\models\secondary\helpers\TireOrderEntity.class
-ru\nsu\carwash_server\payload\response\ImageResponse.class
 ru\nsu\carwash_server\advice\UserControllerAdvice.class
 ru\nsu\carwash_server\payload\response\OrdersArrayResponse.class
 ru\nsu\carwash_server\models\users\RefreshToken.class
@@ -98,7 +96,6 @@ ru\nsu\carwash_server\payload\response\UserInformationResponse.class
 ru\nsu\carwash_server\models\orders\OrderVersions.class
 ru\nsu\carwash_server\exceptions\EmptyOrdersArrayException.class
 ru\nsu\carwash_server\exceptions\validation\fields\NotZeroValidator.class
-ru\nsu\carwash_server\payload\request\GetBookedOrdersInTimeIntervalRequest.class
 ru\nsu\carwash_server\configuration\security\jwt\AuthEntryPointJwt.class
 ru\nsu\carwash_server\models\secondary\helpers\WashingPolishingOrderEntity.class
 ru\nsu\carwash_server\models\secondary\helpers\OrderPriceTimeDoneTypeInfo.class
@@ -115,7 +112,6 @@ ru\nsu\carwash_server\payload\response\TimeAndPriceAndFreeTimeResponse.class
 ru\nsu\carwash_server\payload\request\CreatingTireOrderRequest.class
 ru\nsu\carwash_server\payload\response\FreeTimeAndBoxResponse.class
 ru\nsu\carwash_server\payload\request\SignupRequest$SignupRequestBuilder.class
-ru\nsu\carwash_server\payload\response\UpdateOrderInfoResponse.class
 ru\nsu\carwash_server\services\interfaces\FileService.class
 ru\nsu\carwash_server\controllers\AdminController.class
 ru\nsu\carwash_server\configuration\security\WebSecurityConfig.class
@@ -140,7 +136,6 @@ ru\nsu\carwash_server\payload\request\UpdateUserInfoRequest.class
 ru\nsu\carwash_server\advice\GlobalExceptionHandlerAdvice.class
 ru\nsu\carwash_server\payload\response\ConnectedOrdersResponse.class
 ru\nsu\carwash_server\models\orders\OrdersWashing$OrdersWashingBuilder.class
-ru\nsu\carwash_server\payload\response\ImageResponse$ImageResponseBuilder.class
 ru\nsu\carwash_server\services\interfaces\OperationService.class
 ru\nsu\carwash_server\payload\request\UpdateUserPasswordRequest.class
 ru\nsu\carwash_server\configuration\CacheConfiguration.class
