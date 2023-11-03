@@ -81,13 +81,10 @@ public class AuthController {
 
     private final OperationService operationsService;
 
-    private SimpMessagingTemplate simpMessagingTemplate;
-
 
     @Autowired
     public AuthController(
             RestTemplate restTemplate,
-            SimpMessagingTemplate simpMessagingTemplate,
             UserService userService,
             OperationService operationsService,
             AuthenticationManager authenticationManager,
@@ -97,7 +94,6 @@ public class AuthController {
             RefreshTokenService refreshTokenService) {
         this.authenticationManager = authenticationManager;
         this.operationsService = operationsService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
         this.userService = userService;
         this.restTemplate = restTemplate;
         this.roleRepository = roleRepository;
@@ -240,9 +236,6 @@ public class AuthController {
         operationsService.SaveUserOperation(operationName, user, descriptionMessage, 1);
 
         log.info("SignUp_v1.User with phone '{}' registered successfully", userPhone);
-
-        String message = "{\"notification\":\"Пользователь с телефоном " + userPhone + " успешно зарегистрировался\"}";
-        simpMessagingTemplate.convertAndSend(message);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
