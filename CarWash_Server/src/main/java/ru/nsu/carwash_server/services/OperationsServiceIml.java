@@ -113,7 +113,7 @@ public class OperationsServiceIml implements OperationService {
         message.setRecipient(number);
         message.setText("Ваш код: " + randomNumber);
         message.setRecipientType("recipient");
-        message.setId("Подтверждение телефона"); //ЧЁ ЗА АЙДИ
+        message.setId("Подтверждение телефона");
         message.setSource("CarWash");
         message.setTimeout(3600);
         message.setShortenUrl(true);
@@ -122,7 +122,7 @@ public class OperationsServiceIml implements OperationService {
         smsRequest.setMessages(Collections.singletonList(message));
 
         //При true смс не отправляется
-        smsRequest.setValidate(true);
+        smsRequest.setValidate(false);
 
         List<String> tags = new ArrayList<>();
         tags.add("Подтверждение телефона");
@@ -143,7 +143,7 @@ public class OperationsServiceIml implements OperationService {
 
         //Добавить больше операторов
         List<String> operators = List.of(
-                "beeline"
+                "beeline", "megafon", "mts", "rus_yota", "tele2", "globaltelecom"
         );
         List<String> opsosAllowed = new ArrayList<>(operators);
 
