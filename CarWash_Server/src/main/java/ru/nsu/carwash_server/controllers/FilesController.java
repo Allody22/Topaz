@@ -89,7 +89,7 @@ public class FilesController {
         Long userId = userDetails.getId();
         var latestUserVersion = userService.getActualUserVersionById(userId);
 
-        String operationName = "Update_user_info_by_user";
+        String operationName = "New_sale";
 
         String descriptionMessage = String.format("Пользователь %s загрузил картинку с описанием %s ", latestUserVersion.getPhone(), decodedDescription);
 

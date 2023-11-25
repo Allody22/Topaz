@@ -8,7 +8,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -120,7 +119,9 @@ public class AuthController {
             }
         } else {
             contextMessage = "' для регистрации получил код:";
-
+            if (userService.existByPhone(number)) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Ошибка! Данный номер уже зарегистрирован"));
+            }
             if (operationsService.getAllDescriptionOperationsByTime(number, contextMessage, LocalDateTime.now().minusMinutes(60)).size() >= 2) {
                 throw new SMSException();
             }

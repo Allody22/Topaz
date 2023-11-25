@@ -83,3 +83,8 @@ INSERT INTO operations (name, description)
 VALUES ('Update_user_info_by_user', 'Обновление профиля пользователя');
 INSERT INTO operations_versions (operations_id, creation_time, version, changes)
 VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');
+
+INSERT INTO operations (name, description)
+VALUES ('New_sale', 'Администратор добавил новую акцию');
+INSERT INTO operations_versions (operations_id, creation_time, version, changes)
+VALUES (currval('operations_id_seq'), CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Novosibirsk', 1, 'Initial version');

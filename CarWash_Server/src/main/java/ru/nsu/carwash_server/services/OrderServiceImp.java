@@ -347,7 +347,7 @@ public class OrderServiceImp implements OrderService {
                 .timeThirdType(newServiceRequest.getTimeThirdType())
                 .build();
 
-        String descriptionMessage = operationsDescriptionService.getPolishingWashingOrderChangingInfo(ordersPolishing.getPriceFirstType(), ordersPolishing.getPriceSecondType(),
+        String descriptionMessage = operationsDescriptionService.getPolishingWashingOrderCreatingInfo(ordersPolishing.getPriceFirstType(), ordersPolishing.getPriceSecondType(),
                 ordersPolishing.getPriceThirdType(), ordersPolishing.getTimeFirstType(), ordersPolishing.getTimeSecondType(),
                 ordersPolishing.getTimeThirdType(), "Создана услуга полировки '", ordersPolishing.getName().replace("_", " "));
 
@@ -375,7 +375,7 @@ public class OrderServiceImp implements OrderService {
                 .role(newServiceRequest.getRole())
                 .build();
 
-        String descriptionMessage = operationsDescriptionService.getPolishingWashingOrderChangingInfo(ordersWashing.getPriceFirstType(), ordersWashing.getPriceSecondType(),
+        String descriptionMessage = operationsDescriptionService.getPolishingWashingOrderCreatingInfo(ordersWashing.getPriceFirstType(), ordersWashing.getPriceSecondType(),
                 ordersWashing.getPriceThirdType(), ordersWashing.getTimeFirstType(), ordersWashing.getTimeSecondType(),
                 ordersWashing.getTimeThirdType(), "Создана услуга мойки '", ordersWashing.getName().replace("_", " "));
 

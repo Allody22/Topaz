@@ -172,6 +172,8 @@ public class AdminController {
                 .append(newVersion.getPhone())
                 .append("' получил");
 
+        int initialLength = result.length();
+
         if (updateUserInfoRequest.getPhone() != null) {
             result.append(" новый телефон: '")
                     .append(updateUserInfoRequest.getPhone())
@@ -216,7 +218,15 @@ public class AdminController {
             result.deleteCharAt(result.length() - 1);
         }
 
-        return result.toString();
+        if (result.length() > initialLength) {
+            if (result.charAt(result.length() - 1) == ',') {
+                result.deleteCharAt(result.length() - 1);
+            }
+
+            return result.toString();
+        } else {
+            return "Был отправлен запрос на обновление информации о пользователе админом, но без новой информации";
+        }
     }
 
     public List<SingleOrderResponse> getTimeAndPriceOfOrders(List<OrderVersions> orders) {

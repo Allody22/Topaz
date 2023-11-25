@@ -10,6 +10,8 @@ const operationsNameMapFromEng = {
     "Create_new_service_by_admin": "Создание новой услуги",
     "User_write_wrong_code": "Пользователь вводит неверный код подтверждения для номера",
 
+    "New_sale": "Администратор добавляет новую акцию",
+
     "Update_washing_service_by_admin": "Обновление информации об услуге мойки",
     "Update_polishing_service_by_admin": "Обновление информации об услуге полировки",
     "Update_tire_service_by_admin": "Обновление информации об услуге шиномонтажа",

@@ -262,7 +262,7 @@ const SalePage = observer(() => {
                 setStatus("")
                 setUploadedFile(null)
                 handleRefreshDiscounts();
-                getAllImages();
+                await getAllImages();
             } catch (error) {
                 if (error.response) {
                     let messages = [];

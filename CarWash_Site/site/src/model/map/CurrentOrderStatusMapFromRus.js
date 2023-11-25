@@ -24,6 +24,6 @@ const currentOrderStatusMapFromRus = {
     "Оплачен на 70 процентов и сделан": "createdPaid70PercentAndDone",
     "Оплачен на 80 процентов и сделан": "createdPaid80PercentAndDone",
     "Оплачен на 90 процентов и сделан": "createdPaid90PercentAndDone",
-    "Полностью оплачен и сделан": "createdPaid90PercentAndDone"
+    "Полностью оплачен и сделан": "createdPaid100PercentAndDone"
 }
 export default currentOrderStatusMapFromRus;

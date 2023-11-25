@@ -26,6 +26,8 @@ public class OperationsDescriptionService {
 
         sb.append(context).append(" '").append(orderName.replace("_", " ")).append("', получившая");
 
+        int initialLength = sb.length();
+
         if (priceFirstType != null && (priceFirstType != ordersWashing.getPriceFirstType())) {
             sb.append(" цену за 1 тип: '").append(priceFirstType).append("',");
         }
@@ -45,12 +47,14 @@ public class OperationsDescriptionService {
             sb.append(" время за 3 тип: '").append(timeThirdType).append("',");
         }
 
-        // Удалить последнюю запятую, если она есть
-        if (sb.charAt(sb.length() - 1) == ',') {
-            sb.setLength(sb.length() - 1);
+        if (sb.length() > initialLength) {
+            if (sb.charAt(sb.length() - 1) == ',') {
+                sb.setLength(sb.length() - 1);
+            }
+            return sb.toString();
+        } else {
+            return "Был отправлен запрос на изменение информации об услуге мойки, но без новой информации";
         }
-
-        return sb.toString();
     }
 
     public String getPolishingOrderChangingInfo(Integer priceFirstType, Integer priceSecondType, Integer priceThirdType,
@@ -60,6 +64,8 @@ public class OperationsDescriptionService {
         StringBuilder sb = new StringBuilder();
 
         sb.append(context).append(" '").append(orderName.replace("_", " ")).append("', получившая");
+
+        int initialLength = sb.length();
 
         if (priceFirstType != null && (priceFirstType != ordersPolishing.getPriceFirstType())) {
             sb.append(" цену за 1 тип: '").append(priceFirstType).append("',");
@@ -80,12 +86,53 @@ public class OperationsDescriptionService {
             sb.append(" время за 3 тип: '").append(timeThirdType).append("',");
         }
 
-        // Удалить последнюю запятую, если она есть
-        if (sb.charAt(sb.length() - 1) == ',') {
-            sb.setLength(sb.length() - 1);
+        if (sb.length() > initialLength) {
+            if (sb.charAt(sb.length() - 1) == ',') {
+                sb.setLength(sb.length() - 1);
+            }
+            return sb.toString();
+        } else {
+            return "Был отправлен запрос на изменение информации об услуге полировки, но без новой информации";
+        }
+    }
+
+    public String getPolishingWashingOrderCreatingInfo(Integer priceFirstType, Integer priceSecondType, Integer priceThirdType,
+                                                       Integer timeFirstType, Integer timeSecondType, Integer timeThirdType,
+                                                       String context, String orderName) {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(context).append(" '").append(orderName.replace("_", " ")).append("', получившая");
+
+        int initialLength = sb.length();
+
+        if (priceFirstType != null) {
+            sb.append(" цену за 1 тип: '").append(priceFirstType).append("',");
+        }
+        if (priceSecondType != null) {
+            sb.append(" цену за 2 тип: '").append(priceSecondType).append("',");
+        }
+        if (priceThirdType != null) {
+            sb.append(" цену за 3 тип: '").append(priceThirdType).append("',");
+        }
+        if (timeFirstType != null) {
+            sb.append(" время за 1 тип: '").append(timeFirstType).append("',");
+        }
+        if (timeSecondType != null) {
+            sb.append(" время за 2 тип: '").append(timeSecondType).append("',");
+        }
+        if (timeThirdType != null) {
+            sb.append(" время за 3 тип: '").append(timeThirdType).append("',");
         }
 
-        return sb.toString();
+        if (sb.length() > initialLength) {
+            if (sb.charAt(sb.length() - 1) == ',') {
+                sb.setLength(sb.length() - 1);
+            }
+            return sb.toString();
+        } else {
+            return "Был отправлен запрос на создание услуги мойки или полировки, но без информации";
+        }
     }
 
     public String getUpdateOrderDescription(UpdateOrderInfoRequest updateOrderInfoRequest, OrderVersions actualOrderVersion) {
@@ -93,6 +140,8 @@ public class OperationsDescriptionService {
 
         List<String> newOrders = updateOrderInfoRequest.getOrders();
         descriptionBuilder.append("Заказ с айди '").append(updateOrderInfoRequest.getOrderId()).append("' получил ");
+
+        int initialLength = descriptionBuilder.length();
 
         List<String> parts = new ArrayList<>();
 
@@ -127,6 +176,9 @@ public class OperationsDescriptionService {
         if (updateOrderInfoRequest.getAutoType() != null && actualOrderVersion.getAutoType() != updateOrderInfoRequest.getAutoType()) {
             parts.add("новый тип авто: '" + updateOrderInfoRequest.getAutoType() + "'");
         }
+        if (updateOrderInfoRequest.getSale() != null && (actualOrderVersion.getSale() != null && !actualOrderVersion.getSale().equals(updateOrderInfoRequest.getSale()))) {
+            parts.add("новую привязанную акцию: '" + updateOrderInfoRequest.getSale() + "'");
+        }
         if (updateOrderInfoRequest.getSpecialist() != null && !(actualOrderVersion.getSpecialist().equals(updateOrderInfoRequest.getSpecialist()))) {
             parts.add("нового специалиста: '" + updateOrderInfoRequest.getSpecialist() + "'");
         }
@@ -160,48 +212,23 @@ public class OperationsDescriptionService {
         String combined = String.join(", ", parts);
 
         descriptionBuilder.append(combined);
-        return descriptionBuilder.toString();
-    }
 
-    public String getPolishingWashingOrderChangingInfo(Integer priceFirstType, Integer priceSecondType, Integer priceThirdType,
-                                                       Integer timeFirstType, Integer timeSecondType, Integer timeThirdType,
-                                                       String context, String orderName) {
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(context).append(" '").append(orderName.replace("_", " ")).append("', получившая");
-
-        if (priceFirstType != null) {
-            sb.append(" цену за 1 тип: '").append(priceFirstType).append("',");
+        if (descriptionBuilder.length() > initialLength) {
+            if (descriptionBuilder.charAt(descriptionBuilder.length() - 1) == ',') {
+                descriptionBuilder.setLength(descriptionBuilder.length() - 1);
+            }
+            return descriptionBuilder.toString();
+        } else {
+            return "Был отправлен запрос на обновление информации о заказе, но без новой информации";
         }
-        if (priceSecondType != null) {
-            sb.append(" цену за 2 тип: '").append(priceSecondType).append("',");
-        }
-        if (priceThirdType != null) {
-            sb.append(" цену за 3 тип: '").append(priceThirdType).append("',");
-        }
-        if (timeFirstType != null) {
-            sb.append(" время за 1 тип: '").append(timeFirstType).append("',");
-        }
-        if (timeSecondType != null) {
-            sb.append(" время за 2 тип: '").append(timeSecondType).append("',");
-        }
-        if (timeThirdType != null) {
-            sb.append(" время за 3 тип: '").append(timeThirdType).append("',");
-        }
-
-        // Удалить последнюю запятую, если она есть
-        if (sb.charAt(sb.length() - 1) == ',') {
-            sb.setLength(sb.length() - 1);
-        }
-
-        return sb.toString();
     }
 
     public String updateUserDescription(UpdateUserInfoRequest updateUserInfoRequest, String username, UserVersions previousUserVersion) {
         StringBuilder message = new StringBuilder();
 
         message.append("Пользователь '").append(username).append("' получил");
+
+        int initialLength = message.length();
 
         if (updateUserInfoRequest.getPhone() != null && !(previousUserVersion.getPhone() == null)) {
             if (!updateUserInfoRequest.getPhone().equals(previousUserVersion.getPhone())) {
@@ -226,11 +253,14 @@ public class OperationsDescriptionService {
                 message.append(" новую почту: '").append(updateUserInfoRequest.getEmail()).append("',");
             }
         }
-        if (!message.isEmpty() && message.charAt(message.length() - 1) == ',') {
-            message.deleteCharAt(message.length() - 1);
+        if (message.length() > initialLength) {
+            if (message.charAt(message.length() - 1) == ',') {
+                message.setLength(message.length() - 1);
+            }
+            return message.toString();
+        } else {
+            return "Был отправлен запрос на создание услуги мойки или полировки, но без информации";
         }
-
-        return message.toString();
     }
 
 

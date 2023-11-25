@@ -22,9 +22,6 @@ import ru.nsu.carwash_server.payload.request.UpdatePolishingServiceRequest;
 import ru.nsu.carwash_server.payload.request.UpdateTireServiceRequest;
 import ru.nsu.carwash_server.payload.request.UpdateWashingServiceRequest;
 import ru.nsu.carwash_server.payload.response.MessageResponse;
-import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
-import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
-import ru.nsu.carwash_server.repository.orders.OrdersWashingRepository;
 import ru.nsu.carwash_server.services.UserDetailsImpl;
 import ru.nsu.carwash_server.services.interfaces.OperationService;
 import ru.nsu.carwash_server.services.interfaces.OrderService;
@@ -41,12 +38,6 @@ import javax.validation.Valid;
 public class ServiceChangingController {
     private final OrderService orderService;
 
-    private final OrdersWashingRepository ordersWashingRepository;
-
-    private final OrdersPolishingRepository polishingRepository;
-
-    private final OrdersTireRepository tireRepository;
-
     private final UserService userService;
 
     private final OperationService operationsService;
@@ -55,16 +46,10 @@ public class ServiceChangingController {
     public ServiceChangingController(
             UserService userService,
             OperationService operationsService,
-            OrdersWashingRepository ordersWashingRepository,
-            OrdersPolishingRepository polishingRepository,
-            OrdersTireRepository tireRepository,
             OrderService orderService
     ) {
-        this.polishingRepository = polishingRepository;
         this.userService = userService;
         this.operationsService = operationsService;
-        this.ordersWashingRepository = ordersWashingRepository;
-        this.tireRepository = tireRepository;
         this.orderService = orderService;
     }
 
