@@ -2,6 +2,13 @@ package ru.nsu.carwash_server.controllers;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -58,6 +65,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+@Tag(name = "1. Auth Controller", description = "API для авторизации, выхода из аккаунта, получения смс кодов и работы с JWT и Refresh токеном")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @Slf4j
@@ -101,6 +110,15 @@ public class AuthController {
         this.refreshTokenService = refreshTokenService;
     }
 
+    @Operation(
+            summary = "Получение смс кода.",
+            description = "Этот запрос используется для отправки SMS-кода на указанный номер телефона. В зависимости от контекста (пароль или регистрация) и истории запросов с данным номером, может возникнуть исключение SMSException, если количество запросов превышает два в час."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Успешное выполнение запроса. В ответе будет JSON просто с сообщением о том что всё успешно.", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Ошибка в запросе. В ответе будет JSON-объект типа MessageResponse.", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "429", description = "Превышено количество смс в час. В ответе будет JSON-объект типа MessageResponse.", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")})
+    })
     @GetMapping("/generate_code_v1")
     @Transactional
     public ResponseEntity<MessageResponse> numberCheck(@Valid @NotBlank @RequestParam("number") String number, @Valid @NotBlank @RequestParam("context") String context) throws JsonProcessingException {
@@ -151,11 +169,22 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("Код успешно отправлен"));
     }
 
+    @Hidden
     @GetMapping("/getRoles")
     public ResponseEntity<Optional<List<String>>> getAllRoles() {
         return ResponseEntity.ok(roleRepository.getAllBy());
     }
 
+
+    @Operation(
+            summary = "Аутентификация пользователя.",
+            description = "Этот запрос используется для аутентификации пользователя на основе переданных учетных данных (телефон и пароль)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Успешная аутентификация. В ответе содержится токен доступа JWT, рефреш токен и информация о пользователе.", content = {@Content(schema = @Schema(implementation = JwtResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Ошибка в запросе. В ответе содержится сообщение об ошибке.", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "404", description = "Пользователь с указанным телефоном не найден. В ответе содержится сообщение с этой информацией.", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")})
+    })
     @PostMapping("/signin_v1")
     @Transactional
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -195,6 +224,17 @@ public class AuthController {
     }
 
 
+    @Operation(
+            summary = "Регистрация нового пользователя",
+            description = "Этот запрос регистрирует нового пользователя на основе предоставленных данных."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно зарегистрирован. В ответе содержится сообщение об успешной регистрации.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Ошибка! Код подтверждения из смс не совпадает. В ответе содержится соответствующее сообщение об ошибке.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Пользователь уже существует. В ответе содержится сообщение об этой ошибке.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Превышено количество попыток ввода кода подтверждения в 30 минут. В ответе содержится сообщение об этой ошибке.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "410", description = "Ошибка! При регистрации была передана роль пользователя, которой не существует на сервере. В ответе содержится сообщение об этой ошибке.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/signup_v1")
     @Transactional
     public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
@@ -241,6 +281,14 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+    @Operation(
+            summary = "Обновление токена доступа",
+            description = "Этот метод используется для обновления jwt и refresh токена пользователя. Требует предоставления действующего рефреш токена."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Токен успешно обновлён. В ответе возвращается новый токен доступа.", content = @Content(schema = @Schema(implementation = TokenRefreshResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Ошибка обновления токена. Может возникнуть, если рефреш токен отсутствует в базе данных или истёк его срок действия.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/refreshtoken_v1")
     @Transactional
     public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
@@ -258,6 +306,13 @@ public class AuthController {
     }
 
 
+    @Operation(
+            summary = "Выход пользователя из системы",
+            description = "Этот метод используется для выхода пользователя из системы. Он удаляет все связанные с пользователем рефреш токены, эффективно завершая все его текущие сессии."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Успешный выход из аккаунта. В ответе возвращается сообщение об успешном завершении сессии.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/signout_v1")
     @Transactional
     public ResponseEntity<MessageResponse> logoutUser() {
@@ -270,6 +325,7 @@ public class AuthController {
     }
 
 
+    @Hidden
     @PostMapping("/admin/signin_v1")
     @Transactional
     public ResponseEntity<?> signInAdmin(@Valid @RequestBody LoginRequest loginRequest) {

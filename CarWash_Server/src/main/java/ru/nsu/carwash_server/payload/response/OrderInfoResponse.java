@@ -1,6 +1,7 @@
 package ru.nsu.carwash_server.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,42 +12,60 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "Класс для ответа на запросы, где необходима информация о заказе")
 public class OrderInfoResponse {
 
+    @Schema(description = "Айди заказа")
     private Long id;
 
+    @Schema(description = "Список услуг")
     private List<String> orders;
 
+    @Schema(description = "Время начала", required = true, example = "2023-05-03T08:10:11.0+07")
     @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date startTime;
 
+    @Schema(description = "Время конца", required = true, example = "2023-05-03T08:10:11.0+07")
     @JsonFormat(timezone = "Asia/Novosibirsk")
     private Date endTime;
 
+    @Schema(description = "Контакты администратора")
     private String administrator;
 
+    @Schema(description = "Контакты специалиста")
     private String specialist;
 
+    @Schema(description = "Номер бокса")
     private int boxNumber;
 
+    @Schema(description = "Номер авто")
     private String autoNumber;
 
+    @Schema(description = "Тип кузова")
     private int autoType;
 
+    @Schema(description = "Бонусы, если имеются")
     private int bonuses;
 
+    @Schema(description = "Комментарии к заказу")
     private String comments;
 
+    @Schema(description = "Айди пользователя который делал заказ")
     private Long userId;
 
+    @Schema(description = "Цена за заказ")
     private int price;
 
+    @Schema(description = "Тип услуги")
     private String orderType;
 
+    @Schema(description = "Радиус колес")
     private String wheelR;
 
+    @Schema(description = "Текущий статус заказа")
     private String currentStatus;
 
+    @Schema(description = "Контакты пользователя")
     private String userContacts;
 
     public OrderInfoResponse(Long id, List<String> orders, Date startTime, Date endTime,

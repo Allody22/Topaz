@@ -75,8 +75,7 @@ const columns = [
         sortType: 'alphanumeric',
         accessor: 'userNumber',
         Cell: ({value}) => {
-            const history = useHistory();
-            return <div onClick={() => history.push(`/changeUserInfo/${value}`)}>{value}</div>;
+            return value === null ? 'Неизвестно' : value;
         }
     },
     {
@@ -517,7 +516,6 @@ const OrderTable = observer(() => {
             </Button>
 
             <p style={inputStyle}>Вы можете нажать на цифру айди, чтобы перейти на страницу изменения этого заказа</p>
-            <p style={inputStyle}>Вы можете нажать на телефон клиента, чтобы перейти на страницу этого человека</p>
             <Divider></Divider>
 
             <table {...getTableProps()} className="MyTable" style={{marginBottom: '100px'}}>

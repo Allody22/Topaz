@@ -19,10 +19,11 @@
     </properties>
 
     <dependencies>
-        <!-- Spring Security OAuth2 -->
+
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.15</version>
         </dependency>
 
         <dependency>

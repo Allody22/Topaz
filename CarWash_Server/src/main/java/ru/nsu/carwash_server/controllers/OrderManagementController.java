@@ -1,6 +1,13 @@
 package ru.nsu.carwash_server.controllers;
 
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +71,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+@Tag(name = "3. Order Management Controller", description = "API для создания работы с различными услугами, получения свободного времени, обновлении информации о заказах")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @Slf4j
@@ -103,6 +111,15 @@ public class OrderManagementController {
         this.operationsService = operationsService;
     }
 
+    @Operation(
+            summary = "Удаление заказа",
+            description = "Этот метод позволяет пользователю удалить существующий заказ по его идентификатору. В случае успешного удаления возвращается подтверждающее сообщение."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказ успешно удален.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Заказ с указанным идентификатором не найден в системе.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/deleteOrder_v1")
     @Transactional
     public ResponseEntity<MessageResponse> deleteOrder(@Valid @NotNull @RequestParam(name = "orderId") Long orderId) {
@@ -123,6 +140,16 @@ public class OrderManagementController {
         return ResponseEntity.ok(new MessageResponse("Заказ с айди " + orderId.toString() + " успешно удалён"));
     }
 
+
+    @Operation(
+            summary = "Получение информации об услуге",
+            description = "Этот метод предоставляет информацию об определенной услуге на основе её названия и типа. Поддерживаются услуги мойки, полировки и шиномонтажа."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Информация об услуге успешно получена."),
+            @ApiResponse(responseCode = "410", description = "Запрашиваемая услуга отсутствует в базе данных.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Предоставлены недопустимые параметры запроса, то есть ошибка валидации.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @GetMapping("/getServiceInfo_v1")
     @Transactional
     public ResponseEntity<?> getServiceInfo(@Valid @NotBlank @RequestParam(name = "orderName") String orderName,
@@ -147,6 +174,15 @@ public class OrderManagementController {
         }
     }
 
+    @Operation(
+            summary = "Обновление информации о заказе",
+            description = "Этот метод позволяет пользователю обновить информацию по существующему заказу. Для доступа требуется авторизация."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Информация о заказе успешно обновлена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Заказ с указанным идентификатором не найден.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/updateOrderInfo_v1")
     @Transactional
     public ResponseEntity<MessageResponse> updateOrderInfo(@Valid @RequestBody UpdateOrderInfoRequest updateOrderInfoRequest) {
@@ -166,6 +202,15 @@ public class OrderManagementController {
         return ResponseEntity.ok(new MessageResponse("Информация о заказе успешно обновлена"));
     }
 
+    @Operation(
+            summary = "Получение информации о заказе",
+            description = "Этот запрос предоставляет детальную информацию о заказе по его идентификатору. Для доступа требуется авторизация."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Информация о заказе успешно предоставлена.", content = @Content(schema = @Schema(implementation = SingleOrderResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Заказ с указанным идентификатором не найден.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @GetMapping("/getOrderInfo_v1")
     @Transactional
     public ResponseEntity<?> getOrderInfo(@Valid @NotNull @RequestParam(name = "orderId", required = true) Long orderId) {
@@ -198,6 +243,7 @@ public class OrderManagementController {
                 ordersNames, userPhone, actualOrder.getOrderType(), actualOrder.getCurrentStatus(), actualOrder.getSale()));
     }
 
+    @Hidden
     @GetMapping("/getActualWashingOrders_v1")
     @Transactional
     public ResponseEntity<ConnectedOrdersResponse> getActualWashingServices(@Valid @RequestParam(name = "orderName") String orderName) {
@@ -205,6 +251,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(ordersInfo);
     }
 
+    @Hidden
     @GetMapping("/getAllWashingOrders_v1")
     @Transactional
     public ResponseEntity<MainAndAdditionalResponse> getAllWashingServices() {
@@ -214,6 +261,14 @@ public class OrderManagementController {
         return ResponseEntity.ok(new MainAndAdditionalResponse(mainOrders, additionalOrders));
     }
 
+    @Operation(
+            summary = "Получение списка всех услуг автомойки с ценами и временем",
+            description = "Этот метод возвращает список всех доступных услуг автомойки с указанием цен и времени их выполнения."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Список услуг автомойки предоставлен.", content = @Content(schema = @Schema(implementation = WashingOrdersPriceTimeAndPart.class))),
+            @ApiResponse(responseCode = "410", description = "Услуги автомойки отсутствуют в базе данных.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @GetMapping("/getAllWashingServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<List<WashingOrdersPriceTimeAndPart>> getAllWashingServicesWithPriceAndTime() {
@@ -231,6 +286,14 @@ public class OrderManagementController {
         return ResponseEntity.ok(washingPolishingOrderEntities);
     }
 
+    @Operation(
+            summary = "Получение списка всех услуг полировки с ценами и временем",
+            description = "Этот метод возвращает список всех доступных услуг полировки с указанием цен и времени их выполнения."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Список услуг полировки предоставлен.", content = @Content(schema = @Schema(implementation = WashingPolishingOrderEntity.class))),
+            @ApiResponse(responseCode = "410", description = "Услуги полировки отсутствуют в базе данных.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @GetMapping("/getAllPolishingServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<List<WashingPolishingOrderEntity>> getAllPolishingServicesWithPriceAndTime() {
@@ -248,6 +311,14 @@ public class OrderManagementController {
     }
 
 
+    @Operation(
+            summary = "Получение списка всех услуг шиномонтажа с ценами и временем",
+            description = "Этот метод возвращает список всех доступных услуг шиномонтажа с указанием цен и времени их выполнения."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Список услуг шиномонтажа предоставлен.", content = @Content(schema = @Schema(implementation = TireOrderEntity.class))),
+            @ApiResponse(responseCode = "410", description = "Услуги шиномонтажа отсутствуют в базе данных.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @GetMapping("/getAllTireServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<?> getAllTireServicesWithPriceAndTime() {
@@ -267,6 +338,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(tireOrderEntities);
     }
 
+    @Hidden
     @GetMapping("/getAllServicesWithPriceAndTime_v1")
     @Transactional
     public ResponseEntity<?> getAllServicesWithPriceAndTime() {
@@ -313,6 +385,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(allOrdersEntities);
     }
 
+    @Hidden
     @GetMapping("/getActualPolishingOrders_v1")
     @Transactional
     public ResponseEntity<ActualOrdersResponse> getActualPolishingOrders() {
@@ -321,6 +394,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(new ActualOrdersResponse(orders));
     }
 
+    @Hidden
     @GetMapping("/getActualTireOrders_v1")
     @Transactional
     public ResponseEntity<ActualOrdersResponse> getActualTireOrders() {
@@ -330,6 +404,7 @@ public class OrderManagementController {
     }
 
 
+    @Hidden
     @GetMapping("/getBookedTimeInOneDay_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
@@ -343,6 +418,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(new OrdersArrayResponse(ordersForResponse));
     }
 
+    @Hidden
     @GetMapping("/getNotMadeOrders_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
@@ -352,6 +428,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(new OrdersArrayResponse(ordersForResponse));
     }
 
+    @Hidden
     @GetMapping("/getOrderCreatedAt_v1")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
     @Transactional
@@ -366,6 +443,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(new OrdersArrayResponse(ordersForResponse));
     }
 
+    @Hidden
     @GetMapping("/getPriceAndTime_v1")
     @Transactional
     public ResponseEntity<TimeAndPriceResponse> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceTimeRequest ordersArrayPriceTimeRequest) {
@@ -385,7 +463,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(new TimeAndPriceResponse(timeAndPrice.getSecond(), timeAndPrice.getFirst()));
     }
 
-
+    @Hidden
     @PostMapping("/getPriceAndEndTime_v1")
     @Transactional
     public ResponseEntity<TimeAndPriceAndFreeTimeResponse> getPriceAndTime(@Valid @RequestBody OrdersArrayPriceAndGoodTimeRequest ordersArrayPriceTimeRequest) {
@@ -442,6 +520,14 @@ public class OrderManagementController {
         return ResponseEntity.ok(new TimeAndPriceAndFreeTimeResponse(timeAndPrice.getSecond(), timeAndPrice.getFirst(), clearOrdersWithoutDuplicates));
     }
 
+    @Operation(
+            summary = "Получение свободного времени для заказа",
+            description = "Этот метод позволяет получить информацию о свободных временных интервалах для бронирования заказа."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Свободные временные интервалы успешно получены.", content = @Content(schema = @Schema(implementation = FreeTimeAndBoxResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Ошибка в запросе, например, некорректно указанное время заказа или отсутствие данных в запросе.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/getFreeTime_v1")
     @Transactional
     public ResponseEntity<FreeTimeAndBoxResponse> getFreeTime(@Valid @RequestBody FreeTimeRequest freeTimeRequest) {

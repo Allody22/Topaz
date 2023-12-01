@@ -39,6 +39,7 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\constants\DestinationPrefixes.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\advice\SmsControllerAdvice.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\CarWashServerApplication.java
+C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\CreatingPolishingOrderRequest.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\repository\operations\OperationsVersionsRepository.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\constants\ERole.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\constants\OrderStatuses.java
@@ -68,7 +69,6 @@ C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\response\TimeAndPriceAndFreeTimeResponse.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\helpers\AllOrderTypes.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\configuration\CacheConfiguration.java
-C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\payload\request\CreatingPolishingOrder.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\models\secondary\helpers\WashingPolishingOrderEntity.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\services\interfaces\FileService.java
 C:\Users\IAMNO\OneDrive\Рабочий стол\CarWash\CarWash_Server\src\main\java\ru\nsu\carwash_server\advice\FieldValidationAdvice.java

@@ -1,6 +1,12 @@
 package ru.nsu.carwash_server.controllers;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -28,9 +34,10 @@ import ru.nsu.carwash_server.models.users.User;
 import ru.nsu.carwash_server.models.users.UserVersions;
 import ru.nsu.carwash_server.payload.request.BookingTireOrderRequest;
 import ru.nsu.carwash_server.payload.request.BookingWashingPolishingOrderRequest;
-import ru.nsu.carwash_server.payload.request.CreatingPolishingOrder;
+import ru.nsu.carwash_server.payload.request.CreatingPolishingOrderRequest;
 import ru.nsu.carwash_server.payload.request.CreatingTireOrderRequest;
 import ru.nsu.carwash_server.payload.request.CreatingWashingOrder;
+import ru.nsu.carwash_server.payload.response.MessageResponse;
 import ru.nsu.carwash_server.payload.response.OrderInfoResponse;
 import ru.nsu.carwash_server.repository.orders.OrdersPolishingRepository;
 import ru.nsu.carwash_server.repository.orders.OrdersTireRepository;
@@ -49,6 +56,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
+@Tag(name = "2. Order Creating Controller", description = "API для создания заказов на автокомплекс из приложения и с сайта администратора")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @ControllerAdvice
@@ -89,6 +98,17 @@ public class OrderCreatingController {
     }
 
 
+    @Operation(
+            summary = "Бронирование заказа на автомойку",
+            description = "Этот метод позволяет пользователю забронировать заказ на услуги автомойки. Проверяется доступность выбранного времени и бокса, а также ограничения на количество заказов в день для пользователя."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказ на автомойку успешно забронирован.", content = @Content(schema = @Schema(implementation = OrderInfoResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Выбран недопустимый номер бокса или возникла ошибка валидации в запросе.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Выбранное время в указанном боксе уже занято.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "429", description = "Превышено максимальное количество заказов в день для пользователя.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @Transactional
     @PostMapping("/bookWashingOrder_v1")
     public ResponseEntity<?> newWashingOrder(@Valid @RequestBody BookingWashingPolishingOrderRequest bookingOrderRequest) {
@@ -172,6 +192,18 @@ public class OrderCreatingController {
                 autoType, bonuses, comments, newOrder.getUser().getId(), price, orderType, "wash", orderCurrentVersions.getCurrentStatus()));
     }
 
+
+    @Operation(
+            summary = "Бронирование заказа полировки",
+            description = "Этот метод позволяет пользователю забронировать заказ на полировку. Проверяется доступность выбранного времени и бокса, а также ограничения на количество заказов в день для пользователя."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказ на полировку успешно забронирован.", content = @Content(schema = @Schema(implementation = OrderInfoResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Выбран недопустимый номер бокса или возникла ошибка валидации в запросе.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Выбранное время в указанном боксе уже занято.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "429", description = "Превышено максимальное количество заказов в день для пользователя.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @Transactional
     @PostMapping("/bookPolishingOrder_v1")
     public ResponseEntity<?> newPolishingOrder(@Valid @RequestBody BookingWashingPolishingOrderRequest bookingOrderRequest) {
@@ -255,6 +287,18 @@ public class OrderCreatingController {
                 bookingOrderRequestOrderType, "polishing", currentStatus));
     }
 
+
+    @Operation(
+            summary = "Бронирование заказа на шиномонтаж",
+            description = "Этот метод позволяет пользователю забронировать заказ шиномонтажа. Проверяется доступность выбранного времени и бокса, а также ограничения на количество заказов в день для пользователя."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказ на автомойку успешно забронирован.", content = @Content(schema = @Schema(implementation = OrderInfoResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Выбран недопустимый номер бокса или возникла ошибка валидации в запросе.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Выбранное время в указанном боксе уже занято.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "429", description = "Превышено максимальное количество заказов в день для пользователя.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @Transactional
     @PostMapping("/bookTireOrder_v1")
     public ResponseEntity<?> newTireOrder(@Valid @RequestBody BookingTireOrderRequest bookingOrderRequest) {
@@ -338,6 +382,17 @@ public class OrderCreatingController {
                 autoType, bonuses, comments, newOrder.getUser().getId(), price, "tire", wheelR, currentStatus));
     }
 
+
+    @Operation(
+            summary = "Создание заказа на автомойку",
+            description = "Этот метод позволяет администратору, модератору или пользователю с правами администратора создать заказ автомойки. Проверяется доступность выбранного времени и бокса."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказ на автомойку успешно создан. В ответе возвращается детальная информация о заказе.", content = @Content(schema = @Schema(implementation = OrderInfoResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена или из-за не достаточных прав.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Выбранное время в указанном боксе уже занято.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Запрашиваемая услуга мойки отсутствует в базе данных.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/createWashingOrder_v1")
     @Transactional
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
@@ -407,10 +462,20 @@ public class OrderCreatingController {
     }
 
 
+    @Operation(
+            summary = "Создание заказа на полировку",
+            description = "Этот метод позволяет администратору, модератору или пользователю с правами администратора создать заказ полировки. Проверяется доступность выбранного времени и бокса."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказ на полировку успешно создан. В ответе возвращается детальная информация о заказе.", content = @Content(schema = @Schema(implementation = OrderInfoResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена или из-за не достаточных прав.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Выбранное время в указанном боксе уже занято.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Запрашиваемая услуга полировки отсутствует в базе данных.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/createPolishingOrder_v1")
     @Transactional
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
-    public ResponseEntity<?> creatingPolishingOrder(@Valid @RequestBody CreatingPolishingOrder bookingOrderRequest) {
+    public ResponseEntity<?> creatingPolishingOrder(@Valid @RequestBody CreatingPolishingOrderRequest bookingOrderRequest) {
         Date startTime = bookingOrderRequest.getStartTime();
         Date endTime = bookingOrderRequest.getEndTime();
         int boxNumber = bookingOrderRequest.getBoxNumber();
@@ -475,6 +540,16 @@ public class OrderCreatingController {
                 newOrderVersion.getUserContacts(), newOrderVersion.getCurrentStatus()));
     }
 
+    @Operation(
+            summary = "Создание заказа на шиномонтаж",
+            description = "Этот метод позволяет администратору, модератору или пользователю с правами администратора создать заказ шиномонтажа. Проверяется доступность выбранного времени и бокса."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказ на шиномонтаж успешно создан. В ответе возвращается детальная информация о заказе.", content = @Content(schema = @Schema(implementation = OrderInfoResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена или из-за не достаточных прав.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Выбранное время в указанном боксе уже занято.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Запрашиваемая услуга мойки отсутствует в базе данных.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @PostMapping("/createTireOrder_v1")
     @Transactional
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")

@@ -47,7 +47,6 @@ ru\nsu\carwash_server\repository\users\RefreshTokenRepository.class
 ru\nsu\carwash_server\controllers\FilesController.class
 ru\nsu\carwash_server\services\OrderServiceImp.class
 ru\nsu\carwash_server\payload\request\LoginRequest.class
-ru\nsu\carwash_server\payload\request\CreatingPolishingOrder.class
 ru\nsu\carwash_server\repository\orders\OrdersTireRepository.class
 ru\nsu\carwash_server\models\secondary\helpers\TimeIntervals.class
 ru\nsu\carwash_server\controllers\UserController.class
@@ -110,6 +109,7 @@ ru\nsu\carwash_server\controllers\ServiceChangingController.class
 ru\nsu\carwash_server\models\FileEntity.class
 ru\nsu\carwash_server\payload\response\TimeAndPriceAndFreeTimeResponse.class
 ru\nsu\carwash_server\payload\request\CreatingTireOrderRequest.class
+ru\nsu\carwash_server\payload\request\CreatingPolishingOrderRequest.class
 ru\nsu\carwash_server\payload\response\FreeTimeAndBoxResponse.class
 ru\nsu\carwash_server\payload\request\SignupRequest$SignupRequestBuilder.class
 ru\nsu\carwash_server\services\interfaces\FileService.class

@@ -1,6 +1,7 @@
 package ru.nsu.carwash_server.controllers;
 
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Hidden
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @Slf4j

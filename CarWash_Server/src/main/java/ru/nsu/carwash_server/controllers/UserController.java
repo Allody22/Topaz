@@ -1,5 +1,11 @@
 package ru.nsu.carwash_server.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Tag(name = "4. User Controller", description = "API для работы с профилем пользователя")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @Slf4j
@@ -64,6 +71,15 @@ public class UserController {
         this.orderService = orderService;
     }
 
+    @Operation(
+            summary = "Обновление пароля пользователя",
+            description = "Этот метод позволяет пользователю обновить свой пароль, используя код подтверждения. Ограничение на количество попыток ввода кода."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Пароль успешно обновлён.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Неверный код подтверждения.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Превышено количество попыток ввода кода подтверждения.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @Transactional
     @PostMapping("/updateUserPassword_v1")
     public ResponseEntity<MessageResponse> updateUserPassword(@Valid @RequestBody UpdateUserPasswordRequest updateUserPasswordRequest) {
@@ -97,6 +113,15 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("Пароль успешно обновлён!"));
     }
 
+    @Operation(
+            summary = "Обновление информации о пользователе",
+            description = "Этот метод позволяет авторизованному пользователю обновить свои персональные данные."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Информация о пользователе успешно обновлена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена.", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден в базе данных.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @Transactional
     @PostMapping("/updateUserInfo_v1")
     public ResponseEntity<MessageResponse> updateUserInfo(@Valid @RequestBody UpdateUserInfoRequest updateUserInfoRequest) {
@@ -124,6 +149,15 @@ public class UserController {
                 + "' и с телефоном " + updateUserInfoRequest.getPhone() + "изменил информацию о себе"));
     }
 
+
+    @Operation(
+            summary = "Получение заказов пользователя",
+            description = "Этот метод возвращает историю заказов, сделанных текущим авторизованным пользователем, включая информацию о каждом заказе."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Список заказов пользователя успешно получен.", content = @Content(schema = @Schema(implementation = OrderMainInfo[].class))),
+            @ApiResponse(responseCode = "401", description = "Ошибка авторизации. Доступ запрещен из-за недействительного или отсутствующего JWT токена.", content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     @Transactional
     @GetMapping("/getUserOrders_v1")
     public ResponseEntity<List<OrderMainInfo>> getUserOrders() {

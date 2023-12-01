@@ -1,6 +1,7 @@
 package ru.nsu.carwash_server.controllers;
 
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+@Hidden
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/operations")
