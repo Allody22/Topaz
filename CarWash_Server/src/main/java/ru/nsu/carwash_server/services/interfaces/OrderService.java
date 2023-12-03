@@ -303,6 +303,13 @@ public interface OrderService {
     List<OrderVersions> getOrdersCreatedAt(Date firstDate, Date secondDate, boolean flag);
 
     /**
+     * Получение всех последних версий заказов, которые были созданы
+     *
+     * @return список из всех заказов
+     */
+    List<OrderVersions> getAllOrders();
+
+    /**
      * Получение всех не сделанных заказов
      *
      * @param flag - если передано true - то учитываем отменённые заказа

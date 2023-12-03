@@ -403,6 +403,16 @@ public class OrderManagementController {
         return ResponseEntity.ok(new ActualOrdersResponse(orders));
     }
 
+    @Hidden
+    @GetMapping("/getAllOrders_v1")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('ADMINISTRATOR')")
+    @Transactional
+    public ResponseEntity<OrdersArrayResponse> getAllOrders() {
+        List<OrderVersions> orders = orderService.getAllOrders();
+
+        List<SingleOrderResponse> ordersForResponse = getTimeAndPriceOfOrders(orders);
+        return ResponseEntity.ok(new OrdersArrayResponse(ordersForResponse));
+    }
 
     @Hidden
     @GetMapping("/getBookedTimeInOneDay_v1")

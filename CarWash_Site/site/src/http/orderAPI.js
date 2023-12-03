@@ -59,6 +59,11 @@ export const getOrdersBookedInOneDay = async (startTime, endTime, flag) => {
     return await orders;
 };
 
+export const getAllOrdersEveryMade = async () => {
+    const {data: {orders}} = await $authHost.get('/api/orders/management/getAllOrders_v1');
+    return await orders;
+};
+
 export const getOrdersCreatedInOneDay = async (startTime, endTime, flag) => {
     const {data: {orders}} = await $authHost.get('/api/orders/management/getOrderCreatedAt_v1?startTime='
         + encodeURIComponent(startTime) + '&endTime=' + encodeURIComponent(endTime) + "&includeCancelled=" + flag);

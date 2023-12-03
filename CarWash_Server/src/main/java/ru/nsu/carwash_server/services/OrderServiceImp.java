@@ -622,6 +622,10 @@ public class OrderServiceImp implements OrderService {
         return ordersRepository.findAllByDateOfCreationAndUser(firstDate, secondDate, userId);
     }
 
+    public List<OrderVersions> getAllOrders() {
+        return orderVersionsRepository.getLatestVersion();
+    }
+
 
     public List<OrderVersions> getNotMadeOrders(boolean flag) {
         if (flag) {

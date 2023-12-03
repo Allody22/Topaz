@@ -259,7 +259,7 @@ public class OperationsDescriptionService {
             }
             return message.toString();
         } else {
-            return "Был отправлен запрос на создание услуги мойки или полировки, но без информации";
+            return "Был отправлен запрос на изменении профиля пользователя, но без новой информации";
         }
     }
 

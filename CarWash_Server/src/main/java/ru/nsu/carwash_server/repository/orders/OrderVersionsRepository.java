@@ -77,6 +77,13 @@ public interface OrderVersionsRepository extends JpaRepository<OrderVersions, Lo
     List<OrderVersions> getLatestVersionByDateOfCreationWithCancelled(@Param("StartTime") Date startTime,
                                                                       @Param("EndTime") Date endTime);
 
+    @Query(value =
+            "SELECT o.* FROM orders_versions o INNER JOIN ( " +
+                    "SELECT order_id, MAX(creation_time) as maxDate " +
+                    "FROM orders_versions GROUP BY order_id ) as subquery " +
+                    "ON o.order_id = subquery.order_id AND o.creation_time = subquery.maxDate",
+            nativeQuery = true)
+    List<OrderVersions> getLatestVersion();
 
     @Query(value =
             "SELECT o.* FROM orders_versions o INNER JOIN ( " +

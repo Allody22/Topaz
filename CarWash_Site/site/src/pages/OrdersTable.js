@@ -2,7 +2,12 @@ import React, {useEffect, useState} from 'react';
 import '../css/MyTable.css';
 import {useSortBy, useTable} from 'react-table';
 import {format, parseISO} from 'date-fns';
-import {getNotMadeOrders, getOrdersBookedInOneDay, getOrdersCreatedInOneDay} from "../http/orderAPI";
+import {
+    getAllOrdersEveryMade,
+    getNotMadeOrders,
+    getOrdersBookedInOneDay,
+    getOrdersCreatedInOneDay
+} from "../http/orderAPI";
 import orderTypeMap from "../model/map/OrderTypeMapFromEnglish";
 import {BrowserRouter as Router, useHistory} from "react-router-dom";
 import {DatePicker, Divider, Notification, useToaster} from "rsuite";
@@ -222,6 +227,37 @@ const OrderTable = observer(() => {
             setOrders(response);
 
             setSuccessResponse("Список всех заказов за день успешно получен!")
+            setSuccessFlag(flag => !flag);
+        } catch (error) {
+            if (error.response) {
+                let messages = [];
+                for (let key in error.response.data) {
+                    messages.push(error.response.data[key]);
+                }
+                setErrorResponse(messages.join('\n'));
+                setErrorFlag(flag => !flag);
+
+            } else {
+                setErrorResponse("Системная ошибка.\n" +
+                    "Перезагрузите страницу и повторите попытку")
+                setErrorFlag(flag => !flag)
+            }
+        } finally {
+            setTimeout(() => setIsSubmitting(false), 2000);
+        }
+    };
+
+    const getAllOrders = async (event) => {
+        event.preventDefault();
+        if (isSubmitting) {
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const response = await getAllOrdersEveryMade();
+            setOrders(response);
+
+            setSuccessResponse("Список всех заказов успешно получен!")
             setSuccessFlag(flag => !flag);
         } catch (error) {
             if (error.response) {
@@ -513,6 +549,16 @@ const OrderTable = observer(() => {
                 disabled={isSubmitting}
                 style={{marginBottom: '20px', marginTop: '20px'}}>
                 {isSubmitting ? 'Поиск заказов...' : 'Получить все не сделанные заказы'}
+            </Button>
+
+            <Button
+                className='btn-submit'
+                variant='primary'
+                type='submit'
+                onClick={getAllOrders}
+                disabled={isSubmitting}
+                style={{marginBottom: '20px', marginTop: '20px'}}>
+                {isSubmitting ? 'Поиск заказов...' : 'Получить ВСЕ заказы'}
             </Button>
 
             <p style={inputStyle}>Вы можете нажать на цифру айди, чтобы перейти на страницу изменения этого заказа</p>
